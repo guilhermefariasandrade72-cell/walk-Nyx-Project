@@ -1,5 +1,5 @@
 --==============================================================--
---                    ASTRAL X HUB V9                          --
+--                      WALK NYX PROJECT                        --
 --              PREMIUM UI / MOBILE / LUCIDE                  --
 --                   INTERFACE ONLY                            --
 --==============================================================--
@@ -15,10 +15,11 @@ local PlayerGui = Player:WaitForChild("PlayerGui")
 -- REMOVE GUI ANTIGA
 --==============================================================--
 
-local OldGui = PlayerGui:FindFirstChild("AstralX_Premium")
-if OldGui then
-    OldGui:Destroy()
-end
+local OldGui = PlayerGui:FindFirstChild("WN_Premium")
+if OldGui then OldGui:Destroy() end
+
+local OldFloat = PlayerGui:FindFirstChild("WN_FloatGui")
+if OldFloat then OldFloat:Destroy() end
 
 --==============================================================--
 -- THEME
@@ -74,9 +75,9 @@ local Resizing       = false
 --==============================================================--
 
 local IconAssets = {
-    house    = "rbxassetid://10723407389", -- Casa (Home)
+    house    = "rbxassetid://10723407389", -- Casa (Main)
     eye      = "rbxassetid://6031075929",  -- Olho (ESP)
-    settings = "rbxassetid://10734950309", -- Configurações
+    settings = "rbxassetid://10734950309", -- Configurações (Settings)
     x        = "rbxassetid://10747384394", -- Fechar (X)
 }
 
@@ -102,7 +103,7 @@ local function CreateLucideIcon(Parent, IconName, IconColor, IconSize)
 end
 
 --==============================================================--
--- CRIAÇÃO DO ÍCONE DIRETO DE JOGADOR (TAMANHO AUMENTADO)
+-- CRIAÇÃO DO ÍCONE DIRETO DE JOGADOR
 --==============================================================--
 
 local function CreateDirectPlayerIcon(Parent, IconColor)
@@ -114,7 +115,7 @@ local function CreateDirectPlayerIcon(Parent, IconColor)
     Container.BackgroundTransparency = 1
     Container.Parent = Parent
 
-    -- Cabeça (Aumentada e ajustada)
+    -- Cabeça
     local Head = Instance.new("Frame")
     Head.Name = "Head"
     Head.Size = UDim2.fromOffset(9, 9)
@@ -127,7 +128,7 @@ local function CreateDirectPlayerIcon(Parent, IconColor)
     HeadCorner.CornerRadius = UDim.new(1, 0)
     HeadCorner.Parent = Head
 
-    -- Corpo (Aumentado e ajustado)
+    -- Corpo
     local BodyPart = Instance.new("Frame")
     BodyPart.Name = "BodyPart"
     BodyPart.Size = UDim2.fromOffset(17, 9)
@@ -148,21 +149,22 @@ end
 --==============================================================--
 
 local TabsData = {
-    { Name = "Home",     Icon = "house",    IsCustom = false },
+    { Name = "Main",     Icon = "house",    IsCustom = false },
     { Name = "ESP",      Icon = "eye",      IsCustom = false },
     { Name = "Player",   Icon = "user",     IsCustom = true  },
-    { Name = "Config",   Icon = "settings", IsCustom = false },
+    { Name = "Settings", Icon = "settings", IsCustom = false },
 }
 
 --==============================================================--
--- SCREEN GUI & WINDOW GROUP
+-- SCREEN GUI (PRIORIDADE MÁXIMA)
 --==============================================================--
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AstralX_Premium"
+ScreenGui.Name = "WN_Premium"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 2147483647
 ScreenGui.Parent = PlayerGui
 
 local WindowGroup = Instance.new("CanvasGroup")
@@ -259,12 +261,12 @@ MM2Stroke.Parent = MM2Button
 
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
-Title.Size = UDim2.fromOffset(180, 23)
+Title.Size = UDim2.fromOffset(200, 23)
 Title.Position = UDim2.fromOffset(55, 9)
 Title.BackgroundTransparency = 1
-Title.Text = "ASTRAL X"
+Title.Text = "WALK NYX PROJECT"
 Title.TextColor3 = Theme.Text
-Title.TextSize = 16
+Title.TextSize = 14
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
@@ -345,7 +347,7 @@ SidebarLine.BorderSizePixel = 0
 SidebarLine.Parent = Sidebar
 
 --==============================================================--
--- CONTENT AREA (COM ROLAGEM AUTOMÁTICA)
+-- CONTENT AREA
 --==============================================================--
 
 local ContentContainer = Instance.new("Frame")
@@ -522,7 +524,7 @@ MM2Button.Activated:Connect(function()
 end)
 
 --==============================================================--
--- ARRASTAR JANELA
+-- ARRASTAR JANELA PRINCIPAL
 --==============================================================--
 
 Header.InputBegan:Connect(function(Input)
@@ -534,24 +536,44 @@ Header.InputBegan:Connect(function(Input)
     local StartPosition = Input.Position
     local StartWindowPosition = Main.Position
 
+    TweenService:Create(Main, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(math.floor(CurrentWidth * 1.03), math.floor(CurrentHeight * 1.03))
+    }):Play()
+
     local Changed, Ended
 
     Changed = UserInputService.InputChanged:Connect(function(Change)
         if not DraggingWindow then return end
         if Change.UserInputType == Enum.UserInputType.MouseMovement or Change.UserInputType == Enum.UserInputType.Touch then
             local Delta = Change.Position - StartPosition
-            Main.Position = UDim2.new(
-                StartWindowPosition.X.Scale,
-                StartWindowPosition.X.Offset + Delta.X,
-                StartWindowPosition.Y.Scale,
-                StartWindowPosition.Y.Offset + Delta.Y
-            )
+            local ViewportSize = workspace.CurrentCamera.ViewportSize
+
+            local RawX = StartWindowPosition.X.Offset + Delta.X
+            local RawY = StartWindowPosition.Y.Offset + Delta.Y
+
+            local HalfW = (CurrentWidth * 1.03) / 2
+            local HalfH = (CurrentHeight * 1.03) / 2
+
+            local MinX = HalfW - (ViewportSize.X * 0.5)
+            local MaxX = (ViewportSize.X * 0.5) - HalfW
+            local MinY = HalfH - (ViewportSize.Y * 0.5)
+            local MaxY = (ViewportSize.Y * 0.5) - HalfH
+
+            local ClampedX = math.clamp(RawX, MinX, MaxX)
+            local ClampedY = math.clamp(RawY, MinY, MaxY)
+
+            Main.Position = UDim2.new(0.5, ClampedX, 0.5, ClampedY)
         end
     end)
 
     Ended = UserInputService.InputEnded:Connect(function(EndedInput)
         if EndedInput.UserInputType == Enum.UserInputType.MouseButton1 or EndedInput.UserInputType == Enum.UserInputType.Touch then
             DraggingWindow = false
+            
+            TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = UDim2.fromOffset(CurrentWidth, CurrentHeight)
+            }):Play()
+
             if Changed then Changed:Disconnect() end
             if Ended then Ended:Disconnect() end
         end
@@ -559,7 +581,7 @@ Header.InputBegan:Connect(function(Input)
 end)
 
 --==============================================================--
--- ALÇA DE REDIMENSIONAMENTO (VERMELHO)
+-- ALÇA DE REDIMENSIONAMENTO
 --==============================================================--
 
 local ResizeButton = Instance.new("TextButton")
@@ -673,9 +695,9 @@ local ConfirmTitle = Instance.new("TextLabel")
 ConfirmTitle.Size = UDim2.new(1, -40, 0, 25)
 ConfirmTitle.Position = UDim2.fromOffset(20, 18)
 ConfirmTitle.BackgroundTransparency = 1
-ConfirmTitle.Text = "Fechar Astral X?"
+ConfirmTitle.Text = "Close Walk Nyx Project?"
 ConfirmTitle.TextColor3 = Theme.Text
-ConfirmTitle.TextSize = 16
+ConfirmTitle.TextSize = 15
 ConfirmTitle.Font = Enum.Font.GothamBold
 ConfirmTitle.TextXAlignment = Enum.TextXAlignment.Left
 ConfirmTitle.ZIndex = 54
@@ -685,7 +707,7 @@ local ConfirmText = Instance.new("TextLabel")
 ConfirmText.Size = UDim2.new(1, -40, 0, 30)
 ConfirmText.Position = UDim2.fromOffset(20, 47)
 ConfirmText.BackgroundTransparency = 1
-ConfirmText.Text = "Deseja realmente fechar o hub?"
+ConfirmText.Text = "Do you really want to close Walk Nyx?"
 ConfirmText.TextColor3 = Theme.TextSecondary
 ConfirmText.TextSize = 10
 ConfirmText.Font = Enum.Font.GothamMedium
@@ -699,7 +721,7 @@ YesButton.Size = UDim2.fromOffset(125, 35)
 YesButton.Position = UDim2.fromOffset(20, 105)
 YesButton.BackgroundColor3 = Theme.Accent
 YesButton.BorderSizePixel = 0
-YesButton.Text = "SIM"
+YesButton.Text = "YES"
 YesButton.TextColor3 = Color3.new(1, 1, 1)
 YesButton.TextSize = 10
 YesButton.Font = Enum.Font.GothamBold
@@ -717,43 +739,53 @@ NoButton.Size = UDim2.fromOffset(110, 35)
 NoButton.Position = UDim2.new(1, -130, 0, 105)
 NoButton.BackgroundColor3 = Theme.Window
 NoButton.BorderSizePixel = 0
-NoButton.Text = "NÃO"
+NoButton.Text = "NO"
 NoButton.TextColor3 = Theme.TextSecondary
 NoButton.TextSize = 10
 NoButton.Font = Enum.Font.GothamBold
 NoButton.AutoButtonColor = false
 NoButton.ZIndex = 54
-NoButton.Parent = ConfirmCard
+NoButton.Parent = NoButton.Parent and ConfirmCard
 
 local NoCorner = Instance.new("UICorner")
 NoCorner.CornerRadius = UDim.new(0, 9)
 NoCorner.Parent = NoButton
 
 --==============================================================--
--- BOTÃO FLUTUANTE (AX)
+-- BOTÃO FLUTUANTE (WN) - CORRIGIDO
 --==============================================================--
 
+local FloatGui = Instance.new("ScreenGui")
+FloatGui.Name = "WN_FloatGui"
+FloatGui.ResetOnSpawn = false
+FloatGui.IgnoreGuiInset = true
+FloatGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+FloatGui.DisplayOrder = 2147483646
+FloatGui.Parent = PlayerGui
+
 local FloatButton = Instance.new("TextButton")
-FloatButton.Name = "AstralXFloat"
+FloatButton.Name = "WNFloat"
 FloatButton.Size = UDim2.fromOffset(54, 54)
 FloatButton.Position = UDim2.new(1, -75, 1, -90)
 FloatButton.BackgroundColor3 = Theme.Window
 FloatButton.BorderSizePixel = 0
-FloatButton.Text = "AX"
+FloatButton.Text = "WN"
 FloatButton.TextColor3 = Theme.AccentBright
 FloatButton.TextSize = 14
 FloatButton.Font = Enum.Font.GothamBold
 FloatButton.AutoButtonColor = false
 FloatButton.ZIndex = 100
-FloatButton.Parent = ScreenGui
+FloatButton.Parent = FloatGui
 
 local FloatCorner = Instance.new("UICorner")
 FloatCorner.CornerRadius = UDim.new(0, 14)
 FloatCorner.Parent = FloatButton
 
+-- LINHA EM VOLTA DO BOTÃO FLUTUANTE
 local FloatStroke = Instance.new("UIStroke")
 FloatStroke.Color = Theme.Accent
 FloatStroke.Thickness = 1.5
+FloatStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 FloatStroke.Parent = FloatButton
 
 --==============================================================--
@@ -814,6 +846,7 @@ local function ShowWindow()
 end
 
 FloatButton.Activated:Connect(function()
+    if DraggingFloat then return end
     if WindowOpen then
         HideWindow()
     else
@@ -839,37 +872,60 @@ YesButton.Activated:Connect(function()
     ConfirmOverlay.Visible = false
     WindowOpen = false
     ScreenGui:Destroy()
+    FloatGui:Destroy()
 end)
+
+--==============================================================--
+-- ARRASTAR BOTÃO FLUTUANTE (SEM TELEPORTE)
+--==============================================================--
+
+local FloatDragThreshold = 5
+local FloatStartPos = Vector2.zero
 
 FloatButton.InputBegan:Connect(function(Input)
     if Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch then
         return
     end
 
-    DraggingFloat = true
-    local StartPosition = Input.Position
-    local StartButtonPosition = FloatButton.Position
+    DraggingFloat = false
+    FloatStartPos = Input.Position
+
+    local StartX = FloatButton.AbsolutePosition.X
+    local StartY = FloatButton.AbsolutePosition.Y
 
     local Changed, Ended
 
     Changed = UserInputService.InputChanged:Connect(function(Change)
-        if not DraggingFloat then return end
         if Change.UserInputType == Enum.UserInputType.MouseMovement or Change.UserInputType == Enum.UserInputType.Touch then
-            local Delta = Change.Position - StartPosition
-            FloatButton.Position = UDim2.new(
-                StartButtonPosition.X.Scale,
-                StartButtonPosition.X.Offset + Delta.X,
-                StartButtonPosition.Y.Scale,
-                StartButtonPosition.Y.Offset + Delta.Y
-            )
+            local Delta = Change.Position - FloatStartPos
+
+            if not DraggingFloat and Delta.Magnitude > FloatDragThreshold then
+                DraggingFloat = true
+            end
+
+            if DraggingFloat then
+                local ViewportSize = workspace.CurrentCamera.ViewportSize
+                local RawX = StartX + Delta.X
+                local RawY = StartY + Delta.Y
+
+                local MaxX = ViewportSize.X - FloatButton.AbsoluteSize.X
+                local MaxY = ViewportSize.Y - FloatButton.AbsoluteSize.Y
+
+                local ClampedX = math.clamp(RawX, 0, MaxX)
+                local ClampedY = math.clamp(RawY, 0, MaxY)
+
+                FloatButton.Position = UDim2.fromOffset(ClampedX, ClampedY)
+            end
         end
     end)
 
     Ended = UserInputService.InputEnded:Connect(function(EndedInput)
         if EndedInput.UserInputType == Enum.UserInputType.MouseButton1 or EndedInput.UserInputType == Enum.UserInputType.Touch then
-            DraggingFloat = false
             if Changed then Changed:Disconnect() end
             if Ended then Ended:Disconnect() end
+            task.delay(0.05, function()
+                DraggingFloat = false
+            end)
         end
     end)
 end)
