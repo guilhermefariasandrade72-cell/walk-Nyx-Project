@@ -954,7 +954,7 @@ local function CreatePage(Name)
         3
 
     Page.ScrollBarImageColor3 =
-        AccentColor
+        White
 
     Page.CanvasSize =
         UDim2.new(
