@@ -1,0 +1,1173 @@
+--==============================================================--
+--                    ASTRAL X HUB V9                          --
+--              PREMIUM UI / MOBILE / LUCIDE                  --
+--                   INTERFACE ONLY                            --
+--==============================================================--
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+--==============================================================--
+-- REMOVE GUI ANTIGA
+--==============================================================--
+
+local OldGui = PlayerGui:FindFirstChild("AstralX_Premium")
+
+if OldGui then
+    OldGui:Destroy()
+end
+
+--==============================================================--
+-- THEME
+--==============================================================--
+
+local Theme = {
+    Background = Color3.fromRGB(7, 8, 11),
+    Window = Color3.fromRGB(11, 12, 16),
+    Sidebar = Color3.fromRGB(9, 10, 14),
+
+    Card = Color3.fromRGB(16, 17, 22),
+    CardHover = Color3.fromRGB(23, 24, 30),
+
+    Accent = Color3.fromRGB(225, 40, 56),
+    AccentBright = Color3.fromRGB(255, 65, 80),
+    AccentDark = Color3.fromRGB(120, 15, 27),
+
+    Text = Color3.fromRGB(245, 245, 248),
+    TextSecondary = Color3.fromRGB(165, 166, 177),
+    TextMuted = Color3.fromRGB(91, 93, 104),
+
+    Border = Color3.fromRGB(39, 40, 48),
+}
+
+--==============================================================--
+-- CONFIG
+--==============================================================--
+
+local DEFAULT_WIDTH = 445
+local DEFAULT_HEIGHT = 300
+
+local MIN_WIDTH = 360
+local MAX_WIDTH = 700
+
+local MIN_HEIGHT = 240
+local MAX_HEIGHT = 520
+
+local CurrentWidth = DEFAULT_WIDTH
+local CurrentHeight = DEFAULT_HEIGHT
+
+local SidebarExpanded = false
+local CurrentTab = 1
+
+local WindowOpen = true
+local WindowAnimating = false
+
+local DraggingWindow = false
+local DraggingFloat = false
+local Resizing = false
+
+--==============================================================--
+-- LUCIDE
+--==============================================================--
+
+local Lucide = nil
+
+do
+    local Module = ReplicatedStorage:FindFirstChild("Lucide")
+
+    if Module and Module:IsA("ModuleScript") then
+        local Success, Result = pcall(function()
+            return require(Module)
+        end)
+
+        if Success then
+            Lucide = Result
+        end
+    end
+end
+
+--==============================================================--
+-- ÍCONE LUCIDE
+--==============================================================--
+
+local function CreateLucideIcon(
+    Parent,
+    IconName,
+    IconColor,
+    IconSize
+)
+
+    IconSize = IconSize or 21
+
+    if not Lucide then
+
+        warn(
+            "[Astral X] Lucide não encontrado em ReplicatedStorage."
+        )
+
+        local Fallback =
+            Instance.new("TextLabel")
+
+        Fallback.Name = "Icon"
+
+        Fallback.Size =
+            UDim2.fromOffset(
+                IconSize,
+                IconSize
+            )
+
+        Fallback.AnchorPoint =
+            Vector2.new(
+                0.5,
+                0.5
+            )
+
+        Fallback.Position =
+            UDim2.fromScale(
+                0.5,
+                0.5
+            )
+
+        Fallback.BackgroundTransparency = 1
+
+        Fallback.TextColor3 =
+            IconColor
+
+        Fallback.TextSize =
+            math.floor(
+                IconSize * 0.8
+            )
+
+        Fallback.Font =
+            Enum.Font.GothamBold
+
+        local FallbackIcons = {
+            house = "⌂",
+            eye = "◉",
+            user = "●",
+            settings = "⚙",
+            x = "×",
+        }
+
+        Fallback.Text =
+            FallbackIcons[IconName]
+            or "•"
+
+        Fallback.Parent =
+            Parent
+
+        return Fallback
+    end
+
+    local Success, Asset =
+        pcall(function()
+
+            return Lucide.GetAsset(
+                IconName,
+                IconSize
+            )
+
+        end)
+
+    if not Success or not Asset then
+
+        warn(
+            "[Astral X] Ícone Lucide inválido: "
+                .. tostring(IconName)
+        )
+
+        return nil
+    end
+
+    local Image =
+        Instance.new("ImageLabel")
+
+    Image.Name =
+        "Icon"
+
+    Image.Size =
+        UDim2.fromOffset(
+            IconSize,
+            IconSize
+        )
+
+    Image.AnchorPoint =
+        Vector2.new(
+            0.5,
+            0.5
+        )
+
+    Image.Position =
+        UDim2.fromScale(
+            0.5,
+            0.5
+        )
+
+    Image.BackgroundTransparency = 1
+
+    Image.Image =
+        Asset.Url
+
+    Image.ImageColor3 =
+        IconColor
+
+    Image.ScaleType =
+        Enum.ScaleType.Fit
+
+    Image.Parent =
+        Parent
+
+    return Image
+end
+
+--==============================================================--
+-- TABS
+--==============================================================--
+
+local Tabs = {
+
+    {
+        Name = "Home",
+        Description = "Astral X interface",
+        Icon = "house",
+    },
+
+    {
+        Name = "Visual",
+        Description = "Visual interface",
+        Icon = "eye",
+    },
+
+    {
+        Name = "Player",
+        Description = "Player interface",
+        Icon = "user",
+    },
+
+    {
+        Name = "Config",
+        Description = "Hub configuration",
+        Icon = "settings",
+    },
+}
+
+--==============================================================--
+-- SCREEN GUI
+--==============================================================--
+
+local ScreenGui =
+    Instance.new("ScreenGui")
+
+ScreenGui.Name =
+    "AstralX_Premium"
+
+ScreenGui.ResetOnSpawn = false
+
+ScreenGui.IgnoreGuiInset = true
+
+ScreenGui.ZIndexBehavior =
+    Enum.ZIndexBehavior.Sibling
+
+ScreenGui.Parent =
+    PlayerGui
+
+--==============================================================--
+-- CANVAS GROUP
+--==============================================================--
+
+local WindowGroup =
+    Instance.new("CanvasGroup")
+
+WindowGroup.Name =
+    "WindowGroup"
+
+WindowGroup.Size =
+    UDim2.fromScale(
+        1,
+        1
+    )
+
+WindowGroup.BackgroundTransparency = 1
+
+WindowGroup.GroupTransparency = 0
+
+WindowGroup.Parent =
+    ScreenGui
+
+--==============================================================--
+-- MAIN
+--==============================================================--
+
+local Main =
+    Instance.new("Frame")
+
+Main.Name =
+    "Main"
+
+Main.Size =
+    UDim2.fromOffset(
+        DEFAULT_WIDTH,
+        DEFAULT_HEIGHT
+    )
+
+Main.AnchorPoint =
+    Vector2.new(
+        0.5,
+        0.5
+    )
+
+Main.Position =
+    UDim2.fromScale(
+        0.5,
+        0.5
+    )
+
+Main.BackgroundColor3 =
+    Theme.Window
+
+Main.BorderSizePixel = 0
+
+Main.ClipsDescendants = true
+
+Main.Parent =
+    WindowGroup
+
+local MainCorner =
+    Instance.new("UICorner")
+
+MainCorner.CornerRadius =
+    UDim.new(
+        0,
+        18
+    )
+
+MainCorner.Parent =
+    Main
+
+local MainStroke =
+    Instance.new("UIStroke")
+
+MainStroke.Color =
+    Theme.Border
+
+MainStroke.Thickness = 1
+
+MainStroke.Transparency =
+    0.12
+
+MainStroke.Parent =
+    Main
+
+--==============================================================--
+-- LINHA SUPERIOR
+--==============================================================--
+
+local TopLine =
+    Instance.new("Frame")
+
+TopLine.Name =
+    "TopRedLine"
+
+TopLine.Size =
+    UDim2.new(
+        1,
+        -28,
+        0,
+        2
+    )
+
+TopLine.Position =
+    UDim2.fromOffset(
+        14,
+        0
+    )
+
+TopLine.BackgroundColor3 =
+    Theme.Accent
+
+TopLine.BorderSizePixel = 0
+
+TopLine.ZIndex = 30
+
+TopLine.Parent =
+    Main
+
+local TopLineCorner =
+    Instance.new("UICorner")
+
+TopLineCorner.CornerRadius =
+    UDim.new(
+        1,
+        0
+    )
+
+TopLineCorner.Parent =
+    TopLine
+
+local TopLineGradient =
+    Instance.new("UIGradient")
+
+TopLineGradient.Color =
+    ColorSequence.new({
+        ColorSequenceKeypoint.new(
+            0,
+            Theme.AccentDark
+        ),
+
+        ColorSequenceKeypoint.new(
+            0.25,
+            Theme.Accent
+        ),
+
+        ColorSequenceKeypoint.new(
+            0.5,
+            Theme.AccentBright
+        ),
+
+        ColorSequenceKeypoint.new(
+            0.75,
+            Theme.Accent
+        ),
+
+        ColorSequenceKeypoint.new(
+            1,
+            Theme.AccentDark
+        ),
+    })
+
+TopLineGradient.Parent =
+    TopLine
+
+--==============================================================--
+-- HEADER
+--==============================================================--
+
+local Header =
+    Instance.new("Frame")
+
+Header.Name =
+    "Header"
+
+Header.Size =
+    UDim2.new(
+        1,
+        0,
+        0,
+        58
+    )
+
+Header.Position =
+    UDim2.fromOffset(
+        0,
+        2
+    )
+
+Header.BackgroundTransparency = 1
+
+Header.Active = true
+
+Header.Parent =
+    Main
+
+--==============================================================--
+-- MM2 BUTTON
+--==============================================================--
+
+local MM2Button =
+    Instance.new("TextButton")
+
+MM2Button.Name =
+    "MM2Button"
+
+MM2Button.Size =
+    UDim2.fromOffset(
+        34,
+        34
+    )
+
+MM2Button.Position =
+    UDim2.fromOffset(
+        10,
+        12
+    )
+
+MM2Button.BackgroundColor3 =
+    Theme.Accent
+
+MM2Button.BorderSizePixel = 0
+
+MM2Button.Text =
+    "MM2"
+
+MM2Button.TextColor3 =
+    Color3.new(
+        1,
+        1,
+        1
+    )
+
+MM2Button.TextSize = 9
+
+MM2Button.Font =
+    Enum.Font.GothamBold
+
+MM2Button.AutoButtonColor = false
+
+MM2Button.Parent =
+    Header
+
+local MM2Corner =
+    Instance.new("UICorner")
+
+MM2Corner.CornerRadius =
+    UDim.new(
+        0,
+        8
+    )
+
+MM2Corner.Parent =
+    MM2Button
+
+local MM2Stroke =
+    Instance.new("UIStroke")
+
+MM2Stroke.Color =
+    Theme.AccentBright
+
+MM2Stroke.Thickness = 1
+
+MM2Stroke.Parent =
+    MM2Button
+
+--==============================================================--
+-- TITLE
+--==============================================================--
+
+local Title =
+    Instance.new("TextLabel")
+
+Title.Name =
+    "Title"
+
+Title.Size =
+    UDim2.fromOffset(
+        180,
+        23
+    )
+
+Title.Position =
+    UDim2.fromOffset(
+        55,
+        9
+    )
+
+Title.BackgroundTransparency = 1
+
+Title.Text =
+    "ASTRAL X"
+
+Title.TextColor3 =
+    Theme.Text
+
+Title.TextSize = 16
+
+Title.Font =
+    Enum.Font.GothamBold
+
+Title.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+Title.Parent =
+    Header
+
+--==============================================================--
+-- SUBTITLE
+--==============================================================--
+
+local Subtitle =
+    Instance.new("TextLabel")
+
+Subtitle.Name =
+    "Subtitle"
+
+Subtitle.Size =
+    UDim2.fromOffset(
+        200,
+        15
+    )
+
+Subtitle.Position =
+    UDim2.fromOffset(
+        55,
+        30
+    )
+
+Subtitle.BackgroundTransparency = 1
+
+Subtitle.Text =
+    "PREMIUM INTERFACE"
+
+Subtitle.TextColor3 =
+    Theme.TextMuted
+
+Subtitle.TextSize = 8
+
+Subtitle.Font =
+    Enum.Font.GothamMedium
+
+Subtitle.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+Subtitle.Parent =
+    Header
+
+--==============================================================--
+-- VERSION
+--==============================================================--
+
+local Version =
+    Instance.new("TextLabel")
+
+Version.Name =
+    "Version"
+
+Version.Size =
+    UDim2.fromOffset(
+        35,
+        20
+    )
+
+Version.Position =
+    UDim2.new(
+        1,
+        -82,
+        0,
+        19
+    )
+
+Version.BackgroundTransparency = 1
+
+Version.Text =
+    "V9"
+
+Version.TextColor3 =
+    Theme.TextMuted
+
+Version.TextSize = 9
+
+Version.Font =
+    Enum.Font.GothamBold
+
+Version.Parent =
+    Header
+
+--==============================================================--
+-- CLOSE
+--==============================================================--
+
+local CloseButton =
+    Instance.new("TextButton")
+
+CloseButton.Name =
+    "Close"
+
+CloseButton.Size =
+    UDim2.fromOffset(
+        30,
+        30
+    )
+
+CloseButton.Position =
+    UDim2.new(
+        1,
+        -42,
+        0,
+        14
+    )
+
+CloseButton.BackgroundColor3 =
+    Theme.Card
+
+CloseButton.BorderSizePixel = 0
+
+CloseButton.Text = ""
+
+CloseButton.AutoButtonColor = false
+
+CloseButton.Parent =
+    Header
+
+local CloseCorner =
+    Instance.new("UICorner")
+
+CloseCorner.CornerRadius =
+    UDim.new(
+        0,
+        8
+    )
+
+CloseCorner.Parent =
+    CloseButton
+
+local CloseStroke =
+    Instance.new("UIStroke")
+
+CloseStroke.Color =
+    Theme.Border
+
+CloseStroke.Thickness = 1
+
+CloseStroke.Parent =
+    CloseButton
+
+CreateLucideIcon(
+    CloseButton,
+    "x",
+    Theme.TextSecondary,
+    18
+)
+
+--==============================================================--
+-- BODY
+--==============================================================--
+
+local Body =
+    Instance.new("Frame")
+
+Body.Name =
+    "Body"
+
+Body.Size =
+    UDim2.new(
+        1,
+        0,
+        1,
+        -60
+    )
+
+Body.Position =
+    UDim2.fromOffset(
+        0,
+        60
+    )
+
+Body.BackgroundTransparency = 1
+
+Body.Parent =
+    Main
+
+--==============================================================--
+-- SIDEBAR
+--==============================================================--
+
+local Sidebar =
+    Instance.new("Frame")
+
+Sidebar.Name =
+    "Sidebar"
+
+Sidebar.Size =
+    UDim2.new(
+        0,
+        66,
+        1,
+        0
+    )
+
+Sidebar.BackgroundColor3 =
+    Theme.Sidebar
+
+Sidebar.BorderSizePixel = 0
+
+Sidebar.Parent =
+    Body
+
+local SidebarCorner =
+    Instance.new("UICorner")
+
+SidebarCorner.CornerRadius =
+    UDim.new(
+        0,
+        16
+    )
+
+SidebarCorner.Parent =
+    Sidebar
+
+local SidebarLine =
+    Instance.new("Frame")
+
+SidebarLine.Name =
+    "SidebarLine"
+
+SidebarLine.Size =
+    UDim2.new(
+        0,
+        1,
+        1,
+        -24
+    )
+
+SidebarLine.Position =
+    UDim2.new(
+        1,
+        -1,
+        0,
+        12
+    )
+
+SidebarLine.BackgroundColor3 =
+    Theme.Border
+
+SidebarLine.BackgroundTransparency =
+    0.45
+
+SidebarLine.BorderSizePixel = 0
+
+SidebarLine.Parent =
+    Sidebar
+
+--==============================================================--
+-- CONTENT
+--==============================================================--
+
+local Content =
+    Instance.new("Frame")
+
+Content.Name =
+    "Content"
+
+Content.Size =
+    UDim2.new(
+        1,
+        -86,
+        1,
+        -12
+    )
+
+Content.Position =
+    UDim2.fromOffset(
+        75,
+        6
+    )
+
+Content.BackgroundTransparency = 1
+
+Content.Parent =
+    Body
+
+--==============================================================--
+-- PAGE TITLE
+--==============================================================--
+
+local PageTitle =
+    Instance.new("TextLabel")
+
+PageTitle.Name =
+    "PageTitle"
+
+PageTitle.Size =
+    UDim2.new(
+        1,
+        -10,
+        0,
+        28
+    )
+
+PageTitle.Position =
+    UDim2.fromOffset(
+        4,
+        5
+    )
+
+PageTitle.BackgroundTransparency = 1
+
+PageTitle.Text =
+    "Home"
+
+PageTitle.TextColor3 =
+    Theme.Text
+
+PageTitle.TextSize = 20
+
+PageTitle.Font =
+    Enum.Font.GothamBold
+
+PageTitle.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+PageTitle.Parent =
+    Content
+
+--==============================================================--
+-- PAGE DESCRIPTION
+--==============================================================--
+
+local PageDesc =
+    Instance.new("TextLabel")
+
+PageDesc.Name =
+    "PageDescription"
+
+PageDesc.Size =
+    UDim2.new(
+        1,
+        -10,
+        0,
+        20
+    )
+
+PageDesc.Position =
+    UDim2.fromOffset(
+        4,
+        34
+    )
+
+PageDesc.BackgroundTransparency = 1
+
+PageDesc.Text =
+    "Astral X interface"
+
+PageDesc.TextColor3 =
+    Theme.TextMuted
+
+PageDesc.TextSize = 10
+
+PageDesc.Font =
+    Enum.Font.GothamMedium
+
+PageDesc.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+PageDesc.Parent =
+    Content
+
+--==============================================================--
+-- TAB BUTTONS
+--==============================================================--
+
+local TabButtons = {}
+
+for Index, TabData in ipairs(Tabs) do
+
+    local Button =
+        Instance.new("TextButton")
+
+    Button.Name =
+        TabData.Name
+
+    Button.Size =
+        UDim2.new(
+            1,
+            -12,
+            0,
+            42
+        )
+
+    Button.Position =
+        UDim2.fromOffset(
+            6,
+            10 +
+                ((Index - 1) * 48)
+        )
+
+    Button.BackgroundColor3 =
+        Theme.Card
+
+    Button.BackgroundTransparency =
+        Index == 1
+        and 0
+        or 1
+
+    Button.BorderSizePixel = 0
+
+    Button.Text = ""
+
+    Button.AutoButtonColor = false
+
+    Button.Parent =
+        Sidebar
+
+    local Corner =
+        Instance.new("UICorner")
+
+    Corner.CornerRadius =
+        UDim.new(
+            0,
+            10
+        )
+
+    Corner.Parent =
+        Button
+
+    --==========================================================--
+    -- INDICATOR
+    --==========================================================--
+
+    local Indicator =
+        Instance.new("Frame")
+
+    Indicator.Name =
+        "Indicator"
+
+    Indicator.Size =
+        UDim2.fromOffset(
+            3,
+            20
+        )
+
+    Indicator.Position =
+        UDim2.new(
+            0,
+            0,
+            0.5,
+            -10
+        )
+
+    Indicator.BackgroundColor3 =
+        Theme.Accent
+
+    Indicator.BorderSizePixel = 0
+
+    Indicator.Visible =
+        Index == 1
+
+    Indicator.Parent =
+        Button
+
+    local IndicatorCorner =
+        Instance.new("UICorner")
+
+    IndicatorCorner.CornerRadius =
+        UDim.new(
+            1,
+            0
+        )
+
+    IndicatorCorner.Parent =
+        Indicator
+
+    --==========================================================--
+    -- ICON HOLDER
+    --==========================================================--
+
+    local IconHolder =
+        Instance.new("Frame")
+
+    IconHolder.Name =
+        "IconHolder"
+
+    IconHolder.Size =
+        UDim2.fromOffset(
+            30,
+            30
+        )
+
+    IconHolder.Position =
+        UDim2.fromOffset(
+            8,
+            6
+        )
+
+    IconHolder.BackgroundTransparency = 1
+
+    IconHolder.Parent =
+        Button
+
+    local Icon =
+        CreateLucideIcon(
+            IconHolder,
+
+            TabData.Icon,
+
+            Index == 1
+            and Theme.AccentBright
+            or Theme.TextSecondary,
+
+            21
+        )
+
+    --==========================================================--
+    -- NAME
+    --==========================================================--
+
+    local NameLabel =
+        Instance.new("TextLabel")
+
+    NameLabel.Name =
+        "Name"
+
+    NameLabel.Size =
+        UDim2.new(
+            1,
+            -48,
+            1,
+            0
+        )
+
+    NameLabel.Position =
+        UDim2.fromOffset(
+            46,
+            0
+        )
+
+    NameLabel.BackgroundTransparency = 1
+
+    NameLabel.Text =
+        TabData.Name
+
+    NameLabel.TextColor3 =
+        Index == 1
+        and Theme.Text
+        or Theme.TextSecondary
+
+    NameLabel.TextSize = 11
+
+    NameLabel.Font =
+        Enum.Font.GothamSemibold
+
+    NameLabel.TextXAlignment =
+        Enum.TextXAlignment.Left
+
+    NameLabel.TextTransparency = 1
+
+    NameLabel.Parent =
+        Button
+
+    TabButtons[Index] =
+        Button
+
+    --==========================================================--
+    -- CLICK
+    --==========================================================--
+
+    Button.Activated:Connect(
+        function()
+
+            if CurrentTab == Index then
+                return
+            end
+
+            CurrentTab = Index
+
+            for Number, OtherButton
+                in ipairs(TabButtons) do
+
+                local Selected =
+                    Number == Index
+
+                OtherButton.BackgroundTransparency =
+                    Selected
+                    and 0
+                    or 1
+
+                local OtherName =
+                    OtherButton:FindFirstChild(
+                        "Name"
+                    )
+
