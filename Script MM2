@@ -1181,30 +1181,51 @@ for Index,Name in ipairs(TabNames) do
 end
 
 --==================================================
--- 31. SISTEMA DE SELEÇÃO ANIMADA
+-- 31. SISTEMA DE SELEÇÃO ANIMADA (OTIMIZADO)
 --==================================================
 
 local CurrentTab = nil
 
-local AnimationId = 0
-
 local function SelectTab(Name)
+    if not Name or CurrentTab == Name then return end
 
-    if not Name then
-        return
+    local TargetTabData = Tabs[Name]
+    local TargetPage = Pages[Name]
+    if not TargetTabData or not TargetPage then return end
+
+    -- Atualiza cores do texto e esconde indicadores antigos
+    for TabName, Data in pairs(Tabs) do
+        local IsTarget = (TabName == Name)
+        
+        -- Troca a cor do texto instantaneamente
+        TweenService:Create(Data.Button, TweenInfo.new(0.15), {
+            TextColor3 = IsTarget and White or Gray
+        }):Play()
+
+        -- Esconde a linha indicadora das outras abas
+        if not IsTarget then
+            Data.Indicator.Visible = false
+        end
     end
 
-    if CurrentTab == Name then
-        return
+    -- Troca de Página instantânea
+    for PageName, Page in pairs(Pages) do
+        Page.Visible = (PageName == Name)
     end
 
-    AnimationId += 1
+    -- Anima a linha da NOVA aba surgindo suavemente
+    local Indicator = TargetTabData.Indicator
+    Indicator.Visible = true
+    Indicator.Size = UDim2.fromOffset(3, 0)
+    Indicator.Position = UDim2.new(0, 7, 0.5, 0)
 
-    local ThisAnimation =
-        AnimationId
+    TweenService:Create(Indicator, TweenInfo.new(0.18, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(3, 20),
+        Position = UDim2.new(0, 7, 0.5, -10)
+    }):Play()
 
-    local OldTab =
-        CurrentTab
+    CurrentTab = Name
+end
 
     --==============================================
     -- PRIMEIRA SELEÇÃO
