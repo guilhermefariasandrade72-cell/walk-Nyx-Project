@@ -12,61 +12,41 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
---==============================================================--
--- REMOVE GUI ANTIGA
---==============================================================--
-
 local OldGui = PlayerGui:FindFirstChild("AstralX_Premium")
-
-if OldGui then
-    OldGui:Destroy()
-end
+if OldGui then OldGui:Destroy() end
 
 --==============================================================--
 -- THEME
 --==============================================================--
 
 local Theme = {
-    Background = Color3.fromRGB(7, 8, 11),
-    Window = Color3.fromRGB(11, 12, 16),
-    Sidebar = Color3.fromRGB(9, 10, 14),
-
-    Card = Color3.fromRGB(16, 17, 22),
-    CardHover = Color3.fromRGB(23, 24, 30),
-
-    Accent = Color3.fromRGB(225, 40, 56),
-    AccentBright = Color3.fromRGB(255, 65, 80),
-    AccentDark = Color3.fromRGB(120, 15, 27),
-
-    Text = Color3.fromRGB(245, 245, 248),
-    TextSecondary = Color3.fromRGB(165, 166, 177),
-    TextMuted = Color3.fromRGB(91, 93, 104),
-
-    Border = Color3.fromRGB(39, 40, 48),
+    Background = Color3.fromRGB(7,8,11),
+    Window = Color3.fromRGB(11,12,16),
+    Sidebar = Color3.fromRGB(9,10,14),
+    Card = Color3.fromRGB(16,17,22),
+    CardHover = Color3.fromRGB(23,24,30),
+    Accent = Color3.fromRGB(225,40,56),
+    AccentBright = Color3.fromRGB(255,65,80),
+    AccentDark = Color3.fromRGB(120,15,27),
+    Text = Color3.fromRGB(245,245,248),
+    TextSecondary = Color3.fromRGB(165,166,177),
+    TextMuted = Color3.fromRGB(91,93,104),
+    Border = Color3.fromRGB(39,40,48),
 }
-
---==============================================================--
--- CONFIG
---==============================================================--
 
 local DEFAULT_WIDTH = 445
 local DEFAULT_HEIGHT = 300
-
 local MIN_WIDTH = 360
 local MAX_WIDTH = 700
-
 local MIN_HEIGHT = 240
 local MAX_HEIGHT = 520
 
 local CurrentWidth = DEFAULT_WIDTH
 local CurrentHeight = DEFAULT_HEIGHT
-
 local SidebarExpanded = false
 local CurrentTab = 1
-
 local WindowOpen = true
 local WindowAnimating = false
-
 local DraggingWindow = false
 local DraggingFloat = false
 local Resizing = false
@@ -79,149 +59,61 @@ local Lucide = nil
 
 do
     local Module = ReplicatedStorage:FindFirstChild("Lucide")
-
     if Module and Module:IsA("ModuleScript") then
         local Success, Result = pcall(function()
             return require(Module)
         end)
-
         if Success then
             Lucide = Result
         end
     end
 end
 
---==============================================================--
--- ÍCONE LUCIDE
---==============================================================--
-
-local function CreateLucideIcon(
-    Parent,
-    IconName,
-    IconColor,
-    IconSize
-)
-
+local function CreateLucideIcon(Parent, IconName, IconColor, IconSize)
     IconSize = IconSize or 21
 
     if not Lucide then
-
-        warn(
-            "[Astral X] Lucide não encontrado em ReplicatedStorage."
-        )
-
-        local Fallback =
-            Instance.new("TextLabel")
-
+        warn("[Astral X] Lucide não encontrado em ReplicatedStorage.")
+        local Fallback = Instance.new("TextLabel")
         Fallback.Name = "Icon"
-
-        Fallback.Size =
-            UDim2.fromOffset(
-                IconSize,
-                IconSize
-            )
-
-        Fallback.AnchorPoint =
-            Vector2.new(
-                0.5,
-                0.5
-            )
-
-        Fallback.Position =
-            UDim2.fromScale(
-                0.5,
-                0.5
-            )
-
+        Fallback.Size = UDim2.fromOffset(IconSize,IconSize)
+        Fallback.AnchorPoint = Vector2.new(0.5,0.5)
+        Fallback.Position = UDim2.fromScale(0.5,0.5)
         Fallback.BackgroundTransparency = 1
-
-        Fallback.TextColor3 =
-            IconColor
-
-        Fallback.TextSize =
-            math.floor(
-                IconSize * 0.8
-            )
-
-        Fallback.Font =
-            Enum.Font.GothamBold
-
-        local FallbackIcons = {
+        Fallback.TextColor3 = IconColor
+        Fallback.TextSize = math.floor(IconSize * 0.8)
+        Fallback.Font = Enum.Font.GothamBold
+        local Icons = {
             house = "⌂",
             eye = "◉",
             user = "●",
             settings = "⚙",
-            x = "×",
+            x = "×"
         }
-
-        Fallback.Text =
-            FallbackIcons[IconName]
-            or "•"
-
-        Fallback.Parent =
-            Parent
-
+        Fallback.Text = Icons[IconName] or "•"
+        Fallback.Parent = Parent
         return Fallback
     end
 
-    local Success, Asset =
-        pcall(function()
-
-            return Lucide.GetAsset(
-                IconName,
-                IconSize
-            )
-
-        end)
+    local Success, Asset = pcall(function()
+        return Lucide.GetAsset(IconName,IconSize)
+    end)
 
     if not Success or not Asset then
-
-        warn(
-            "[Astral X] Ícone Lucide inválido: "
-                .. tostring(IconName)
-        )
-
+        warn("[Astral X] Ícone Lucide inválido: "..tostring(IconName))
         return nil
     end
 
-    local Image =
-        Instance.new("ImageLabel")
-
-    Image.Name =
-        "Icon"
-
-    Image.Size =
-        UDim2.fromOffset(
-            IconSize,
-            IconSize
-        )
-
-    Image.AnchorPoint =
-        Vector2.new(
-            0.5,
-            0.5
-        )
-
-    Image.Position =
-        UDim2.fromScale(
-            0.5,
-            0.5
-        )
-
+    local Image = Instance.new("ImageLabel")
+    Image.Name = "Icon"
+    Image.Size = UDim2.fromOffset(IconSize,IconSize)
+    Image.AnchorPoint = Vector2.new(0.5,0.5)
+    Image.Position = UDim2.fromScale(0.5,0.5)
     Image.BackgroundTransparency = 1
-
-    Image.Image =
-        Asset.Url
-
-    Image.ImageColor3 =
-        IconColor
-
-    Image.ScaleType =
-        Enum.ScaleType.Fit
-
-    Image.Parent =
-        Parent
-
+    Image.Image = Asset.Url
+    Image.ImageColor3 = IconColor
+    Image.ScaleType = Enum.ScaleType.Fit
+    Image.Parent = Parent
     return Image
 end
 
@@ -230,25 +122,21 @@ end
 --==============================================================--
 
 local Tabs = {
-
     {
         Name = "Home",
         Description = "Astral X interface",
         Icon = "house",
     },
-
     {
         Name = "Visual",
         Description = "Visual interface",
         Icon = "eye",
     },
-
     {
         Name = "Player",
         Description = "Player interface",
         Icon = "user",
     },
-
     {
         Name = "Config",
         Description = "Hub configuration",
@@ -260,692 +148,222 @@ local Tabs = {
 -- SCREEN GUI
 --==============================================================--
 
-local ScreenGui =
-    Instance.new("ScreenGui")
-
-ScreenGui.Name =
-    "AstralX_Premium"
-
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AstralX_Premium"
 ScreenGui.ResetOnSpawn = false
-
 ScreenGui.IgnoreGuiInset = true
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = PlayerGui
 
-ScreenGui.ZIndexBehavior =
-    Enum.ZIndexBehavior.Sibling
-
-ScreenGui.Parent =
-    PlayerGui
-
---==============================================================--
--- CANVAS GROUP
---==============================================================--
-
-local WindowGroup =
-    Instance.new("CanvasGroup")
-
-WindowGroup.Name =
-    "WindowGroup"
-
-WindowGroup.Size =
-    UDim2.fromScale(
-        1,
-        1
-    )
-
+local WindowGroup = Instance.new("CanvasGroup")
+WindowGroup.Name = "WindowGroup"
+WindowGroup.Size = UDim2.fromScale(1,1)
 WindowGroup.BackgroundTransparency = 1
-
 WindowGroup.GroupTransparency = 0
-
-WindowGroup.Parent =
-    ScreenGui
+WindowGroup.Parent = ScreenGui
 
 --==============================================================--
 -- MAIN
 --==============================================================--
 
-local Main =
-    Instance.new("Frame")
-
-Main.Name =
-    "Main"
-
-Main.Size =
-    UDim2.fromOffset(
-        DEFAULT_WIDTH,
-        DEFAULT_HEIGHT
-    )
-
-Main.AnchorPoint =
-    Vector2.new(
-        0.5,
-        0.5
-    )
-
-Main.Position =
-    UDim2.fromScale(
-        0.5,
-        0.5
-    )
-
-Main.BackgroundColor3 =
-    Theme.Window
-
+local Main = Instance.new("Frame")
+Main.Name = "Main"
+Main.Size = UDim2.fromOffset(DEFAULT_WIDTH,DEFAULT_HEIGHT)
+Main.AnchorPoint = Vector2.new(0.5,0.5)
+Main.Position = UDim2.fromScale(0.5,0.5)
+Main.BackgroundColor3 = Theme.Window
 Main.BorderSizePixel = 0
-
 Main.ClipsDescendants = true
+Main.Parent = WindowGroup
 
-Main.Parent =
-    WindowGroup
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0,18)
+MainCorner.Parent = Main
 
-local MainCorner =
-    Instance.new("UICorner")
-
-MainCorner.CornerRadius =
-    UDim.new(
-        0,
-        18
-    )
-
-MainCorner.Parent =
-    Main
-
-local MainStroke =
-    Instance.new("UIStroke")
-
-MainStroke.Color =
-    Theme.Border
-
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Theme.Border
 MainStroke.Thickness = 1
-
-MainStroke.Transparency =
-    0.12
-
-MainStroke.Parent =
-    Main
+MainStroke.Transparency = 0.12
+MainStroke.Parent = Main
 
 --==============================================================--
--- LINHA SUPERIOR
+-- TOP LINE
 --==============================================================--
 
-local TopLine =
-    Instance.new("Frame")
-
-TopLine.Name =
-    "TopRedLine"
-
-TopLine.Size =
-    UDim2.new(
-        1,
-        -28,
-        0,
-        2
-    )
-
-TopLine.Position =
-    UDim2.fromOffset(
-        14,
-        0
-    )
-
-TopLine.BackgroundColor3 =
-    Theme.Accent
-
+local TopLine = Instance.new("Frame")
+TopLine.Name = "TopRedLine"
+TopLine.Size = UDim2.new(1,-28,0,2)
+TopLine.Position = UDim2.fromOffset(14,0)
+TopLine.BackgroundColor3 = Theme.Accent
 TopLine.BorderSizePixel = 0
-
 TopLine.ZIndex = 30
+TopLine.Parent = Main
 
-TopLine.Parent =
-    Main
+local TopLineCorner = Instance.new("UICorner")
+TopLineCorner.CornerRadius = UDim.new(1,0)
+TopLineCorner.Parent = TopLine
 
-local TopLineCorner =
-    Instance.new("UICorner")
-
-TopLineCorner.CornerRadius =
-    UDim.new(
-        1,
-        0
-    )
-
-TopLineCorner.Parent =
-    TopLine
-
-local TopLineGradient =
-    Instance.new("UIGradient")
-
-TopLineGradient.Color =
-    ColorSequence.new({
-        ColorSequenceKeypoint.new(
-            0,
-            Theme.AccentDark
-        ),
-
-        ColorSequenceKeypoint.new(
-            0.25,
-            Theme.Accent
-        ),
-
-        ColorSequenceKeypoint.new(
-            0.5,
-            Theme.AccentBright
-        ),
-
-        ColorSequenceKeypoint.new(
-            0.75,
-            Theme.Accent
-        ),
-
-        ColorSequenceKeypoint.new(
-            1,
-            Theme.AccentDark
-        ),
-    })
-
-TopLineGradient.Parent =
-    TopLine
+local TopLineGradient = Instance.new("UIGradient")
+TopLineGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0,Theme.AccentDark),
+    ColorSequenceKeypoint.new(0.25,Theme.Accent),
+    ColorSequenceKeypoint.new(0.5,Theme.AccentBright),
+    ColorSequenceKeypoint.new(0.75,Theme.Accent),
+    ColorSequenceKeypoint.new(1,Theme.AccentDark)
+})
+TopLineGradient.Parent = TopLine
 
 --==============================================================--
 -- HEADER
 --==============================================================--
 
-local Header =
-    Instance.new("Frame")
-
-Header.Name =
-    "Header"
-
-Header.Size =
-    UDim2.new(
-        1,
-        0,
-        0,
-        58
-    )
-
-Header.Position =
-    UDim2.fromOffset(
-        0,
-        2
-    )
-
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1,0,0,58)
+Header.Position = UDim2.fromOffset(0,2)
 Header.BackgroundTransparency = 1
-
 Header.Active = true
+Header.Parent = Main
 
-Header.Parent =
-    Main
-
---==============================================================--
--- MM2 BUTTON
---==============================================================--
-
-local MM2Button =
-    Instance.new("TextButton")
-
-MM2Button.Name =
-    "MM2Button"
-
-MM2Button.Size =
-    UDim2.fromOffset(
-        34,
-        34
-    )
-
-MM2Button.Position =
-    UDim2.fromOffset(
-        10,
-        12
-    )
-
-MM2Button.BackgroundColor3 =
-    Theme.Accent
-
+local MM2Button = Instance.new("TextButton")
+MM2Button.Name = "MM2Button"
+MM2Button.Size = UDim2.fromOffset(34,34)
+MM2Button.Position = UDim2.fromOffset(10,12)
+MM2Button.BackgroundColor3 = Theme.Accent
 MM2Button.BorderSizePixel = 0
-
-MM2Button.Text =
-    "MM2"
-
-MM2Button.TextColor3 =
-    Color3.new(
-        1,
-        1,
-        1
-    )
-
+MM2Button.Text = "MM2"
+MM2Button.TextColor3 = Color3.new(1,1,1)
 MM2Button.TextSize = 9
-
-MM2Button.Font =
-    Enum.Font.GothamBold
-
+MM2Button.Font = Enum.Font.GothamBold
 MM2Button.AutoButtonColor = false
+MM2Button.Parent = Header
 
-MM2Button.Parent =
-    Header
+local MM2Corner = Instance.new("UICorner")
+MM2Corner.CornerRadius = UDim.new(0,8)
+MM2Corner.Parent = MM2Button
 
-local MM2Corner =
-    Instance.new("UICorner")
-
-MM2Corner.CornerRadius =
-    UDim.new(
-        0,
-        8
-    )
-
-MM2Corner.Parent =
-    MM2Button
-
-local MM2Stroke =
-    Instance.new("UIStroke")
-
-MM2Stroke.Color =
-    Theme.AccentBright
-
+local MM2Stroke = Instance.new("UIStroke")
+MM2Stroke.Color = Theme.AccentBright
 MM2Stroke.Thickness = 1
+MM2Stroke.Parent = MM2Button
 
-MM2Stroke.Parent =
-    MM2Button
-
---==============================================================--
--- TITLE
---==============================================================--
-
-local Title =
-    Instance.new("TextLabel")
-
-Title.Name =
-    "Title"
-
-Title.Size =
-    UDim2.fromOffset(
-        180,
-        23
-    )
-
-Title.Position =
-    UDim2.fromOffset(
-        55,
-        9
-    )
-
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.fromOffset(180,23)
+Title.Position = UDim2.fromOffset(55,9)
 Title.BackgroundTransparency = 1
-
-Title.Text =
-    "ASTRAL X"
-
-Title.TextColor3 =
-    Theme.Text
-
+Title.Text = "ASTRAL X"
+Title.TextColor3 = Theme.Text
 Title.TextSize = 16
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Header
 
-Title.Font =
-    Enum.Font.GothamBold
-
-Title.TextXAlignment =
-    Enum.TextXAlignment.Left
-
-Title.Parent =
-    Header
-
---==============================================================--
--- SUBTITLE
---==============================================================--
-
-local Subtitle =
-    Instance.new("TextLabel")
-
-Subtitle.Name =
-    "Subtitle"
-
-Subtitle.Size =
-    UDim2.fromOffset(
-        200,
-        15
-    )
-
-Subtitle.Position =
-    UDim2.fromOffset(
-        55,
-        30
-    )
-
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Name = "Subtitle"
+Subtitle.Size = UDim2.fromOffset(200,15)
+Subtitle.Position = UDim2.fromOffset(55,30)
 Subtitle.BackgroundTransparency = 1
-
-Subtitle.Text =
-    "PREMIUM INTERFACE"
-
-Subtitle.TextColor3 =
-    Theme.TextMuted
-
+Subtitle.Text = "PREMIUM INTERFACE"
+Subtitle.TextColor3 = Theme.TextMuted
 Subtitle.TextSize = 8
+Subtitle.Font = Enum.Font.GothamMedium
+Subtitle.TextXAlignment = Enum.TextXAlignment.Left
+Subtitle.Parent = Header
 
-Subtitle.Font =
-    Enum.Font.GothamMedium
-
-Subtitle.TextXAlignment =
-    Enum.TextXAlignment.Left
-
-Subtitle.Parent =
-    Header
-
---==============================================================--
--- VERSION
---==============================================================--
-
-local Version =
-    Instance.new("TextLabel")
-
-Version.Name =
-    "Version"
-
-Version.Size =
-    UDim2.fromOffset(
-        35,
-        20
-    )
-
-Version.Position =
-    UDim2.new(
-        1,
-        -82,
-        0,
-        19
-    )
-
+local Version = Instance.new("TextLabel")
+Version.Name = "Version"
+Version.Size = UDim2.fromOffset(35,20)
+Version.Position = UDim2.new(1,-82,0,19)
 Version.BackgroundTransparency = 1
-
-Version.Text =
-    "V9"
-
-Version.TextColor3 =
-    Theme.TextMuted
-
+Version.Text = "V9"
+Version.TextColor3 = Theme.TextMuted
 Version.TextSize = 9
+Version.Font = Enum.Font.GothamBold
+Version.Parent = Header
 
-Version.Font =
-    Enum.Font.GothamBold
-
-Version.Parent =
-    Header
-
---==============================================================--
--- CLOSE
---==============================================================--
-
-local CloseButton =
-    Instance.new("TextButton")
-
-CloseButton.Name =
-    "Close"
-
-CloseButton.Size =
-    UDim2.fromOffset(
-        30,
-        30
-    )
-
-CloseButton.Position =
-    UDim2.new(
-        1,
-        -42,
-        0,
-        14
-    )
-
-CloseButton.BackgroundColor3 =
-    Theme.Card
-
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "Close"
+CloseButton.Size = UDim2.fromOffset(30,30)
+CloseButton.Position = UDim2.new(1,-42,0,14)
+CloseButton.BackgroundColor3 = Theme.Card
 CloseButton.BorderSizePixel = 0
-
 CloseButton.Text = ""
-
 CloseButton.AutoButtonColor = false
+CloseButton.Parent = Header
 
-CloseButton.Parent =
-    Header
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0,8)
+CloseCorner.Parent = CloseButton
 
-local CloseCorner =
-    Instance.new("UICorner")
-
-CloseCorner.CornerRadius =
-    UDim.new(
-        0,
-        8
-    )
-
-CloseCorner.Parent =
-    CloseButton
-
-local CloseStroke =
-    Instance.new("UIStroke")
-
-CloseStroke.Color =
-    Theme.Border
-
+local CloseStroke = Instance.new("UIStroke")
+CloseStroke.Color = Theme.Border
 CloseStroke.Thickness = 1
+CloseStroke.Parent = CloseButton
 
-CloseStroke.Parent =
-    CloseButton
-
-CreateLucideIcon(
-    CloseButton,
-    "x",
-    Theme.TextSecondary,
-    18
-)
+CreateLucideIcon(CloseButton,"x",Theme.TextSecondary,18)
 
 --==============================================================--
 -- BODY
 --==============================================================--
 
-local Body =
-    Instance.new("Frame")
-
-Body.Name =
-    "Body"
-
-Body.Size =
-    UDim2.new(
-        1,
-        0,
-        1,
-        -60
-    )
-
-Body.Position =
-    UDim2.fromOffset(
-        0,
-        60
-    )
-
+local Body = Instance.new("Frame")
+Body.Name = "Body"
+Body.Size = UDim2.new(1,0,1,-60)
+Body.Position = UDim2.fromOffset(0,60)
 Body.BackgroundTransparency = 1
+Body.Parent = Main
 
-Body.Parent =
-    Main
-
---==============================================================--
--- SIDEBAR
---==============================================================--
-
-local Sidebar =
-    Instance.new("Frame")
-
-Sidebar.Name =
-    "Sidebar"
-
-Sidebar.Size =
-    UDim2.new(
-        0,
-        66,
-        1,
-        0
-    )
-
-Sidebar.BackgroundColor3 =
-    Theme.Sidebar
-
+local Sidebar = Instance.new("Frame")
+Sidebar.Name = "Sidebar"
+Sidebar.Size = UDim2.new(0,66,1,0)
+Sidebar.BackgroundColor3 = Theme.Sidebar
 Sidebar.BorderSizePixel = 0
+Sidebar.Parent = Body
 
-Sidebar.Parent =
-    Body
+local SidebarCorner = Instance.new("UICorner")
+SidebarCorner.CornerRadius = UDim.new(0,16)
+SidebarCorner.Parent = Sidebar
 
-local SidebarCorner =
-    Instance.new("UICorner")
-
-SidebarCorner.CornerRadius =
-    UDim.new(
-        0,
-        16
-    )
-
-SidebarCorner.Parent =
-    Sidebar
-
-local SidebarLine =
-    Instance.new("Frame")
-
-SidebarLine.Name =
-    "SidebarLine"
-
-SidebarLine.Size =
-    UDim2.new(
-        0,
-        1,
-        1,
-        -24
-    )
-
-SidebarLine.Position =
-    UDim2.new(
-        1,
-        -1,
-        0,
-        12
-    )
-
-SidebarLine.BackgroundColor3 =
-    Theme.Border
-
-SidebarLine.BackgroundTransparency =
-    0.45
-
+local SidebarLine = Instance.new("Frame")
+SidebarLine.Name = "SidebarLine"
+SidebarLine.Size = UDim2.new(0,1,1,-24)
+SidebarLine.Position = UDim2.new(1,-1,0,12)
+SidebarLine.BackgroundColor3 = Theme.Border
+SidebarLine.BackgroundTransparency = 0.45
 SidebarLine.BorderSizePixel = 0
+SidebarLine.Parent = Sidebar
 
-SidebarLine.Parent =
-    Sidebar
-
---==============================================================--
--- CONTENT
---==============================================================--
-
-local Content =
-    Instance.new("Frame")
-
-Content.Name =
-    "Content"
-
-Content.Size =
-    UDim2.new(
-        1,
-        -86,
-        1,
-        -12
-    )
-
-Content.Position =
-    UDim2.fromOffset(
-        75,
-        6
-    )
-
+local Content = Instance.new("Frame")
+Content.Name = "Content"
+Content.Size = UDim2.new(1,-86,1,-12)
+Content.Position = UDim2.fromOffset(75,6)
 Content.BackgroundTransparency = 1
+Content.Parent = Body
 
-Content.Parent =
-    Body
-
---==============================================================--
--- PAGE TITLE
---==============================================================--
-
-local PageTitle =
-    Instance.new("TextLabel")
-
-PageTitle.Name =
-    "PageTitle"
-
-PageTitle.Size =
-    UDim2.new(
-        1,
-        -10,
-        0,
-        28
-    )
-
-PageTitle.Position =
-    UDim2.fromOffset(
-        4,
-        5
-    )
-
+local PageTitle = Instance.new("TextLabel")
+PageTitle.Name = "PageTitle"
+PageTitle.Size = UDim2.new(1,-10,0,28)
+PageTitle.Position = UDim2.fromOffset(4,5)
 PageTitle.BackgroundTransparency = 1
-
-PageTitle.Text =
-    "Home"
-
-PageTitle.TextColor3 =
-    Theme.Text
-
+PageTitle.Text = "Home"
+PageTitle.TextColor3 = Theme.Text
 PageTitle.TextSize = 20
+PageTitle.Font = Enum.Font.GothamBold
+PageTitle.TextXAlignment = Enum.TextXAlignment.Left
+PageTitle.Parent = Content
 
-PageTitle.Font =
-    Enum.Font.GothamBold
-
-PageTitle.TextXAlignment =
-    Enum.TextXAlignment.Left
-
-PageTitle.Parent =
-    Content
-
---==============================================================--
--- PAGE DESCRIPTION
---==============================================================--
-
-local PageDesc =
-    Instance.new("TextLabel")
-
-PageDesc.Name =
-    "PageDescription"
-
-PageDesc.Size =
-    UDim2.new(
-        1,
-        -10,
-        0,
-        20
-    )
-
-PageDesc.Position =
-    UDim2.fromOffset(
-        4,
-        34
-    )
-
+local PageDesc = Instance.new("TextLabel")
+PageDesc.Name = "PageDescription"
+PageDesc.Size = UDim2.new(1,-10,0,20)
+PageDesc.Position = UDim2.fromOffset(4,34)
 PageDesc.BackgroundTransparency = 1
-
-PageDesc.Text =
-    "Astral X interface"
-
-PageDesc.TextColor3 =
-    Theme.TextMuted
-
+PageDesc.Text = "Astral X interface"
+PageDesc.TextColor3 = Theme.TextMuted
 PageDesc.TextSize = 10
-
-PageDesc.Font =
-    Enum.Font.GothamMedium
-
-PageDesc.TextXAlignment =
-    Enum.TextXAlignment.Left
-
-PageDesc.Parent =
-    Content
+PageDesc.Font = Enum.Font.GothamMedium
+PageDesc.TextXAlignment = Enum.TextXAlignment.Left
+PageDesc.Parent = Content
 
 --==============================================================--
 -- TAB BUTTONS
@@ -953,697 +371,574 @@ PageDesc.Parent =
 
 local TabButtons = {}
 
-for Index, TabData in ipairs(Tabs) do
-
-    local Button =
-        Instance.new("TextButton")
-
-    Button.Name =
-        TabData.Name
-
-    Button.Size =
-        UDim2.new(
-            1,
-            -12,
-            0,
-            42
-        )
-
-    Button.Position =
-        UDim2.fromOffset(
-            6,
-            10 +
-                ((Index - 1) * 48)
-        )
-
-    Button.BackgroundColor3 =
-        Theme.Card
-
-    Button.BackgroundTransparency =
-        Index == 1
-        and 0
-        or 1
-
+for Index,TabData in ipairs(Tabs) do
+    local Button = Instance.new("TextButton")
+    Button.Name = TabData.Name
+    Button.Size = UDim2.new(1,-12,0,42)
+    Button.Position = UDim2.fromOffset(6,10+((Index-1)*48))
+    Button.BackgroundColor3 = Theme.Card
+    Button.BackgroundTransparency = Index == 1 and 0 or 1
     Button.BorderSizePixel = 0
-
     Button.Text = ""
-
     Button.AutoButtonColor = false
+    Button.Parent = Sidebar
 
-    Button.Parent =
-        Sidebar
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0,10)
+    Corner.Parent = Button
 
-    local Corner =
-        Instance.new("UICorner")
-
-    Corner.CornerRadius =
-        UDim.new(
-            0,
-            10
-        )
-
-    Corner.Parent =
-        Button
-
-    --==========================================================--
-    -- INDICATOR
-    --==========================================================--
-
-    local Indicator =
-        Instance.new("Frame")
-
-    Indicator.Name =
-        "Indicator"
-
-    Indicator.Size =
-        UDim2.fromOffset(
-            3,
-            20
-        )
-
-    Indicator.Position =
-        UDim2.new(
-            0,
-            0,
-            0.5,
-            -10
-        )
-
-    Indicator.BackgroundColor3 =
-        Theme.Accent
-
+    local Indicator = Instance.new("Frame")
+    Indicator.Name = "Indicator"
+    Indicator.Size = UDim2.fromOffset(3,20)
+    Indicator.Position = UDim2.new(0,0,0.5,-10)
+    Indicator.BackgroundColor3 = Theme.Accent
     Indicator.BorderSizePixel = 0
+    Indicator.Visible = Index == 1
+    Indicator.Parent = Button
 
-    Indicator.Visible =
-        Index == 1
+    local IndicatorCorner = Instance.new("UICorner")
+    IndicatorCorner.CornerRadius = UDim.new(1,0)
+    IndicatorCorner.Parent = Indicator
 
-    Indicator.Parent =
-        Button
-
-    local IndicatorCorner =
-        Instance.new("UICorner")
-
-    IndicatorCorner.CornerRadius =
-        UDim.new(
-            1,
-            0
-        )
-
-    IndicatorCorner.Parent =
-        Indicator
-
-    --==========================================================--
-    -- ICON HOLDER
-    --==========================================================--
-
-    local IconHolder =
-        Instance.new("Frame")
-
-    IconHolder.Name =
-        "IconHolder"
-
-    IconHolder.Size =
-        UDim2.fromOffset(
-            30,
-            30
-        )
-
-    IconHolder.Position =
-        UDim2.fromOffset(
-            8,
-            6
-        )
-
+    local IconHolder = Instance.new("Frame")
+    IconHolder.Name = "IconHolder"
+    IconHolder.Size = UDim2.fromOffset(30,30)
+    IconHolder.Position = UDim2.fromOffset(8,6)
     IconHolder.BackgroundTransparency = 1
+    IconHolder.Parent = Button
 
-    IconHolder.Parent =
-        Button
+    CreateLucideIcon(
+        IconHolder,
+        TabData.Icon,
+        Index == 1 and Theme.AccentBright or Theme.TextSecondary,
+        21
+    )
 
-    local Icon =
-        CreateLucideIcon(
-            IconHolder,
-
-            TabData.Icon,
-
-            Index == 1
-            and Theme.AccentBright
-            or Theme.TextSecondary,
-
-            21
-        )
-
-    --==========================================================--
-    -- NAME
-    --==========================================================--
-
-    local NameLabel =
-        Instance.new("TextLabel")
-
-    NameLabel.Name =
-        "Name"
-
-    NameLabel.Size =
-        UDim2.new(
-            1,
-            -48,
-            1,
-            0
-        )
-
-    NameLabel.Position =
-        UDim2.fromOffset(
-            46,
-            0
-        )
-
+    local NameLabel = Instance.new("TextLabel")
+    NameLabel.Name = "Name"
+    NameLabel.Size = UDim2.new(1,-48,1,0)
+    NameLabel.Position = UDim2.fromOffset(46,0)
     NameLabel.BackgroundTransparency = 1
-
-    NameLabel.Text =
-        TabData.Name
-
-    NameLabel.TextColor3 =
-        Index == 1
-        and Theme.Text
-        or Theme.TextSecondary
-
+    NameLabel.Text = TabData.Name
+    NameLabel.TextColor3 = Index == 1 and Theme.Text or Theme.TextSecondary
     NameLabel.TextSize = 11
-
-    NameLabel.Font =
-        Enum.Font.GothamSemibold
-
-    NameLabel.TextXAlignment =
-        Enum.TextXAlignment.Left
-
+    NameLabel.Font = Enum.Font.GothamSemibold
+    NameLabel.TextXAlignment = Enum.TextXAlignment.Left
     NameLabel.TextTransparency = 1
+    NameLabel.Parent = Button
 
-    NameLabel.Parent =
-        Button
+    TabButtons[Index] = Button
 
-    TabButtons[Index] =
-        Button
+    Button.Activated:Connect(function()
+        if CurrentTab == Index then return end
+        CurrentTab = Index
 
-    --==========================================================--
-    -- CLICK
-    --==========================================================--
+        for Number,OtherButton in ipairs(TabButtons) do
+            local Selected = Number == Index
+            OtherButton.BackgroundTransparency = Selected and 0 or 1
 
-    Button.Activated:Connect(
-        function()
-
-            if CurrentTab == Index then
-                return
+            local OtherName = OtherButton:FindFirstChild("Name")
+            if OtherName then
+                OtherName.TextColor3 = Selected and Theme.Text or Theme.TextSecondary
             end
 
-            CurrentTab = Index
+            local OtherIndicator = OtherButton:FindFirstChild("Indicator")
+            if OtherIndicator then
+                OtherIndicator.Visible = Selected
+            end
 
-            for Number, OtherButton
-                in ipairs(TabButtons) do
+            local OtherIconHolder = OtherButton:FindFirstChild("IconHolder")
+            if OtherIconHolder then
+                local OtherIcon = OtherIconHolder:FindFirstChild("Icon")
+                if OtherIcon then
+                    if OtherIcon:IsA("ImageLabel") then
+                        OtherIcon.ImageColor3 = Selected and Theme.AccentBright or Theme.TextSecondary
+                    elseif OtherIcon:IsA("TextLabel") then
+                        OtherIcon.TextColor3 = Selected and Theme.AccentBright or Theme.TextSecondary
+                    end
+                end
+            end
+        end
 
-                local Selected =
-                    Number == Index
+        PageTitle.Text = TabData.Name
+        PageDesc.Text = TabData.Description
+    end)
 
-                OtherButton.BackgroundTransparency =
-                    Selected
-                    and 0
-                    or 1
+    Button.MouseEnter:Connect(function()
+        if CurrentTab ~= Index then
+            TweenService:Create(Button,TweenInfo.new(0.12),{
+                BackgroundTransparency = 0.35
+            }):Play()
+        end
+    end)
 
-                local OtherName =
-                    OtherButton:FindFirstChild(
-                        "Name"
-                    )
+    Button.MouseLeave:Connect(function()
+        if CurrentTab ~= Index then
+            TweenService:Create(Button,TweenInfo.new(0.12),{
+                BackgroundTransparency = 1
+            }):Play()
+        end
+    end)
+end
+
+--==============================================================--
+-- SIDEBAR
+--==============================================================--
+
+local function SetSidebarExpanded(State)
+    SidebarExpanded = State
+
+    local Width = State and 155 or 66
+    local ContentX = State and 164 or 75
+    local ContentWidth = State and -175 or -86
+
+    TweenService:Create(
+        Sidebar,
+        TweenInfo.new(0.25,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),
+        {Size = UDim2.new(0,Width,1,0)}
+    ):Play()
+
+    TweenService:Create(
+        Content,
+        TweenInfo.new(0.25,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),
+        {
+            Position = UDim2.fromOffset(ContentX,6),
+            Size = UDim2.new(1,ContentWidth,1,-12)
+        }
+    ):Play()
+
+    for _,Button in ipairs(TabButtons) do
+        local NameLabel = Button:FindFirstChild("Name")
+        if NameLabel then
+            TweenService:Create(
+                NameLabel,
+                TweenInfo.new(0.18),
+                {TextTransparency = State and 0 or 1}
+            ):Play()
+        end
+    end
+end
+
+MM2Button.Activated:Connect(function()
+    SetSidebarExpanded(not SidebarExpanded)
+end)
+
+--==============================================================--
+-- ARRASTAR JANELA
+--==============================================================--
+
+Header.InputBegan:Connect(function(Input)
+    if Input.UserInputType ~= Enum.UserInputType.MouseButton1
+    and Input.UserInputType ~= Enum.UserInputType.Touch then
+        return
+    end
+
+    DraggingWindow = true
+    local StartPosition = Input.Position
+    local StartWindowPosition = Main.Position
+    local Changed
+    local Ended
+
+    Changed = UserInputService.InputChanged:Connect(function(Change)
+        if not DraggingWindow then return end
+
+        if Change.UserInputType == Enum.UserInputType.MouseMovement
+        or Change.UserInputType == Enum.UserInputType.Touch then
+            local Delta = Change.Position - StartPosition
+            Main.Position = UDim2.new(
+                StartWindowPosition.X.Scale,
+                StartWindowPosition.X.Offset + Delta.X,
+                StartWindowPosition.Y.Scale,
+                StartWindowPosition.Y.Offset + Delta.Y
+            )
+        end
+    end)
+
+    Ended = UserInputService.InputEnded:Connect(function(EndedInput)
+        if EndedInput.UserInputType == Enum.UserInputType.MouseButton1
+        or EndedInput.UserInputType == Enum.UserInputType.Touch then
+            DraggingWindow = false
+            if Changed then Changed:Disconnect() end
+            if Ended then Ended:Disconnect() end
+        end
+    end)
+end)
+
+--==============================================================--
+-- RESIZE
+--==============================================================--
+
+local ResizeButton = Instance.new("TextButton")
+ResizeButton.Name = "Resize"
+ResizeButton.Size = UDim2.fromOffset(30,30)
+ResizeButton.AnchorPoint = Vector2.new(1,1)
+ResizeButton.Position = UDim2.new(1,-2,1,-2)
+ResizeButton.BackgroundTransparency = 1
+ResizeButton.Text = ""
+ResizeButton.AutoButtonColor = false
+ResizeButton.ZIndex = 40
+ResizeButton.Parent = Main
+
+for i = 1,3 do
+    local Line = Instance.new("Frame")
+    Line.Size = UDim2.fromOffset(2,7)
+    Line.Position = UDim2.fromOffset(17+((i-1)*4),17-((i-1)*4))
+    Line.Rotation = -45
+    Line.BackgroundColor3 = Theme.TextMuted
+    Line.BorderSizePixel = 0
+    Line.ZIndex = 41
+    Line.Parent = ResizeButton
+end
+
+ResizeButton.InputBegan:Connect(function(Input)
+    if Input.UserInputType ~= Enum.UserInputType.MouseButton1
+    and Input.UserInputType ~= Enum.UserInputType.Touch then
+        return
+    end
+
+    Resizing = true
+    local StartPosition = Input.Position
+    local StartWidth = Main.AbsoluteSize.X
+    local StartHeight = Main.AbsoluteSize.Y
+    local Changed
+    local Ended
+
+    Changed = UserInputService.InputChanged:Connect(function(Change)
+        if not Resizing then return end
+
+        if Change.UserInputType == Enum.UserInputType.MouseMovement
+        or Change.UserInputType == Enum.UserInputType.Touch then
+            local Delta = Change.Position - StartPosition
+
+            CurrentWidth = math.clamp(
+                StartWidth + Delta.X,
+                MIN_WIDTH,
+                MAX_WIDTH
+            )
+
+            CurrentHeight = math.clamp(
+                StartHeight + Delta.Y,
+                MIN_HEIGHT,
+                MAX_HEIGHT
+            )
+
+            Main.Size = UDim2.fromOffset(CurrentWidth,CurrentHeight)
+        end
+    end)
+
+    Ended = UserInputService.InputEnded:Connect(function(EndedInput)
+        if EndedInput.UserInputType == Enum.UserInputType.MouseButton1
+        or EndedInput.UserInputType == Enum.UserInputType.Touch then
+            Resizing = false
+            if Changed then Changed:Disconnect() end
+            if Ended then Ended:Disconnect() end
+        end
+    end)
+end
+
+--==============================================================--
+-- CONFIRMAÇÃO
+--==============================================================--
+
+local ConfirmOverlay = Instance.new("Frame")
+ConfirmOverlay.Name = "ConfirmOverlay"
+ConfirmOverlay.Size = UDim2.fromScale(1,1)
+ConfirmOverlay.BackgroundColor3 = Color3.new(0,0,0)
+ConfirmOverlay.BackgroundTransparency = 0.38
+ConfirmOverlay.Visible = false
+ConfirmOverlay.ZIndex = 50
+ConfirmOverlay.Parent = Main
+
+local ConfirmCard = Instance.new("Frame")
+ConfirmCard.Name = "ConfirmCard"
+ConfirmCard.Size = UDim2.fromOffset(285,155)
+ConfirmCard.AnchorPoint = Vector2.new(0.5,0.5)
+ConfirmCard.Position = UDim2.fromScale(0.5,0.5)
+ConfirmCard.BackgroundColor3 = Theme.Card
+ConfirmCard.BorderSizePixel = 0
+ConfirmCard.ZIndex = 51
+ConfirmCard.Parent = ConfirmOverlay
+
+local ConfirmCorner = Instance.new("UICorner")
+ConfirmCorner.CornerRadius = UDim.new(0,15)
+ConfirmCorner.Parent = ConfirmCard
+
+local ConfirmStroke = Instance.new("UIStroke")
+ConfirmStroke.Color = Theme.Border
+ConfirmStroke.Thickness = 1
+ConfirmStroke.Parent = ConfirmCard
+
+local ConfirmRedLine = Instance.new("Frame")
+ConfirmRedLine.Name = "RedLine"
+ConfirmRedLine.Size = UDim2.new(0,3,1,-30)
+ConfirmRedLine.Position = UDim2.fromOffset(0,15)
+ConfirmRedLine.BackgroundColor3 = Theme.Accent
+ConfirmRedLine.BorderSizePixel = 0
+ConfirmRedLine.ZIndex = 53
+ConfirmRedLine.Parent = ConfirmCard
+
+local ConfirmRedCorner = Instance.new("UICorner")
+ConfirmRedCorner.CornerRadius = UDim.new(1,0)
+ConfirmRedCorner.Parent = ConfirmRedLine
+
+local ConfirmTitle = Instance.new("TextLabel")
+ConfirmTitle.Size = UDim2.new(1,-40,0,25)
+ConfirmTitle.Position = UDim2.fromOffset(20,18)
+ConfirmTitle.BackgroundTransparency = 1
+ConfirmTitle.Text = "Fechar Astral X?"
+ConfirmTitle.TextColor3 = Theme.Text
+ConfirmTitle.TextSize = 16
+ConfirmTitle.Font = Enum.Font.GothamBold
+ConfirmTitle.TextXAlignment = Enum.TextXAlignment.Left
+ConfirmTitle.ZIndex = 54
+ConfirmTitle.Parent = ConfirmCard
+
+local ConfirmText = Instance.new("TextLabel")
+ConfirmText.Size = UDim2.new(1,-40,0,30)
+ConfirmText.Position = UDim2.fromOffset(20,47)
+ConfirmText.BackgroundTransparency = 1
+ConfirmText.Text = "Deseja realmente fechar o hub?"
+ConfirmText.TextColor3 = Theme.TextSecondary
+ConfirmText.TextSize = 10
+ConfirmText.Font = Enum.Font.GothamMedium
+ConfirmText.TextXAlignment = Enum.TextXAlignment.Left
+ConfirmText.ZIndex = 54
+ConfirmText.Parent = ConfirmCard
+
+local YesButton = Instance.new("TextButton")
+YesButton.Name = "YesButton"
+YesButton.Size = UDim2.fromOffset(125,35)
+YesButton.Position = UDim2.fromOffset(20,105)
+YesButton.BackgroundColor3 = Theme.Accent
+YesButton.BorderSizePixel = 0
+YesButton.Text = "SIM"
+YesButton.TextColor3 = Color3.new(1,1,1)
+YesButton.TextSize = 10
+YesButton.Font = Enum.Font.GothamBold
+YesButton.AutoButtonColor = false
+YesButton.ZIndex = 54
+YesButton.Parent = ConfirmCard
+
+local YesCorner = Instance.new("UICorner")
+YesCorner.CornerRadius = UDim.new(0,9)
+YesCorner.Parent = YesButton
+
+local NoButton = Instance.new("TextButton")
+NoButton.Name = "NoButton"
+NoButton.Size = UDim2.fromOffset(110,35)
+NoButton.Position = UDim2.new(1,-130,0,105)
+NoButton.BackgroundColor3 = Theme.Window
+NoButton.BorderSizePixel = 0
+NoButton.Text = "NÃO"
+NoButton.TextColor3 = Theme.TextSecondary
+NoButton.TextSize = 10
+NoButton.Font = Enum.Font.GothamBold
+NoButton.AutoButtonColor = false
+NoButton.ZIndex = 54
+NoButton.Parent = ConfirmCard
+
+local NoCorner = Instance.new("UICorner")
+NoCorner.CornerRadius = UDim.new(0,9)
+NoCorner.Parent = NoButton
 
 --==============================================================--
 -- BOTÃO AX
 --==============================================================--
 
-local FloatButton =
-    Instance.new("TextButton")
-
-FloatButton.Name =
-    "AstralXFloat"
-
-FloatButton.Size =
-    UDim2.fromOffset(
-        54,
-        54
-    )
-
-FloatButton.Position =
-    UDim2.new(
-        1,
-        -75,
-        1,
-        -90
-    )
-
-FloatButton.BackgroundColor3 =
-    Theme.Window
-
+local FloatButton = Instance.new("TextButton")
+FloatButton.Name = "AstralXFloat"
+FloatButton.Size = UDim2.fromOffset(54,54)
+FloatButton.Position = UDim2.new(1,-75,1,-90)
+FloatButton.BackgroundColor3 = Theme.Window
 FloatButton.BorderSizePixel = 0
-
-FloatButton.Text =
-    "AX"
-
-FloatButton.TextColor3 =
-    Theme.AccentBright
-
+FloatButton.Text = "AX"
+FloatButton.TextColor3 = Theme.AccentBright
 FloatButton.TextSize = 14
-
-FloatButton.Font =
-    Enum.Font.GothamBold
-
+FloatButton.Font = Enum.Font.GothamBold
 FloatButton.AutoButtonColor = false
-
 FloatButton.ZIndex = 100
+FloatButton.Parent = ScreenGui
 
-FloatButton.Parent =
-    ScreenGui
+local FloatCorner = Instance.new("UICorner")
+FloatCorner.CornerRadius = UDim.new(0,14)
+FloatCorner.Parent = FloatButton
 
-local FloatCorner =
-    Instance.new("UICorner")
-
-FloatCorner.CornerRadius =
-    UDim.new(
-        0,
-        14
-    )
-
-FloatCorner.Parent =
-    FloatButton
-
-local FloatStroke =
-    Instance.new("UIStroke")
-
-FloatStroke.Color =
-    Theme.Accent
-
-FloatStroke.Thickness =
-    1.5
-
-FloatStroke.Parent =
-    FloatButton
-
+local FloatStroke = Instance.new("UIStroke")
+FloatStroke.Color = Theme.Accent
+FloatStroke.Thickness = 1.5
+FloatStroke.Parent = FloatButton
 
 --==============================================================--
--- FUNÇÃO: ESCONDER HUB
+-- ESCONDER / MOSTRAR
 --==============================================================--
 
 local function HideWindow()
-
-    if WindowAnimating or not WindowOpen then
-        return
-    end
+    if WindowAnimating or not WindowOpen then return end
 
     WindowAnimating = true
     WindowOpen = false
 
-    local HiddenWidth =
-        math.floor(
-            CurrentWidth * 0.82
-        )
+    local HiddenWidth = math.floor(CurrentWidth * 0.82)
+    local HiddenHeight = math.floor(CurrentHeight * 0.82)
 
-    local HiddenHeight =
-        math.floor(
-            CurrentHeight * 0.82
-        )
+    TweenService:Create(
+        Main,
+        TweenInfo.new(0.28,Enum.EasingStyle.Quint,Enum.EasingDirection.In),
+        {Size = UDim2.fromOffset(HiddenWidth,HiddenHeight)}
+    ):Play()
 
-    local SizeTween =
-        TweenService:Create(
-            Main,
+    local FadeTween = TweenService:Create(
+        WindowGroup,
+        TweenInfo.new(0.24,Enum.EasingStyle.Quint,Enum.EasingDirection.In),
+        {GroupTransparency = 1}
+    )
 
-            TweenInfo.new(
-                0.28,
-                Enum.EasingStyle.Quint,
-                Enum.EasingDirection.In
-            ),
-
-            {
-                Size =
-                    UDim2.fromOffset(
-                        HiddenWidth,
-                        HiddenHeight
-                    )
-            }
-        )
-
-    local FadeTween =
-        TweenService:Create(
-            WindowGroup,
-
-            TweenInfo.new(
-                0.24,
-                Enum.EasingStyle.Quint,
-                Enum.EasingDirection.In
-            ),
-
-            {
-                GroupTransparency = 1
-            }
-        )
-
-    SizeTween:Play()
     FadeTween:Play()
 
-    FadeTween.Completed:Connect(
-        function()
+    FadeTween.Completed:Connect(function()
+        if not ScreenGui.Parent then return end
 
-            if not ScreenGui.Parent then
-                return
-            end
-
-            Main.Visible = false
-
-            Main.Size =
-                UDim2.fromOffset(
-                    CurrentWidth,
-                    CurrentHeight
-                )
-
-            WindowGroup.GroupTransparency = 0
-
-            WindowAnimating = false
-        end
-    )
+        Main.Visible = false
+        Main.Size = UDim2.fromOffset(CurrentWidth,CurrentHeight)
+        WindowGroup.GroupTransparency = 0
+        WindowAnimating = false
+    end)
 end
 
-
---==============================================================--
--- FUNÇÃO: MOSTRAR HUB
---==============================================================--
-
 local function ShowWindow()
-
-    if WindowAnimating or WindowOpen then
-        return
-    end
+    if WindowAnimating or WindowOpen then return end
 
     WindowAnimating = true
     WindowOpen = true
-
     Main.Visible = true
 
-    Main.Size =
-        UDim2.fromOffset(
-            math.floor(
-                CurrentWidth * 0.82
-            ),
-
-            math.floor(
-                CurrentHeight * 0.82
-            )
-        )
+    Main.Size = UDim2.fromOffset(
+        math.floor(CurrentWidth * 0.82),
+        math.floor(CurrentHeight * 0.82)
+    )
 
     WindowGroup.GroupTransparency = 1
 
-    local SizeTween =
-        TweenService:Create(
-            Main,
+    TweenService:Create(
+        Main,
+        TweenInfo.new(0.32,Enum.EasingStyle.Back,Enum.EasingDirection.Out),
+        {Size = UDim2.fromOffset(CurrentWidth,CurrentHeight)}
+    ):Play()
 
-            TweenInfo.new(
-                0.32,
-                Enum.EasingStyle.Back,
-                Enum.EasingDirection.Out
-            ),
+    local FadeTween = TweenService:Create(
+        WindowGroup,
+        TweenInfo.new(0.26,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),
+        {GroupTransparency = 0}
+    )
 
-            {
-                Size =
-                    UDim2.fromOffset(
-                        CurrentWidth,
-                        CurrentHeight
-                    )
-            }
-        )
-
-    local FadeTween =
-        TweenService:Create(
-            WindowGroup,
-
-            TweenInfo.new(
-                0.26,
-                Enum.EasingStyle.Quint,
-                Enum.EasingDirection.Out
-            ),
-
-            {
-                GroupTransparency = 0
-            }
-        )
-
-    SizeTween:Play()
     FadeTween:Play()
 
-    FadeTween.Completed:Connect(
-        function()
-
-            WindowAnimating = false
-
-        end
-    )
+    FadeTween.Completed:Connect(function()
+        WindowAnimating = false
+    end)
 end
 
-
---==============================================================--
--- CLICK DO BOTÃO AX
---==============================================================--
-
-FloatButton.Activated:Connect(
-    function()
-
-        if WindowOpen then
-
-            HideWindow()
-
-        else
-
-            ShowWindow()
-
-        end
-
+FloatButton.Activated:Connect(function()
+    if WindowOpen then
+        HideWindow()
+    else
+        ShowWindow()
     end
-)
-
+end)
 
 --==============================================================--
--- ABRIR CONFIRMAÇÃO PELO X
+-- FECHAR
 --==============================================================--
 
-CloseButton.Activated:Connect(
-    function()
+CloseButton.Activated:Connect(function()
+    if WindowAnimating then return end
 
-        if WindowAnimating then
-            return
-        end
+    ConfirmOverlay.Visible = true
 
-        ConfirmOverlay.Visible = true
+    ConfirmCard.Size = UDim2.fromOffset(250,140)
 
-        ConfirmCard.Size =
-            UDim2.fromOffset(
-                250,
-                140
+    TweenService:Create(
+        ConfirmCard,
+        TweenInfo.new(0.22,Enum.EasingStyle.Back,Enum.EasingDirection.Out),
+        {Size = UDim2.fromOffset(285,155)}
+    ):Play()
+end)
+
+NoButton.Activated:Connect(function()
+    ConfirmOverlay.Visible = false
+end)
+
+YesButton.Activated:Connect(function()
+    ConfirmOverlay.Visible = false
+    WindowOpen = false
+    ScreenGui:Destroy()
+end)
+
+--==============================================================--
+-- ARRASTAR AX
+--==============================================================--
+
+FloatButton.InputBegan:Connect(function(Input)
+    if Input.UserInputType ~= Enum.UserInputType.MouseButton1
+    and Input.UserInputType ~= Enum.UserInputType.Touch then
+        return
+    end
+
+    DraggingFloat = true
+
+    local StartPosition = Input.Position
+    local StartButtonPosition = FloatButton.Position
+    local Changed
+    local Ended
+
+    Changed = UserInputService.InputChanged:Connect(function(Change)
+        if not DraggingFloat then return end
+
+        if Change.UserInputType == Enum.UserInputType.MouseMovement
+        or Change.UserInputType == Enum.UserInputType.Touch then
+            local Delta = Change.Position - StartPosition
+
+            FloatButton.Position = UDim2.new(
+                StartButtonPosition.X.Scale,
+                StartButtonPosition.X.Offset + Delta.X,
+                StartButtonPosition.Y.Scale,
+                StartButtonPosition.Y.Offset + Delta.Y
             )
-
-        TweenService:Create(
-            ConfirmCard,
-
-            TweenInfo.new(
-                0.22,
-                Enum.EasingStyle.Back,
-                Enum.EasingDirection.Out
-            ),
-
-            {
-                Size =
-                    UDim2.fromOffset(
-                        285,
-                        155
-                    )
-            }
-        ):Play()
-
-    end
-)
-
-
---==============================================================--
--- BOTÃO NÃO
---==============================================================--
-
-NoButton.Activated:Connect(
-    function()
-
-        ConfirmOverlay.Visible = false
-
-    end
-)
-
-
---==============================================================--
--- BOTÃO SIM
---==============================================================--
-
-YesButton.Activated:Connect(
-    function()
-
-        ConfirmOverlay.Visible = false
-
-        WindowOpen = false
-
-        -- Fecha o hub inteiro.
-        -- O AX também desaparece.
-        -- Só volta quando o script for executado novamente.
-
-        ScreenGui:Destroy()
-
-    end
-)
-
-
---==============================================================--
--- ARRASTAR BOTÃO AX
---==============================================================--
-
-FloatButton.InputBegan:Connect(
-    function(Input)
-
-        if Input.UserInputType
-            ~= Enum.UserInputType.MouseButton1
-
-            and Input.UserInputType
-            ~= Enum.UserInputType.Touch then
-
-            return
         end
+    end)
 
-        DraggingFloat = true
-
-        local StartPosition =
-            Input.Position
-
-        local StartButtonPosition =
-            FloatButton.Position
-
-        local Changed
-        local Ended
-
-        Changed =
-            UserInputService.InputChanged:Connect(
-                function(Change)
-
-                    if not DraggingFloat then
-                        return
-                    end
-
-                    if Change.UserInputType
-                        == Enum.UserInputType.MouseMovement
-
-                        or Change.UserInputType
-                        == Enum.UserInputType.Touch then
-
-                        local Delta =
-                            Change.Position -
-                            StartPosition
-
-                        FloatButton.Position =
-                            UDim2.new(
-                                StartButtonPosition.X.Scale,
-
-                                StartButtonPosition.X.Offset
-                                    + Delta.X,
-
-                                StartButtonPosition.Y.Scale,
-
-                                StartButtonPosition.Y.Offset
-                                    + Delta.Y
-                            )
-
-                    end
-
-                end
-            )
-
-        Ended =
-            UserInputService.InputEnded:Connect(
-                function(EndedInput)
-
-                    if EndedInput.UserInputType
-                        == Enum.UserInputType.MouseButton1
-
-                        or EndedInput.UserInputType
-                        == Enum.UserInputType.Touch then
-
-                        DraggingFloat = false
-
-                        if Changed then
-                            Changed:Disconnect()
-                        end
-
-                        if Ended then
-                            Ended:Disconnect()
-                        end
-
-                    end
-
-                end
-            )
-
-    end
-)
-
+    Ended = UserInputService.InputEnded:Connect(function(EndedInput)
+        if EndedInput.UserInputType == Enum.UserInputType.MouseButton1
+        or EndedInput.UserInputType == Enum.UserInputType.Touch then
+            DraggingFloat = false
+            if Changed then Changed:Disconnect() end
+            if Ended then Ended:Disconnect() end
+        end
+    end)
+end)
 
 --==============================================================--
--- ANIMAÇÃO DO AX AO PASSAR/TOCAR
+-- HOVER AX
 --==============================================================--
 
-FloatButton.MouseEnter:Connect(
-    function()
+FloatButton.MouseEnter:Connect(function()
+    TweenService:Create(
+        FloatButton,
+        TweenInfo.new(0.15,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),
+        {Size = UDim2.fromOffset(58,58)}
+    ):Play()
+end)
 
-        TweenService:Create(
-            FloatButton,
-
-            TweenInfo.new(
-                0.15,
-                Enum.EasingStyle.Quad,
-                Enum.EasingDirection.Out
-            ),
-
-            {
-                Size =
-                    UDim2.fromOffset(
-                        58,
-                        58
-                    )
-            }
-        ):Play()
-
-    end
-)
-
-FloatButton.MouseLeave:Connect(
-    function()
-
-        TweenService:Create(
-            FloatButton,
-
-            TweenInfo.new(
-                0.15,
-                Enum.EasingStyle.Quad,
-                Enum.EasingDirection.Out
-            ),
-
-            {
-                Size =
-                    UDim2.fromOffset(
-                        54,
-                        54
-                    )
-            }
-        ):Play()
-
-    end
-)
-
+FloatButton.MouseLeave:Connect(function()
+    TweenService:Create(
+        FloatButton,
+        TweenInfo.new(0.15,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),
+        {Size = UDim2.fromOffset(54,54)}
+    ):Play()
+end)
 
 --==============================================================--
--- FINALIZAÇÃO
+-- FINAL
 --==============================================================--
 
 Main.Visible = true
