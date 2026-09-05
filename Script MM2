@@ -1187,35 +1187,30 @@ end
 local CurrentTab = nil
 
 local function SelectTab(Name)
-    if not Name or CurrentTab == Name then return end
+    if not Name then return end
+    if CurrentTab == Name then return end
 
     local TargetTabData = Tabs[Name]
     local TargetPage = Pages[Name]
     if not TargetTabData or not TargetPage then return end
 
-    -- Atualiza cores do texto e esconde indicadores antigos
+    CurrentTab = Name
+
+    -- Atualiza cores do texto e esconde indicadores das outras abas
     for TabName, Data in pairs(Tabs) do
         local IsTarget = (TabName == Name)
         
-        -- Troca a cor do texto instantaneamente
-        TweenService:Create(Data.Button, TweenInfo.new(0.15), {
-            TextColor3 = IsTarget and White or Gray
-        }):Play()
-
-        -- Esconde a linha indicadora das outras abas
-        if not IsTarget then
-            Data.Indicator.Visible = false
-        end
+        Data.Button.TextColor3 = IsTarget and White or Gray
+        Data.Indicator.Visible = IsTarget
     end
 
-    -- Troca de Página instantânea
+    -- Mostra a página correta e esconde as outras
     for PageName, Page in pairs(Pages) do
         Page.Visible = (PageName == Name)
     end
 
-    -- Anima a linha da NOVA aba surgindo suavemente
+    -- Anima a linha da aba selecionada
     local Indicator = TargetTabData.Indicator
-    Indicator.Visible = true
     Indicator.Size = UDim2.fromOffset(3, 0)
     Indicator.Position = UDim2.new(0, 7, 0.5, 0)
 
@@ -1223,9 +1218,8 @@ local function SelectTab(Name)
         Size = UDim2.fromOffset(3, 20),
         Position = UDim2.new(0, 7, 0.5, -10)
     }):Play()
-
-    CurrentTab = Name
 end
+
 
 --==================================================
 -- 32. EVENTOS DAS ABAS
