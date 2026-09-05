@@ -1,0 +1,1286 @@
+--==================================================
+-- WALK NYX PROJECT
+-- INTERFACE PREMIUM COMPLETA
+--==================================================
+
+--==================================================
+-- 01. CONFIGURAÇÕES
+--==================================================
+
+local GUI_NAME = "WalkNyxPremium"
+
+local WINDOW_WIDTH = 570
+local WINDOW_HEIGHT = 380
+
+local TOPBAR_HEIGHT = 52
+
+local BackgroundColor = Color3.fromRGB(10,10,13)
+local SecondaryColor = Color3.fromRGB(16,16,20)
+local ButtonColor = Color3.fromRGB(23,23,27)
+local AccentColor = Color3.fromRGB(150,35,45)
+
+local White = Color3.fromRGB(255,255,255)
+local Gray = Color3.fromRGB(150,150,158)
+
+--==================================================
+-- 02. TAMANHOS
+--==================================================
+
+local MIN_WIDTH = 430
+local MIN_HEIGHT = 300
+
+local MAX_WIDTH = 850
+local MAX_HEIGHT = 650
+
+--==================================================
+-- 03. SERVIÇOS
+--==================================================
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+
+--==================================================
+-- 04. VARIÁVEIS MURDERER
+--==================================================
+
+-- >>> COLOQUE AS VARIÁVEIS DO MURDERER AQUI <<<
+
+--==================================================
+-- 05. VARIÁVEIS SHERIFF
+--==================================================
+
+-- >>> COLOQUE AS VARIÁVEIS DO SHERIFF AQUI <<<
+
+--==================================================
+-- 06. VARIÁVEIS AUTO FARM
+--==================================================
+
+-- >>> COLOQUE AS VARIÁVEIS DO AUTO FARM AQUI <<<
+
+--==================================================
+-- 07. VARIÁVEIS ESP
+--==================================================
+
+-- >>> COLOQUE AS VARIÁVEIS DO ESP AQUI <<<
+
+--==================================================
+-- 08. VARIÁVEIS LOCAL PLAYER
+--==================================================
+
+-- >>> COLOQUE AS VARIÁVEIS DO LOCAL PLAYER AQUI <<<
+
+--==================================================
+-- 09. FUNÇÕES VISUAIS
+--==================================================
+
+local function Round(Object,Radius)
+
+    local Corner = Instance.new("UICorner")
+
+    Corner.CornerRadius =
+        UDim.new(
+            0,
+            Radius or 10
+        )
+
+    Corner.Parent = Object
+
+    return Corner
+end
+
+local function Stroke(
+    Object,
+    Transparency,
+    Thickness
+)
+
+    local S = Instance.new("UIStroke")
+
+    S.Color = White
+    S.Transparency = Transparency or 0
+    S.Thickness = Thickness or 1
+
+    S.Parent = Object
+
+    return S
+end
+
+local function Padding(
+    Object,
+    Left,
+    Right,
+    Top,
+    Bottom
+)
+
+    local P = Instance.new("UIPadding")
+
+    P.PaddingLeft =
+        UDim.new(0,Left or 0)
+
+    P.PaddingRight =
+        UDim.new(0,Right or 0)
+
+    P.PaddingTop =
+        UDim.new(0,Top or 0)
+
+    P.PaddingBottom =
+        UDim.new(0,Bottom or 0)
+
+    P.Parent = Object
+
+    return P
+end
+
+--==================================================
+-- 10. LIMPAR INTERFACE ANTIGA
+--==================================================
+
+pcall(function()
+
+    local Old =
+        CoreGui:FindFirstChild(GUI_NAME)
+
+    if Old then
+        Old:Destroy()
+    end
+
+end)
+
+--==================================================
+-- 11. SCREEN GUI
+--==================================================
+
+local ScreenGui =
+    Instance.new("ScreenGui")
+
+ScreenGui.Name =
+    GUI_NAME
+
+ScreenGui.ResetOnSpawn =
+    false
+
+ScreenGui.IgnoreGuiInset =
+    true
+
+ScreenGui.ZIndexBehavior =
+    Enum.ZIndexBehavior.Global
+
+ScreenGui.Parent =
+    CoreGui
+
+--==================================================
+-- 12. ESCALA MOBILE
+--==================================================
+
+local UIScale =
+    Instance.new("UIScale")
+
+UIScale.Scale = 1
+
+UIScale.Parent =
+    ScreenGui
+
+local function UpdateScale()
+
+    local Camera =
+        workspace.CurrentCamera
+
+    if not Camera then
+        return
+    end
+
+    local Size =
+        Camera.ViewportSize
+
+    if Size.X < 600 then
+
+        UIScale.Scale =
+            math.clamp(
+                Size.X / 570,
+                0.72,
+                0.92
+            )
+
+    else
+
+        UIScale.Scale = 1
+
+    end
+end
+
+UpdateScale()
+
+if workspace.CurrentCamera then
+
+    workspace.CurrentCamera:
+        GetPropertyChangedSignal(
+            "ViewportSize"
+        ):
+        Connect(UpdateScale)
+
+end
+
+--==================================================
+-- 13. JANELA PRINCIPAL
+--==================================================
+
+local Main =
+    Instance.new("Frame")
+
+Main.Name =
+    "Main"
+
+Main.AnchorPoint =
+    Vector2.new(0.5,0)
+
+Main.Position =
+    UDim2.new(
+        0.5,
+        0,
+        0.5,
+        -WINDOW_HEIGHT / 2
+    )
+
+Main.Size =
+    UDim2.fromOffset(
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT
+    )
+
+Main.BackgroundColor3 =
+    BackgroundColor
+
+Main.BorderSizePixel = 0
+
+Main.ClipsDescendants =
+    true
+
+Main.Active =
+    true
+
+Main.Parent =
+    ScreenGui
+
+Round(Main,16)
+Stroke(Main,0.15,1.5)
+
+--==================================================
+-- 14. TOP BAR
+--==================================================
+
+local TopBar =
+    Instance.new("Frame")
+
+TopBar.Name =
+    "TopBar"
+
+TopBar.Size =
+    UDim2.new(
+        1,
+        0,
+        0,
+        TOPBAR_HEIGHT
+    )
+
+TopBar.BackgroundTransparency = 1
+TopBar.BorderSizePixel = 0
+
+TopBar.ZIndex = 10
+
+TopBar.Parent =
+    Main
+
+--==================================================
+-- 15. TÍTULO
+--==================================================
+
+local Title =
+    Instance.new("TextLabel")
+
+Title.Name =
+    "Title"
+
+Title.BackgroundTransparency =
+    1
+
+Title.Position =
+    UDim2.fromOffset(
+        16,
+        5
+    )
+
+Title.Size =
+    UDim2.new(
+        1,
+        -170,
+        0,
+        42
+    )
+
+Title.Text =
+    "Walk Nyx Project"
+
+Title.TextColor3 =
+    White
+
+Title.TextSize =
+    19
+
+Title.Font =
+    Enum.Font.GothamBold
+
+Title.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+Title.ZIndex =
+    11
+
+Title.Parent =
+    TopBar
+
+--==================================================
+-- 16. MINIMIZAR
+--==================================================
+
+local Minimize =
+    Instance.new("TextButton")
+
+Minimize.Name =
+    "Minimize"
+
+Minimize.Size =
+    UDim2.fromOffset(
+        35,
+        32
+    )
+
+Minimize.Position =
+    UDim2.new(
+        1,
+        -122,
+        0,
+        10
+    )
+
+Minimize.BackgroundColor3 =
+    ButtonColor
+
+Minimize.BackgroundTransparency =
+    0.15
+
+Minimize.BorderSizePixel =
+    0
+
+Minimize.Text =
+    "—"
+
+Minimize.TextColor3 =
+    White
+
+Minimize.TextSize =
+    18
+
+Minimize.Font =
+    Enum.Font.GothamBold
+
+Minimize.AutoButtonColor =
+    false
+
+Minimize.ZIndex =
+    12
+
+Minimize.Parent =
+    TopBar
+
+Round(Minimize,9)
+Stroke(Minimize,0.45,1)
+
+--==================================================
+-- 17. MAXIMIZAR
+--==================================================
+
+local Maximize =
+    Instance.new("TextButton")
+
+Maximize.Name =
+    "Maximize"
+
+Maximize.Size =
+    UDim2.fromOffset(
+        35,
+        32
+    )
+
+Maximize.Position =
+    UDim2.new(
+        1,
+        -82,
+        0,
+        10
+    )
+
+Maximize.BackgroundColor3 =
+    ButtonColor
+
+Maximize.BackgroundTransparency =
+    0.15
+
+Maximize.BorderSizePixel =
+    0
+
+Maximize.Text =
+    "□"
+
+Maximize.TextColor3 =
+    White
+
+Maximize.TextSize =
+    16
+
+Maximize.Font =
+    Enum.Font.GothamBold
+
+Maximize.AutoButtonColor =
+    false
+
+Maximize.ZIndex =
+    12
+
+Maximize.Parent =
+    TopBar
+
+Round(Maximize,9)
+Stroke(Maximize,0.45,1)
+
+--==================================================
+-- 18. FECHAR
+--==================================================
+
+local Close =
+    Instance.new("TextButton")
+
+Close.Name =
+    "Close"
+
+Close.Size =
+    UDim2.fromOffset(
+        35,
+        32
+    )
+
+Close.Position =
+    UDim2.new(
+        1,
+        -42,
+        0,
+        10
+    )
+
+Close.BackgroundColor3 =
+    ButtonColor
+
+Close.BackgroundTransparency =
+    0.15
+
+Close.BorderSizePixel =
+    0
+
+Close.Text =
+    "X"
+
+Close.TextColor3 =
+    White
+
+Close.TextSize =
+    14
+
+Close.Font =
+    Enum.Font.GothamBold
+
+Close.AutoButtonColor =
+    false
+
+Close.ZIndex =
+    12
+
+Close.Parent =
+    TopBar
+
+Round(Close,9)
+Stroke(Close,0.45,1)
+
+--==================================================
+-- 19. CONTEÚDO
+--==================================================
+
+local Content =
+    Instance.new("Frame")
+
+Content.Name =
+    "Content"
+
+Content.Position =
+    UDim2.fromOffset(
+        8,
+        58
+    )
+
+Content.Size =
+    UDim2.new(
+        1,
+        -16,
+        1,
+        -66
+    )
+
+Content.BackgroundTransparency =
+    1
+
+Content.BorderSizePixel =
+    0
+
+Content.ZIndex =
+    2
+
+Content.Parent =
+    Main
+
+--==================================================
+-- 20. SIDEBAR
+--==================================================
+
+local Sidebar =
+    Instance.new("Frame")
+
+Sidebar.Name =
+    "Sidebar"
+
+Sidebar.Position =
+    UDim2.fromOffset(
+        0,
+        0
+    )
+
+Sidebar.Size =
+    UDim2.new(
+        0,
+        145,
+        1,
+        0
+    )
+
+Sidebar.BackgroundColor3 =
+    SecondaryColor
+
+Sidebar.BackgroundTransparency =
+    0.12
+
+Sidebar.BorderSizePixel =
+    0
+
+Sidebar.ZIndex =
+    3
+
+Sidebar.Parent =
+    Content
+
+Round(Sidebar,12)
+Stroke(Sidebar,0.55,1)
+
+--==================================================
+-- 21. PERFIL
+--==================================================
+
+local Profile =
+    Instance.new("Frame")
+
+Profile.Name =
+    "Profile"
+
+Profile.Size =
+    UDim2.new(
+        1,
+        -14,
+        0,
+        52
+    )
+
+Profile.Position =
+    UDim2.fromOffset(
+        7,
+        7
+    )
+
+Profile.BackgroundColor3 =
+    ButtonColor
+
+Profile.BackgroundTransparency =
+    0.15
+
+Profile.BorderSizePixel =
+    0
+
+Profile.ZIndex =
+    4
+
+Profile.Parent =
+    Sidebar
+
+Round(Profile,10)
+
+--==================================================
+-- 22. AVATAR
+--==================================================
+
+local Avatar =
+    Instance.new("ImageLabel")
+
+Avatar.Name =
+    "Avatar"
+
+Avatar.Size =
+    UDim2.fromOffset(
+        38,
+        38
+    )
+
+Avatar.Position =
+    UDim2.fromOffset(
+        7,
+        7
+    )
+
+Avatar.BackgroundColor3 =
+    Color3.fromRGB(
+        30,
+        30,
+        35
+    )
+
+Avatar.BorderSizePixel =
+    0
+
+Avatar.ZIndex =
+    5
+
+Avatar.Parent =
+    Profile
+
+Round(Avatar,10)
+
+pcall(function()
+
+    Avatar.Image =
+        Players:GetUserThumbnailAsync(
+            player.UserId,
+            Enum.ThumbnailType.HeadShot,
+            Enum.ThumbnailSize.Size100x100
+        )
+
+end)
+
+--==================================================
+-- 23. NOME
+--==================================================
+
+local ProfileName =
+    Instance.new("TextLabel")
+
+ProfileName.Name =
+    "ProfileName"
+
+ProfileName.BackgroundTransparency =
+    1
+
+ProfileName.Position =
+    UDim2.fromOffset(
+        52,
+        5
+    )
+
+ProfileName.Size =
+    UDim2.new(
+        1,
+        -57,
+        0,
+        22
+    )
+
+ProfileName.Text =
+    player.DisplayName
+
+ProfileName.TextColor3 =
+    White
+
+ProfileName.TextSize =
+    13
+
+ProfileName.Font =
+    Enum.Font.GothamBold
+
+ProfileName.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+ProfileName.TextTruncate =
+    Enum.TextTruncate.AtEnd
+
+ProfileName.ZIndex =
+    5
+
+ProfileName.Parent =
+    Profile
+
+--==================================================
+-- 24. USERNAME
+--==================================================
+
+local Username =
+    Instance.new("TextLabel")
+
+Username.Name =
+    "Username"
+
+Username.BackgroundTransparency =
+    1
+
+Username.Position =
+    UDim2.fromOffset(
+        52,
+        26
+    )
+
+Username.Size =
+    UDim2.new(
+        1,
+        -57,
+        0,
+        18
+    )
+
+Username.Text =
+    "@" .. player.Name
+
+Username.TextColor3 =
+    Gray
+
+Username.TextSize =
+    10
+
+Username.Font =
+    Enum.Font.Gotham
+
+Username.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+Username.TextTruncate =
+    Enum.TextTruncate.AtEnd
+
+Username.ZIndex =
+    5
+
+Username.Parent =
+    Profile
+
+--==================================================
+-- 25. SCROLL DAS ABAS
+--==================================================
+
+local TabScroll =
+    Instance.new("ScrollingFrame")
+
+TabScroll.Name =
+    "TabScroll"
+
+TabScroll.Position =
+    UDim2.fromOffset(
+        7,
+        66
+    )
+
+TabScroll.Size =
+    UDim2.new(
+        1,
+        -14,
+        1,
+        -73
+    )
+
+TabScroll.BackgroundTransparency =
+    1
+
+TabScroll.BorderSizePixel =
+    0
+
+TabScroll.ScrollBarThickness =
+    3
+
+TabScroll.ScrollBarImageColor3 =
+    White
+
+TabScroll.ScrollBarImageTransparency =
+    0.45
+
+TabScroll.CanvasSize =
+    UDim2.new(
+        0,
+        0,
+        0,
+        0
+    )
+
+TabScroll.AutomaticCanvasSize =
+    Enum.AutomaticSize.Y
+
+TabScroll.ScrollingDirection =
+    Enum.ScrollingDirection.Y
+
+TabScroll.ZIndex =
+    4
+
+TabScroll.Parent =
+    Sidebar
+
+local TabLayout =
+    Instance.new("UIListLayout")
+
+TabLayout.Padding =
+    UDim.new(
+        0,
+        6
+    )
+
+TabLayout.HorizontalAlignment =
+    Enum.HorizontalAlignment.Center
+
+TabLayout.SortOrder =
+    Enum.SortOrder.LayoutOrder
+
+TabLayout.Parent =
+    TabScroll
+
+--==================================================
+-- 26. PÁGINAS
+--==================================================
+
+local PageContainer =
+    Instance.new("Frame")
+
+PageContainer.Name =
+    "PageContainer"
+
+PageContainer.Position =
+    UDim2.fromOffset(
+        153,
+        0
+    )
+
+PageContainer.Size =
+    UDim2.new(
+        1,
+        -153,
+        1,
+        0
+    )
+
+PageContainer.BackgroundColor3 =
+    SecondaryColor
+
+PageContainer.BackgroundTransparency =
+    0.18
+
+PageContainer.BorderSizePixel =
+    0
+
+PageContainer.ClipsDescendants =
+    true
+
+PageContainer.ZIndex =
+    3
+
+PageContainer.Parent =
+    Content
+
+Round(PageContainer,12)
+Stroke(PageContainer,0.55,1)
+
+--==================================================
+-- 27. ABAS
+--==================================================
+
+local TabNames = {
+
+    "Murderer",
+    "Sheriff",
+    "Auto Farm",
+    "ESP",
+    "Local Player",
+    "Info"
+
+}
+
+local Tabs = {}
+local Pages = {}
+
+--==================================================
+-- 28. CRIAR PÁGINA
+--==================================================
+
+local function CreatePage(Name)
+
+    local Page =
+        Instance.new("ScrollingFrame")
+
+    Page.Name =
+        Name
+
+    Page.Size =
+        UDim2.fromScale(
+            1,
+            1
+        )
+
+    Page.BackgroundTransparency =
+        1
+
+    Page.BorderSizePixel =
+        0
+
+    Page.ScrollBarThickness =
+        3
+
+    Page.ScrollBarImageColor3 =
+        AccentColor
+
+    Page.CanvasSize =
+        UDim2.new(
+            0,
+            0,
+            0,
+            0
+        )
+
+    Page.AutomaticCanvasSize =
+        Enum.AutomaticSize.Y
+
+    Page.ScrollingDirection =
+        Enum.ScrollingDirection.Y
+
+    Page.Visible =
+        false
+
+    Page.ZIndex =
+        4
+
+    Page.Parent =
+        PageContainer
+
+    local Layout =
+        Instance.new("UIListLayout")
+
+    Layout.SortOrder =
+        Enum.SortOrder.LayoutOrder
+
+    Layout.Padding =
+        UDim.new(
+            0,
+            8
+        )
+
+    Layout.Parent =
+        Page
+
+    Padding(
+        Page,
+        6,
+        6,
+        6,
+        10
+    )
+
+    Pages[Name] =
+        Page
+
+    return Page
+end
+
+--==================================================
+-- 29. CRIAR BOTÃO DA ABA
+--==================================================
+
+local function CreateTabButton(
+    Name,
+    Order
+)
+
+    local Holder =
+        Instance.new("Frame")
+
+    Holder.Name =
+        "TabHolder_" .. Name
+
+    Holder.Size =
+        UDim2.new(
+            1,
+            -2,
+            0,
+            39
+        )
+
+    Holder.BackgroundTransparency =
+        1
+
+    Holder.BorderSizePixel =
+        0
+
+    Holder.LayoutOrder =
+        Order
+
+    Holder.ZIndex =
+        5
+
+    Holder.Parent =
+        TabScroll
+
+    --==============================================
+    -- BOTÃO
+    --==============================================
+
+    local Button =
+        Instance.new("TextButton")
+
+    Button.Name =
+        "Tab_" .. Name
+
+    Button.Size =
+        UDim2.new(
+            1,
+            0,
+            1,
+            0
+        )
+
+    Button.BackgroundColor3 =
+        ButtonColor
+
+    Button.BackgroundTransparency =
+        1
+
+    Button.BorderSizePixel =
+        0
+
+    Button.Text =
+        Name
+
+    Button.TextColor3 =
+        Gray
+
+    Button.TextSize =
+        12
+
+    Button.Font =
+        Enum.Font.GothamMedium
+
+    Button.TextXAlignment =
+        Enum.TextXAlignment.Left
+
+    Button.AutoButtonColor =
+        false
+
+    Button.ZIndex =
+        5
+
+    Button.Parent =
+        Holder
+
+    Round(Button,9)
+
+    -- Espaço para a linha
+    Padding(
+        Button,
+        28,
+        5,
+        0,
+        0
+    )
+
+    --==============================================
+    -- LINHA VERMELHA
+    --==============================================
+
+    local Indicator =
+        Instance.new("Frame")
+
+    Indicator.Name =
+        "Indicator"
+
+    Indicator.Size =
+        UDim2.fromOffset(
+            3,
+            20
+        )
+
+    Indicator.Position =
+        UDim2.new(
+            0,
+            7,
+            0.5,
+            -10
+        )
+
+    Indicator.BackgroundColor3 =
+        AccentColor
+
+    Indicator.BorderSizePixel =
+        0
+
+    Indicator.Visible =
+        false
+
+    Indicator.ZIndex =
+        8
+
+    Indicator.Parent =
+        Holder
+
+    Round(
+        Indicator,
+        3
+    )
+
+    Tabs[Name] = {
+
+        Button = Button,
+
+        Indicator = Indicator,
+
+        Holder = Holder
+
+    }
+
+    return Button
+end
+
+--==================================================
+-- 30. CRIAR TODAS AS ABAS
+--==================================================
+
+for Index,Name in ipairs(TabNames) do
+
+    CreatePage(Name)
+
+    CreateTabButton(
+        Name,
+        Index
+    )
+
+end
+
+--==================================================
+-- 31. SISTEMA DE SELEÇÃO ANIMADA
+--==================================================
+
+local CurrentTab = nil
+
+local AnimationId = 0
+
+local function SelectTab(Name)
+
+    if not Name then
+        return
+    end
+
+    if CurrentTab == Name then
+        return
+    end
+
+    AnimationId += 1
+
+    local ThisAnimation =
+        AnimationId
+
+    local OldTab =
+        CurrentTab
+
+    --==============================================
+    -- PRIMEIRA SELEÇÃO
+    --==============================================
+
+    if not OldTab then
+
+        CurrentTab =
+            Name
+
+        for TabName,Data in pairs(Tabs) do
+
+            local Selected =
+                TabName == Name
+
+            Data.Button.TextColor3 =
+                Selected
+                and White
+                or Gray
+
+            Data.Button.BackgroundTransparency =
+                1
+
+            Data.Indicator.Visible =
+                Selected
+
+            if Pages[TabName] then
+
+                Pages[TabName].Visible =
+                    Selected
+
+            end
+        end
+
+        return
+    end
+
+    --==============================================
+    -- PEGAR ÍNDICES
+    --==============================================
+
+    local OldIndex
+    local NewIndex
+
+    for Index,TabName in ipairs(TabNames) do
+
+        if TabName == OldTab then
+            OldIndex = Index
+        end
+
+        if TabName == Name then
+            NewIndex = Index
+        end
+
+    end
+
+    if not OldIndex
+    or not NewIndex then
+        return
+    end
+
+    --==============================================
+    -- ESCONDER TODAS AS LINHAS
+    --==============================================
+
+    for _,Data in pairs(Tabs) do
+
+        Data.Indicator.Visible =
+            false
+
+    end
+
+    --==============================================
+    -- CORES DOS TEXTOS
+    --==============================================
+
+    for TabName,Data in pairs(Tabs) do
+
+        Data.Button.Backgroun
