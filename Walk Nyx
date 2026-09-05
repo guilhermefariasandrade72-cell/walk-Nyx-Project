@@ -1,7 +1,7 @@
 --==============================================================--
 --                      WALK NYX PROJECT                        --
 --              PREMIUM UI / MOBILE / LUCIDE                  --
---                   INTERFACE ONLY                            --
+--                   INTERFACE ONLY - FIXED                     --
 --==============================================================--
 
 local Players = game:GetService("Players")
@@ -733,6 +733,7 @@ local YesCorner = Instance.new("UICorner")
 YesCorner.CornerRadius = UDim.new(0, 9)
 YesCorner.Parent = YesButton
 
+-- [CORRIGIDO] O botão 'No' estava com erro de atribuição no Parent e sumia da tela
 local NoButton = Instance.new("TextButton")
 NoButton.Name = "NoButton"
 NoButton.Size = UDim2.fromOffset(110, 35)
@@ -745,7 +746,7 @@ NoButton.TextSize = 10
 NoButton.Font = Enum.Font.GothamBold
 NoButton.AutoButtonColor = false
 NoButton.ZIndex = 54
-NoButton.Parent = NoButton.Parent and ConfirmCard
+NoButton.Parent = ConfirmCard
 
 local NoCorner = Instance.new("UICorner")
 NoCorner.CornerRadius = UDim.new(0, 9)
@@ -766,6 +767,8 @@ FloatGui.Parent = PlayerGui
 local FloatButton = Instance.new("TextButton")
 FloatButton.Name = "WNFloat"
 FloatButton.Size = UDim2.fromOffset(54, 54)
+-- [CORRIGIDO] AnchorPoint definido explicitamente para prevenir pulos ao arrastar
+FloatButton.AnchorPoint = Vector2.new(0, 0)
 FloatButton.Position = UDim2.new(1, -75, 1, -90)
 FloatButton.BackgroundColor3 = Theme.Window
 FloatButton.BorderSizePixel = 0
@@ -890,8 +893,9 @@ FloatButton.InputBegan:Connect(function(Input)
     DraggingFloat = false
     FloatStartPos = Input.Position
 
-    local StartX = FloatButton.AbsolutePosition.X
-    local StartY = FloatButton.AbsolutePosition.Y
+    -- [CORRIGIDO] Usa diretamente as propriedades de Offset para evitar deslocamentos indesejados
+    local StartX = FloatButton.Position.X.Offset
+    local StartY = FloatButton.Position.Y.Offset
 
     local Changed, Ended
 
