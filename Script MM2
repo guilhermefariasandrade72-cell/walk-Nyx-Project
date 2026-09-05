@@ -70,8 +70,12 @@ local CoreGui = game:GetService("CoreGui")
 --==================================================
 -- 08. VARIÁVEIS LOCAL PLAYER
 --==================================================
-
--- >>> COLOQUE AS VARIÁVEIS DO LOCAL PLAYER AQUI <<<
+-- 🧍 SPEED TOGGLE
+local SpeedAtivado = false
+local SpeedEscolhida = 16
+local SpeedMin = 16
+local SpeedMax = 30
+local VerificarIntervalo = 0.5 -- segundos
 
 --==================================================
 -- 09. FUNÇÕES VISUAIS
@@ -1364,7 +1368,156 @@ end
 -- 40. BOTÕES LOCAL PLAYER
 --==================================================
 
--- >>> COLOQUE OS BOTÕES DO LOCAL PLAYER AQUI <<<
+-- 🧍 SPEED
+
+-- 📌 SESSÃO: MOVIMENTO
+local Sec_Speed = Instance.new("Frame")
+Sec_Speed.Name = "Sec_Speed"
+Sec_Speed.Size = UDim2.new(1, -20, 0, 90)
+Sec_Speed.Position = UDim2.new(0, 10, 0, 10)
+Sec_Speed.BackgroundTransparency = 1
+Sec_Speed.Parent = Pages["Local Player"]
+
+-- 🟦 BOTÃO TOGGLE QUADRADO
+local Btn_SpeedToggle = Instance.new("TextButton")
+Btn_SpeedToggle.Name = "Btn_SpeedToggle"
+Btn_SpeedToggle.Size = UDim2.new(0, 34, 0, 34)
+Btn_SpeedToggle.Position = UDim2.new(0, 0, 0, 0)
+Btn_SpeedToggle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+Btn_SpeedToggle.AutoButtonColor = false
+Btn_SpeedToggle.Text = ""
+Btn_SpeedToggle.Parent = Sec_Speed
+Round(Btn_SpeedToggle, 8) -- bordas arredondadas
+
+-- ✔️ ÍCONE DE CHECK
+local Icone_Check = Instance.new("TextLabel")
+Icone_Check.Name = "Icone_Check"
+Icone_Check.Size = UDim2.new(1, 0, 1, 0)
+Icone_Check.BackgroundTransparency = 1
+Icone_Check.Text = "✔"
+Icone_Check.TextColor3 = Color3.fromRGB(30, 30, 30)
+Icone_Check.TextSize = 18
+Icone_Check.Font = Enum.Font.GothamBold
+Icone_Check.Visible = false
+Icone_Check.Parent = Btn_SpeedToggle
+
+-- ⚡ TEXTO "VELOCIDADE"
+local Label_Speed = Instance.new("TextLabel")
+Label_Speed.Name = "Label_Speed"
+Label_Speed.Size = UDim2.new(1, -50, 0, 34)
+Label_Speed.Position = UDim2.new(0, 44, 0, 0)
+Label_Speed.BackgroundTransparency = 1
+Label_Speed.Text = "⚡ Velocidade"
+Label_Speed.TextColor3 = Color3.fromRGB(180, 180, 180)
+Label_Speed.TextSize = 14
+Label_Speed.Font = Enum.Font.GothamMedium
+Label_Speed.TextXAlignment = Enum.TextXAlignment.Left
+Label_Speed.Parent = Sec_Speed
+
+-- 🎚️ SLIDER
+local Slider_Container = Instance.new("Frame")
+Slider_Container.Name = "Slider_Container"
+Slider_Container.Size = UDim2.new(1, 0, 0, 28)
+Slider_Container.Position = UDim2.new(0, 0, 0, 50)
+Slider_Container.BackgroundTransparency = 1
+Slider_Container.Parent = Sec_Speed
+
+local Slider_Bg = Instance.new("Frame")
+Slider_Bg.Name = "Slider_Bg"
+Slider_Bg.Size = UDim2.new(1, -45, 0, 20)
+Slider_Bg.Position = UDim2.new(0, 0, 0.5, -10)
+Slider_Bg.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+Slider_Bg.Parent = Slider_Container
+Round(Slider_Bg, 6)
+
+local Slider_Barra = Instance.new("Frame")
+Slider_Barra.Name = "Slider_Barra"
+Slider_Barra.Size = UDim2.new((SpeedEscolhida - SpeedMin) / (SpeedMax - SpeedMin), 0, 1, 0)
+Slider_Barra.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Slider_Barra.Parent = Slider_Bg
+Round(Slider_Barra, 6)
+
+local Slider_Botao = Instance.new("TextButton")
+Slider_Botao.Name = "Slider_Botao"
+Slider_Botao.Size = UDim2.new(0, 24, 0, 24)
+Slider_Botao.Position = UDim2.new((SpeedEscolhida - SpeedMin) / (SpeedMax - SpeedMin), -12, 0.5, -12)
+Slider_Botao.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Slider_Botao.Text = ""
+Slider_Botao.AutoButtonColor = false
+Slider_Botao.Parent = Slider_Container
+Round(Slider_Botao, 12)
+
+local Label_Valor = Instance.new("TextLabel")
+Label_Valor.Name = "Label_Valor"
+Label_Valor.Size = UDim2.new(0, 40, 1, 0)
+Label_Valor.Position = UDim2.new(1, -38, 0, 0)
+Label_Valor.BackgroundTransparency = 1
+Label_Valor.Text = tostring(SpeedEscolhida)
+Label_Valor.TextColor3 = Color3.fromRGB(255, 255, 255)
+Label_Valor.TextSize = 13
+Label_Valor.Font = Enum.Font.GothamBold
+Label_Valor.Parent = Slider_Container
+
+-- ==================================
+-- 🔗 LÓGICA DOS BOTÕES
+-- ==================================
+
+-- 🟦 TOGGLE SPEED
+Btn_SpeedToggle.MouseButton1Click:Connect(function()
+    SpeedAtivado = not SpeedAtivado
+    
+    if SpeedAtivado then
+        -- Ligado → Fica branco com ✔️
+        Btn_SpeedToggle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Icone_Check.Visible = true
+        -- Aplica velocidade imediatamente
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = SpeedEscolhida
+        end
+    else
+        -- Desligado → Volta ao normal
+        Btn_SpeedToggle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        Icone_Check.Visible = false
+        -- Restaura velocidade padrão
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = 16
+        end
+    end
+end)
+
+-- 🎚️ SLIDER ARRASTÁVEL
+local Arrastando = false
+
+Slider_Botao.MouseButton1Down:Connect(function()
+    Arrastando = true
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+        Arrastando = false
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not Arrastando then return end
+    
+    local Abs = Slider_Bg.AbsolutePosition
+    local Tam = Slider_Bg.AbsoluteSize.X
+    local Mouse = UserInputService:GetMouseLocation().X
+    
+    local Pos = math.clamp((Mouse - Abs.X) / Tam, 0, 1)
+    SpeedEscolhida = math.floor(SpeedMin + (SpeedMax - SpeedMin) * Pos + 0.5)
+    
+    -- Atualiza barra e botão
+    Slider_Barra.Size = UDim2.new(Pos, 0, 1, 0)
+    Slider_Botao.Position = UDim2.new(Pos, -12, 0.5, -12)
+    Label_Valor.Text = tostring(SpeedEscolhida)
+    
+    -- Se estiver ligado, aplica a velocidade nova
+    if SpeedAtivado and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = SpeedEscolhida
+    end
+end)
 
 --==================================================
 -- 41. BOTÕES INFO
@@ -2442,3 +2595,21 @@ YesButton.Activated:Connect(
 print(
     "Walk Nyx Project carregado com sucesso!"
 )
+
+-- ================================
+-- ==================================
+-- 🧍 SISTEMA — VERIFICAÇÃO DE VELOCIDADE
+-- ==================================
+task.spawn(function()
+    while task.wait(VerificarIntervalo) do
+        if not SpeedAtivado then continue end
+        
+        local c = player.Character
+        if not c or not c:FindFirstChild("Humanoid") then continue end
+        
+        -- Se a velocidade atual for diferente da escolhida, aplica de novo
+        if c.Humanoid.WalkSpeed ~= SpeedEscolhida then
+            c.Humanoid.WalkSpeed = SpeedEscolhida
+        end
+    end
+end)
