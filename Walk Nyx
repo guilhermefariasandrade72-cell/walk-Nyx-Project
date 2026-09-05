@@ -71,16 +71,17 @@ local DraggingFloat = false
 local Resizing = false
 
 --==============================================================--
--- MAPA DE ÍCONES (IDS INDIVIDUAIS LIMPOS)
+-- MAPA DE ÍCONES (IDS TESTADOS E GARANTIDOS)
 --==============================================================--
 
 local IconAssets = {
-    house = "rbxassetid://10723407389",    -- Casa
-    eye = "rbxassetid://10723415205",      -- Olho (ESP)
-    user = "rbxassetid://10723423986",     -- Jogador (Player)
+    house = "rbxassetid://10723407389",    -- Casa (Home)
+    eye = "rbxassetid://6031075929",      -- Olho (ESP)
+    user = "rbxassetid://6034287525",     -- Jogador (Player)
     settings = "rbxassetid://10734950309", -- Configurações
     x = "rbxassetid://10747384394",        -- Fechar (X)
 }
+
 
 --==============================================================--
 -- CRIAÇÃO DE ÍCONE LIMPO
@@ -114,7 +115,7 @@ end
 
 local Tabs = {
     {
-        Name = "Home",
+        Name = "Main",
         Description = "Astral X interface",
         Icon = "house",
     },
@@ -124,12 +125,12 @@ local Tabs = {
         Icon = "eye",
     },
     {
-        Name = "Player",
+        Name = "Local Player",
         Description = "Player interface",
         Icon = "user",
     },
     {
-        Name = "Config",
+        Name = "Settings",
         Description = "Hub configuration",
         Icon = "settings",
     },
