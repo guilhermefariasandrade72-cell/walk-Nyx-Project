@@ -1283,4 +1283,1421 @@ local function SelectTab(Name)
 
     for TabName,Data in pairs(Tabs) do
 
-        Data.Button.Backgroun
+        Data.Button.BackgroundTransparency =
+            1
+
+        Data.Button.TextColor3 =
+            TabName == Name
+            and White
+            or Gray
+
+    end
+
+    --==============================================
+    -- DIREÇÃO
+    --==============================================
+
+    local Step
+
+    if NewIndex > OldIndex then
+
+        Step = 1
+
+    else
+
+        Step = -1
+
+    end
+
+    --==============================================
+    -- ANIMAÇÃO
+    --==============================================
+
+    task.spawn(function()
+
+        local Index =
+            OldIndex
+
+        while true do
+
+            if ThisAnimation ~= AnimationId then
+                return
+            end
+
+            local TabName =
+                TabNames[Index]
+
+            local Data =
+                Tabs[TabName]
+
+            if Data then
+
+                --==============================
+                -- MOSTRA A LINHA
+                --==============================
+
+                Data.Indicator.Visible =
+                    true
+
+                Data.Indicator.Size =
+                    UDim2.fromOffset(
+                        3,
+                        5
+                    )
+
+                Data.Indicator.Position =
+                    UDim2.new(
+                        0,
+                        7,
+                        0.5,
+                        -2.5
+                    )
+
+                --==============================
+                -- CRESCIMENTO
+                --==============================
+
+                local Grow =
+                    TweenService:Create(
+
+                        Data.Indicator,
+
+                        TweenInfo.new(
+                            0.08,
+                            Enum.EasingStyle.Quart,
+                            Enum.EasingDirection.Out
+                        ),
+
+                        {
+
+                            Size =
+                                UDim2.fromOffset(
+                                    3,
+                                    20
+                                ),
+
+                            Position =
+                                UDim2.new(
+                                    0,
+                                    7,
+                                    0.5,
+                                    -10
+                                )
+
+                        }
+                    )
+
+                Grow:Play()
+
+                Grow.Completed:Wait()
+
+                if ThisAnimation ~= AnimationId then
+                    return
+                end
+
+                --==============================
+                -- CHEGOU NO DESTINO
+                --==============================
+
+                if Index == NewIndex then
+
+                    CurrentTab =
+                        Name
+
+                    for PageName,Page in pairs(Pages) do
+
+                        Page.Visible =
+                            PageName == Name
+
+                    end
+
+                    -- Garante que só ela fique ativa
+                    for OtherName,OtherData in pairs(Tabs) do
+
+                        OtherData.Indicator.Visible =
+                            OtherName == Name
+
+                    end
+
+                    return
+                end
+
+                --==============================
+                -- DIMINUI ANTES DE PASSAR
+                --==============================
+
+                local Shrink =
+                    TweenService:Create(
+
+                        Data.Indicator,
+
+                        TweenInfo.new(
+                            0.05,
+                            Enum.EasingStyle.Linear
+                        ),
+
+                        {
+
+                            Size =
+                                UDim2.fromOffset(
+                                    3,
+                                    5
+                                ),
+
+                            Position =
+                                UDim2.new(
+                                    0,
+                                    7,
+                                    0.5,
+                                    -2.5
+                                )
+
+                        }
+                    )
+
+                Shrink:Play()
+
+                Shrink.Completed:Wait()
+
+                Data.Indicator.Visible =
+                    false
+
+            end
+
+            Index += Step
+
+            if Index < 1
+            or Index > #TabNames then
+
+                break
+
+            end
+
+            task.wait(0.025)
+
+        end
+
+    end)
+end
+
+--==================================================
+-- 32. EVENTOS DAS ABAS
+--==================================================
+
+for Name,Data in pairs(Tabs) do
+
+    Data.Button.Activated:Connect(
+        function()
+
+            SelectTab(Name)
+
+        end
+    )
+
+end
+
+--==================================================
+-- 33. ABA INICIAL
+--==================================================
+
+SelectTab(
+    "Murderer"
+)
+
+--==================================================
+-- 34. FUNÇÃO PARA ADICIONAR ELEMENTOS
+--==================================================
+
+local function AddElement(
+    Page,
+    Element
+)
+
+    Element.Parent =
+        Page
+
+    return Element
+end
+
+--==================================================
+-- 35. BOTÃO PADRÃO
+--==================================================
+
+local function CreateButton(
+    Page,
+    Text,
+    Callback
+)
+
+    local Button =
+        Instance.new("TextButton")
+
+    Button.Name =
+        Text .. "Button"
+
+    Button.Size =
+        UDim2.new(
+            1,
+            -8,
+            0,
+            40
+        )
+
+    Button.BackgroundColor3 =
+        ButtonColor
+
+    Button.BackgroundTransparency =
+        0.1
+
+    Button.BorderSizePixel =
+        0
+
+    Button.Text =
+        Text
+
+    Button.TextColor3 =
+        White
+
+    Button.TextSize =
+        12
+
+    Button.Font =
+        Enum.Font.GothamMedium
+
+    Button.AutoButtonColor =
+        false
+
+    Button.ZIndex =
+        5
+
+    Button.Parent =
+        Page
+
+    Round(
+        Button,
+        9
+    )
+
+    Stroke(
+        Button,
+        0.7,
+        1
+    )
+
+    if Callback then
+
+        Button.Activated:Connect(
+            Callback
+        )
+
+    end
+
+    return Button
+end
+
+--==================================================
+-- 36. BOTÕES MURDERER
+--==================================================
+
+-- >>> COLOQUE OS BOTÕES DO MURDERER AQUI <<<
+
+--==================================================
+-- 37. BOTÕES SHERIFF
+--==================================================
+
+-- >>> COLOQUE OS BOTÕES DO SHERIFF AQUI <<<
+
+--==================================================
+-- 38. BOTÕES AUTO FARM
+--==================================================
+
+-- >>> COLOQUE OS BOTÕES DO AUTO FARM AQUI <<<
+
+--==================================================
+-- 39. BOTÕES ESP
+--==================================================
+
+-- >>> COLOQUE OS BOTÕES DO ESP AQUI <<<
+
+--==================================================
+-- 40. BOTÕES LOCAL PLAYER
+--==================================================
+
+-- >>> COLOQUE OS BOTÕES DO LOCAL PLAYER AQUI <<<
+
+--==================================================
+-- 41. BOTÕES INFO
+--==================================================
+
+-- >>> COLOQUE OS ELEMENTOS DO INFO AQUI <<<
+
+--==================================================
+-- 42. BOTÃO FLUTUANTE NYX
+--==================================================
+
+local FloatingButton =
+    Instance.new("TextButton")
+
+FloatingButton.Name =
+    "NyxButton"
+
+FloatingButton.Size =
+    UDim2.fromOffset(
+        58,
+        58
+    )
+
+FloatingButton.Position =
+    UDim2.new(
+        0,
+        20,
+        0.5,
+        -29
+    )
+
+FloatingButton.BackgroundColor3 =
+    Color3.fromRGB(
+        15,
+        15,
+        18
+    )
+
+FloatingButton.BorderSizePixel =
+    0
+
+FloatingButton.Text =
+    "Nyx"
+
+FloatingButton.TextColor3 =
+    White
+
+FloatingButton.TextSize =
+    14
+
+FloatingButton.Font =
+    Enum.Font.GothamBold
+
+FloatingButton.AutoButtonColor =
+    false
+
+FloatingButton.ZIndex =
+    50
+
+FloatingButton.Parent =
+    ScreenGui
+
+Round(
+    FloatingButton,
+    12
+)
+
+Stroke(
+    FloatingButton,
+    0.15,
+    1.5
+)
+
+--==================================================
+-- 43. ABRIR / ESCONDER
+--==================================================
+
+FloatingButton.Activated:Connect(
+    function()
+
+        Main.Visible =
+            not Main.Visible
+
+    end
+)
+
+--==================================================
+-- 44. ARRASTAR NYX
+--==================================================
+
+local DraggingNyx =
+    false
+
+local NyxDragStart
+local NyxStartPosition
+
+FloatingButton.InputBegan:Connect(
+    function(Input)
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseButton1
+
+        or Input.UserInputType ==
+            Enum.UserInputType.Touch then
+
+            DraggingNyx =
+                true
+
+            NyxDragStart =
+                Input.Position
+
+            NyxStartPosition =
+                FloatingButton.Position
+
+        end
+    end
+)
+
+UserInputService.InputChanged:Connect(
+    function(Input)
+
+        if not DraggingNyx then
+            return
+        end
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseMovement
+
+        or Input.UserInputType ==
+            Enum.UserInputType.Touch then
+
+            local Delta =
+                Input.Position
+                - NyxDragStart
+
+            FloatingButton.Position =
+                UDim2.new(
+
+                    NyxStartPosition.X.Scale,
+
+                    NyxStartPosition.X.Offset
+                        + Delta.X,
+
+                    NyxStartPosition.Y.Scale,
+
+                    NyxStartPosition.Y.Offset
+                        + Delta.Y
+
+                )
+
+        end
+    end
+)
+
+UserInputService.InputEnded:Connect(
+    function(Input)
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseButton1
+
+        or Input.UserInputType ==
+            Enum.UserInputType.Touch then
+
+            DraggingNyx =
+                false
+
+        end
+    end
+)
+
+--==================================================
+-- 45. ARRASTAR JANELA
+--==================================================
+
+local DraggingWindow =
+    false
+
+local WindowDragStart
+local WindowStartPosition
+
+TopBar.InputBegan:Connect(
+    function(Input)
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseButton1
+
+        or Input.UserInputType ==
+            Enum.UserInputType.Touch then
+
+            DraggingWindow =
+                true
+
+            WindowDragStart =
+                Input.Position
+
+            WindowStartPosition =
+                Main.Position
+
+        end
+    end
+)
+
+UserInputService.InputChanged:Connect(
+    function(Input)
+
+        if not DraggingWindow then
+            return
+        end
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseMovement
+
+        or Input.UserInputType ==
+            Enum.UserInputType.Touch then
+
+            local Delta =
+                Input.Position
+                - WindowDragStart
+
+            Main.Position =
+                UDim2.new(
+
+                    WindowStartPosition.X.Scale,
+
+                    WindowStartPosition.X.Offset
+                        + Delta.X,
+
+                    WindowStartPosition.Y.Scale,
+
+                    WindowStartPosition.Y.Offset
+                        + Delta.Y
+
+                )
+
+        end
+    end
+)
+
+UserInputService.InputEnded:Connect(
+    function(Input)
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseButton1
+
+        or Input.UserInputType ==
+            Enum.UserInputType.Touch then
+
+            DraggingWindow =
+                false
+
+        end
+    end
+)
+
+--==================================================
+-- 46. MINIMIZAR
+--==================================================
+
+local IsMinimized =
+    false
+
+Minimize.Activated:Connect(
+    function()
+
+        if IsMaximized then
+            return
+        end
+
+        IsMinimized =
+            not IsMinimized
+
+        if IsMinimized then
+
+            Content.Visible =
+                false
+
+            TweenService:Create(
+
+                Main,
+
+                TweenInfo.new(
+                    0.3,
+                    Enum.EasingStyle.Quart,
+                    Enum.EasingDirection.Out
+                ),
+
+                {
+
+                    Size =
+                        UDim2.fromOffset(
+
+                            Main.AbsoluteSize.X,
+
+                            TOPBAR_HEIGHT
+
+                        )
+
+                }
+
+            ):Play()
+
+            Minimize.Text =
+                "+"
+
+        else
+
+            local Animation =
+                TweenService:Create(
+
+                    Main,
+
+                    TweenInfo.new(
+                        0.3,
+                        Enum.EasingStyle.Quart,
+                        Enum.EasingDirection.Out
+                    ),
+
+                    {
+
+                        Size =
+                            UDim2.fromOffset(
+
+                                Main.AbsoluteSize.X,
+
+                                WINDOW_HEIGHT
+
+                            )
+
+                    }
+
+                )
+
+            Animation:Play()
+
+            Animation.Completed:Connect(
+                function()
+
+                    if not IsMinimized then
+
+                        Content.Visible =
+                            true
+
+                    end
+
+                end
+            )
+
+            Minimize.Text =
+                "—"
+
+        end
+    end
+)
+
+--==================================================
+-- 47. RESIZE
+--==================================================
+
+local ResizeHandle =
+    Instance.new("TextButton")
+
+ResizeHandle.Name =
+    "ResizeHandle"
+
+ResizeHandle.Size =
+    UDim2.fromOffset(
+        24,
+        24
+    )
+
+ResizeHandle.AnchorPoint =
+    Vector2.new(
+        1,
+        1
+    )
+
+ResizeHandle.Position =
+    UDim2.new(
+        1,
+        -4,
+        1,
+        -4
+    )
+
+ResizeHandle.BackgroundTransparency =
+    1
+
+ResizeHandle.BorderSizePixel =
+    0
+
+ResizeHandle.Text =
+    ""
+
+ResizeHandle.AutoButtonColor =
+    false
+
+ResizeHandle.ZIndex =
+    40
+
+ResizeHandle.Parent =
+    Main
+
+--==================================================
+-- 48. VISUAL RESIZE
+--==================================================
+
+local ResizeLine1 =
+    Instance.new("Frame")
+
+ResizeLine1.Size =
+    UDim2.fromOffset(
+        10,
+        2
+    )
+
+ResizeLine1.Position =
+    UDim2.fromOffset(
+        8,
+        13
+    )
+
+ResizeLine1.Rotation =
+    -45
+
+ResizeLine1.BackgroundColor3 =
+    Gray
+
+ResizeLine1.BackgroundTransparency =
+    0.3
+
+ResizeLine1.BorderSizePixel =
+    0
+
+ResizeLine1.ZIndex =
+    41
+
+ResizeLine1.Parent =
+    ResizeHandle
+
+local ResizeLine2 =
+    Instance.new("Frame")
+
+ResizeLine2.Size =
+    UDim2.fromOffset(
+        7,
+        2
+    )
+
+ResizeLine2.Position =
+    UDim2.fromOffset(
+        12,
+        17
+    )
+
+ResizeLine2.Rotation =
+    -45
+
+ResizeLine2.BackgroundColor3 =
+    Gray
+
+ResizeLine2.BackgroundTransparency =
+    0.3
+
+ResizeLine2.BorderSizePixel =
+    0
+
+ResizeLine2.ZIndex =
+    41
+
+ResizeLine2.Parent =
+    ResizeHandle
+
+--==================================================
+-- 49. SISTEMA RESIZE
+--==================================================
+
+local Resizing =
+    false
+
+local ResizeStart
+
+local StartWidth
+local StartHeight
+
+ResizeHandle.InputBegan:Connect(
+    function(Input)
+
+        if IsMinimized then
+            return
+        end
+
+        if IsMaximized then
+            return
+        end
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseButton1
+
+        or Input.UserInputType ==
+            Enum.UserInputType.Touch then
+
+            Resizing =
+                true
+
+            ResizeStart =
+                Input.Position
+
+            StartWidth =
+                Main.AbsoluteSize.X
+
+            StartHeight =
+                Main.AbsoluteSize.Y
+
+        end
+    end
+)
+
+UserInputService.InputChanged:Connect(
+    function(Input)
+
+        if not Resizing then
+            return
+        end
+
+        if IsMinimized
+        or IsMaximized then
+            return
+        end
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseMovement
+
+        or Input.UserInputType ==
+            Enum.UserInputType.Touch then
+
+            local Delta =
+                Input.Position
+                - ResizeStart
+
+            local NewWidth =
+                math.clamp(
+
+                    StartWidth + Delta.X,
+
+                    MIN_WIDTH,
+                    MAX_WIDTH
+
+                )
+
+            local NewHeight =
+                math.clamp(
+
+                    StartHeight + Delta.Y,
+
+                    MIN_HEIGHT,
+                    MAX_HEIGHT
+
+                )
+
+            Main.Size =
+                UDim2.fromOffset(
+
+                    NewWidth,
+                    NewHeight
+
+                )
+
+        end
+    end
+)
+
+UserInputService.InputEnded:Connect(
+    function(Input)
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseButton1
+
+        or Input.UserInputType ==
+            Enum.UserInputType.Touch then
+
+            Resizing =
+                false
+
+        end
+    end
+)
+
+--==================================================
+-- 50. MAXIMIZAR / RESTAURAR
+--==================================================
+
+local IsMaximized =
+    false
+
+local PreviousSize =
+    nil
+
+local PreviousPosition =
+    nil
+
+local function GetMaximizedSize()
+
+    local Camera =
+        workspace.CurrentCamera
+
+    if not Camera then
+
+        return
+            WINDOW_WIDTH,
+            WINDOW_HEIGHT
+
+    end
+
+    local Viewport =
+        Camera.ViewportSize
+
+    local TargetWidth =
+        Viewport.X * 0.80
+
+    local TargetHeight =
+        Viewport.Y * 0.82
+
+    local Scale =
+        UIScale.Scale
+
+    if Scale > 0 then
+
+        TargetWidth =
+            TargetWidth / Scale
+
+        TargetHeight =
+            TargetHeight / Scale
+
+    end
+
+    TargetWidth =
+        math.clamp(
+
+            TargetWidth,
+
+            MIN_WIDTH,
+            MAX_WIDTH
+
+        )
+
+    TargetHeight =
+        math.clamp(
+
+            TargetHeight,
+
+            MIN_HEIGHT,
+            MAX_HEIGHT
+
+        )
+
+    return
+        TargetWidth,
+        TargetHeight
+end
+
+Maximize.Activated:Connect(
+    function()
+
+        if IsMinimized then
+            return
+        end
+
+        if not IsMaximized then
+
+            --======================================
+            -- SALVAR TAMANHO ATUAL
+            --======================================
+
+            PreviousSize =
+                Main.Size
+
+            PreviousPosition =
+                Main.Position
+
+            local TargetWidth,
+                TargetHeight =
+                GetMaximizedSize()
+
+            IsMaximized =
+                true
+
+            Maximize.Text =
+                "❐"
+
+            TweenService:Create(
+
+                Main,
+
+                TweenInfo.new(
+                    0.3,
+                    Enum.EasingStyle.Quart,
+                    Enum.EasingDirection.Out
+                ),
+
+                {
+
+                    Size =
+                        UDim2.fromOffset(
+
+                            TargetWidth,
+                            TargetHeight
+
+                        ),
+
+                    Position =
+                        UDim2.new(
+
+                            0.5,
+                            0,
+
+                            0.5,
+                            -TargetHeight / 2
+
+                        )
+
+                }
+
+            ):Play()
+
+        else
+
+            --======================================
+            -- RESTAURAR TAMANHO
+            --======================================
+
+            if PreviousSize
+            and PreviousPosition then
+
+                IsMaximized =
+                    false
+
+                Maximize.Text =
+                    "□"
+
+                TweenService:Create(
+
+                    Main,
+
+                    TweenInfo.new(
+                        0.3,
+                        Enum.EasingStyle.Quart,
+                        Enum.EasingDirection.Out
+                    ),
+
+                    {
+
+                        Size =
+                            PreviousSize,
+
+                        Position =
+                            PreviousPosition
+
+                    }
+
+                ):Play()
+
+            end
+        end
+    end
+)
+
+--==================================================
+-- 51. CONFIRMAÇÃO DO X
+--==================================================
+
+local ConfirmFrame =
+    Instance.new("Frame")
+
+ConfirmFrame.Name =
+    "ConfirmFrame"
+
+ConfirmFrame.AnchorPoint =
+    Vector2.new(
+        0.5,
+        0.5
+    )
+
+ConfirmFrame.Position =
+    UDim2.fromScale(
+        0.5,
+        0.5
+    )
+
+ConfirmFrame.Size =
+    UDim2.fromOffset(
+        300,
+        150
+    )
+
+ConfirmFrame.BackgroundColor3 =
+    Color3.fromRGB(
+        14,
+        14,
+        18
+    )
+
+ConfirmFrame.BorderSizePixel =
+    0
+
+ConfirmFrame.Visible =
+    false
+
+ConfirmFrame.ZIndex =
+    100
+
+ConfirmFrame.Parent =
+    ScreenGui
+
+Round(
+    ConfirmFrame,
+    14
+)
+
+Stroke(
+    ConfirmFrame,
+    0.15,
+    1.5
+)
+
+--==================================================
+-- 52. TÍTULO CONFIRMAÇÃO
+--==================================================
+
+local ConfirmTitle =
+    Instance.new("TextLabel")
+
+ConfirmTitle.Name =
+    "ConfirmTitle"
+
+ConfirmTitle.BackgroundTransparency =
+    1
+
+ConfirmTitle.Position =
+    UDim2.fromOffset(
+        15,
+        16
+    )
+
+ConfirmTitle.Size =
+    UDim2.new(
+        1,
+        -30,
+        0,
+        25
+    )
+
+ConfirmTitle.Text =
+    "Fechar interface?"
+
+ConfirmTitle.TextColor3 =
+    White
+
+ConfirmTitle.TextSize =
+    16
+
+ConfirmTitle.Font =
+    Enum.Font.GothamBold
+
+ConfirmTitle.ZIndex =
+    101
+
+ConfirmTitle.Parent =
+    ConfirmFrame
+
+--==================================================
+-- 53. TEXTO CONFIRMAÇÃO
+--==================================================
+
+local ConfirmText =
+    Instance.new("TextLabel")
+
+ConfirmText.Name =
+    "ConfirmText"
+
+ConfirmText.BackgroundTransparency =
+    1
+
+ConfirmText.Position =
+    UDim2.fromOffset(
+        15,
+        44
+    )
+
+ConfirmText.Size =
+    UDim2.new(
+        1,
+        -30,
+        0,
+        30
+    )
+
+ConfirmText.Text =
+    "Você quer mesmo fechar a interface?"
+
+ConfirmText.TextColor3 =
+    Gray
+
+ConfirmText.TextSize =
+    11
+
+ConfirmText.Font =
+    Enum.Font.Gotham
+
+ConfirmText.ZIndex =
+    101
+
+ConfirmText.Parent =
+    ConfirmFrame
+
+--==================================================
+-- 54. SIM
+--==================================================
+
+local YesButton =
+    Instance.new("TextButton")
+
+YesButton.Name =
+    "YesButton"
+
+YesButton.Size =
+    UDim2.fromOffset(
+        115,
+        34
+    )
+
+YesButton.Position =
+    UDim2.new(
+        0.5,
+        -120,
+        1,
+        -48
+    )
+
+YesButton.BackgroundColor3 =
+    AccentColor
+
+YesButton.BorderSizePixel =
+    0
+
+YesButton.Text =
+    "Sim"
+
+YesButton.TextColor3 =
+    White
+
+YesButton.TextSize =
+    12
+
+YesButton.Font =
+    Enum.Font.GothamBold
+
+YesButton.AutoButtonColor =
+    false
+
+YesButton.ZIndex =
+    101
+
+YesButton.Parent =
+    ConfirmFrame
+
+Round(
+    YesButton,
+    8
+)
+
+--==================================================
+-- 55. NÃO
+--==================================================
+
+local NoButton =
+    Instance.new("TextButton")
+
+NoButton.Name =
+    "NoButton"
+
+NoButton.Size =
+    UDim2.fromOffset(
+        115,
+        34
+    )
+
+NoButton.Position =
+    UDim2.new(
+        0.5,
+        5,
+        1,
+        -48
+    )
+
+NoButton.BackgroundColor3 =
+    ButtonColor
+
+NoButton.BorderSizePixel =
+    0
+
+NoButton.Text =
+    "Não"
+
+NoButton.TextColor3 =
+    White
+
+NoButton.TextSize =
+    12
+
+NoButton.Font =
+    Enum.Font.GothamBold
+
+NoButton.AutoButtonColor =
+    false
+
+NoButton.ZIndex =
+    101
+
+NoButton.Parent =
+    ConfirmFrame
+
+Round(
+    NoButton,
+    8
+)
+
+Stroke(
+    NoButton,
+    0.5,
+    1
+)
+
+--==================================================
+-- 56. X ABRE CONFIRMAÇÃO
+--==================================================
+
+Close.Activated:Connect(
+    function()
+
+        ConfirmFrame.Visible =
+            true
+
+    end
+)
+
+--==================================================
+-- 57. NÃO CANCELA
+--==================================================
+
+NoButton.Activated:Connect(
+    function()
+
+        ConfirmFrame.Visible =
+            false
+
+    end
+)
+
+--==================================================
+-- 58. SIM FECHA
+--==================================================
+
+YesButton.Activated:Connect(
+    function()
+
+        ScreenGui:Destroy()
+
+    end
+)
+
+--==================================================
+-- 59. FINAL
+--==================================================
+
+print(
+    "Walk Nyx Project carregado com sucesso!"
+)
