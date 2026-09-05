@@ -75,11 +75,11 @@ local Resizing = false
 --==============================================================--
 
 local IconAssets = {
-    house = "rbxassetid://10723407389",    -- Casa (Home)
-    eye = "rbxassetid://6031075929",      -- Olho (ESP)
-    user = "rbxassetid://10723423986",     -- Jogador (Player - ID Atualizado)
-    settings = "rbxassetid://10734950309", -- Configurações
-    x = "rbxassetid://10747384394",        -- Fechar (X)
+    house = "rbxassetid://10723407389",
+    eye = "rbxassetid://6031075929",
+    user = "rbxassetid://10734934585",
+    settings = "rbxassetid://10734950309",
+    x = "rbxassetid://10747384394",
 }
 
 --==============================================================--
