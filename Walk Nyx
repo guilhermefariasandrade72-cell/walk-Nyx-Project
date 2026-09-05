@@ -1171,3 +1171,483 @@ for Index, TabData in ipairs(Tabs) do
                         "Name"
                     )
 
+--==============================================================--
+-- BOTÃO AX
+--==============================================================--
+
+local FloatButton =
+    Instance.new("TextButton")
+
+FloatButton.Name =
+    "AstralXFloat"
+
+FloatButton.Size =
+    UDim2.fromOffset(
+        54,
+        54
+    )
+
+FloatButton.Position =
+    UDim2.new(
+        1,
+        -75,
+        1,
+        -90
+    )
+
+FloatButton.BackgroundColor3 =
+    Theme.Window
+
+FloatButton.BorderSizePixel = 0
+
+FloatButton.Text =
+    "AX"
+
+FloatButton.TextColor3 =
+    Theme.AccentBright
+
+FloatButton.TextSize = 14
+
+FloatButton.Font =
+    Enum.Font.GothamBold
+
+FloatButton.AutoButtonColor = false
+
+FloatButton.ZIndex = 100
+
+FloatButton.Parent =
+    ScreenGui
+
+local FloatCorner =
+    Instance.new("UICorner")
+
+FloatCorner.CornerRadius =
+    UDim.new(
+        0,
+        14
+    )
+
+FloatCorner.Parent =
+    FloatButton
+
+local FloatStroke =
+    Instance.new("UIStroke")
+
+FloatStroke.Color =
+    Theme.Accent
+
+FloatStroke.Thickness =
+    1.5
+
+FloatStroke.Parent =
+    FloatButton
+
+
+--==============================================================--
+-- FUNÇÃO: ESCONDER HUB
+--==============================================================--
+
+local function HideWindow()
+
+    if WindowAnimating or not WindowOpen then
+        return
+    end
+
+    WindowAnimating = true
+    WindowOpen = false
+
+    local HiddenWidth =
+        math.floor(
+            CurrentWidth * 0.82
+        )
+
+    local HiddenHeight =
+        math.floor(
+            CurrentHeight * 0.82
+        )
+
+    local SizeTween =
+        TweenService:Create(
+            Main,
+
+            TweenInfo.new(
+                0.28,
+                Enum.EasingStyle.Quint,
+                Enum.EasingDirection.In
+            ),
+
+            {
+                Size =
+                    UDim2.fromOffset(
+                        HiddenWidth,
+                        HiddenHeight
+                    )
+            }
+        )
+
+    local FadeTween =
+        TweenService:Create(
+            WindowGroup,
+
+            TweenInfo.new(
+                0.24,
+                Enum.EasingStyle.Quint,
+                Enum.EasingDirection.In
+            ),
+
+            {
+                GroupTransparency = 1
+            }
+        )
+
+    SizeTween:Play()
+    FadeTween:Play()
+
+    FadeTween.Completed:Connect(
+        function()
+
+            if not ScreenGui.Parent then
+                return
+            end
+
+            Main.Visible = false
+
+            Main.Size =
+                UDim2.fromOffset(
+                    CurrentWidth,
+                    CurrentHeight
+                )
+
+            WindowGroup.GroupTransparency = 0
+
+            WindowAnimating = false
+        end
+    )
+end
+
+
+--==============================================================--
+-- FUNÇÃO: MOSTRAR HUB
+--==============================================================--
+
+local function ShowWindow()
+
+    if WindowAnimating or WindowOpen then
+        return
+    end
+
+    WindowAnimating = true
+    WindowOpen = true
+
+    Main.Visible = true
+
+    Main.Size =
+        UDim2.fromOffset(
+            math.floor(
+                CurrentWidth * 0.82
+            ),
+
+            math.floor(
+                CurrentHeight * 0.82
+            )
+        )
+
+    WindowGroup.GroupTransparency = 1
+
+    local SizeTween =
+        TweenService:Create(
+            Main,
+
+            TweenInfo.new(
+                0.32,
+                Enum.EasingStyle.Back,
+                Enum.EasingDirection.Out
+            ),
+
+            {
+                Size =
+                    UDim2.fromOffset(
+                        CurrentWidth,
+                        CurrentHeight
+                    )
+            }
+        )
+
+    local FadeTween =
+        TweenService:Create(
+            WindowGroup,
+
+            TweenInfo.new(
+                0.26,
+                Enum.EasingStyle.Quint,
+                Enum.EasingDirection.Out
+            ),
+
+            {
+                GroupTransparency = 0
+            }
+        )
+
+    SizeTween:Play()
+    FadeTween:Play()
+
+    FadeTween.Completed:Connect(
+        function()
+
+            WindowAnimating = false
+
+        end
+    )
+end
+
+
+--==============================================================--
+-- CLICK DO BOTÃO AX
+--==============================================================--
+
+FloatButton.Activated:Connect(
+    function()
+
+        if WindowOpen then
+
+            HideWindow()
+
+        else
+
+            ShowWindow()
+
+        end
+
+    end
+)
+
+
+--==============================================================--
+-- ABRIR CONFIRMAÇÃO PELO X
+--==============================================================--
+
+CloseButton.Activated:Connect(
+    function()
+
+        if WindowAnimating then
+            return
+        end
+
+        ConfirmOverlay.Visible = true
+
+        ConfirmCard.Size =
+            UDim2.fromOffset(
+                250,
+                140
+            )
+
+        TweenService:Create(
+            ConfirmCard,
+
+            TweenInfo.new(
+                0.22,
+                Enum.EasingStyle.Back,
+                Enum.EasingDirection.Out
+            ),
+
+            {
+                Size =
+                    UDim2.fromOffset(
+                        285,
+                        155
+                    )
+            }
+        ):Play()
+
+    end
+)
+
+
+--==============================================================--
+-- BOTÃO NÃO
+--==============================================================--
+
+NoButton.Activated:Connect(
+    function()
+
+        ConfirmOverlay.Visible = false
+
+    end
+)
+
+
+--==============================================================--
+-- BOTÃO SIM
+--==============================================================--
+
+YesButton.Activated:Connect(
+    function()
+
+        ConfirmOverlay.Visible = false
+
+        WindowOpen = false
+
+        -- Fecha o hub inteiro.
+        -- O AX também desaparece.
+        -- Só volta quando o script for executado novamente.
+
+        ScreenGui:Destroy()
+
+    end
+)
+
+
+--==============================================================--
+-- ARRASTAR BOTÃO AX
+--==============================================================--
+
+FloatButton.InputBegan:Connect(
+    function(Input)
+
+        if Input.UserInputType
+            ~= Enum.UserInputType.MouseButton1
+
+            and Input.UserInputType
+            ~= Enum.UserInputType.Touch then
+
+            return
+        end
+
+        DraggingFloat = true
+
+        local StartPosition =
+            Input.Position
+
+        local StartButtonPosition =
+            FloatButton.Position
+
+        local Changed
+        local Ended
+
+        Changed =
+            UserInputService.InputChanged:Connect(
+                function(Change)
+
+                    if not DraggingFloat then
+                        return
+                    end
+
+                    if Change.UserInputType
+                        == Enum.UserInputType.MouseMovement
+
+                        or Change.UserInputType
+                        == Enum.UserInputType.Touch then
+
+                        local Delta =
+                            Change.Position -
+                            StartPosition
+
+                        FloatButton.Position =
+                            UDim2.new(
+                                StartButtonPosition.X.Scale,
+
+                                StartButtonPosition.X.Offset
+                                    + Delta.X,
+
+                                StartButtonPosition.Y.Scale,
+
+                                StartButtonPosition.Y.Offset
+                                    + Delta.Y
+                            )
+
+                    end
+
+                end
+            )
+
+        Ended =
+            UserInputService.InputEnded:Connect(
+                function(EndedInput)
+
+                    if EndedInput.UserInputType
+                        == Enum.UserInputType.MouseButton1
+
+                        or EndedInput.UserInputType
+                        == Enum.UserInputType.Touch then
+
+                        DraggingFloat = false
+
+                        if Changed then
+                            Changed:Disconnect()
+                        end
+
+                        if Ended then
+                            Ended:Disconnect()
+                        end
+
+                    end
+
+                end
+            )
+
+    end
+)
+
+
+--==============================================================--
+-- ANIMAÇÃO DO AX AO PASSAR/TOCAR
+--==============================================================--
+
+FloatButton.MouseEnter:Connect(
+    function()
+
+        TweenService:Create(
+            FloatButton,
+
+            TweenInfo.new(
+                0.15,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.Out
+            ),
+
+            {
+                Size =
+                    UDim2.fromOffset(
+                        58,
+                        58
+                    )
+            }
+        ):Play()
+
+    end
+)
+
+FloatButton.MouseLeave:Connect(
+    function()
+
+        TweenService:Create(
+            FloatButton,
+
+            TweenInfo.new(
+                0.15,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.Out
+            ),
+
+            {
+                Size =
+                    UDim2.fromOffset(
+                        54,
+                        54
+                    )
+            }
+        ):Play()
+
+    end
+)
+
+
+--==============================================================--
+-- FINALIZAÇÃO
+--==============================================================--
+
+Main.Visible = true
+WindowOpen = true
+WindowAnimating = false
+
+print("[Astral X] Interface carregada com sucesso.")
