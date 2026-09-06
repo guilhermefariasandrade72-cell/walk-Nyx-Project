@@ -375,12 +375,17 @@ local TabButtons = {}
 
 for Index, TabData in ipairs(TabsData) do
 
-    local PageFrame = Instance.new("Frame")
+    -- Transformado em ScrollingFrame para crescer automaticamente e permitir scroll se necessário
+    local PageFrame = Instance.new("ScrollingFrame")
     PageFrame.Name = TabData.Name .. "Page"
-    PageFrame.Size = UDim2.new(1, 0, 0, 0)
+    PageFrame.Size = UDim2.new(1, 0, 1, 0)
     PageFrame.BackgroundTransparency = 1
     PageFrame.BorderSizePixel = 0
     PageFrame.Visible = (Index == 1)
+    PageFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    PageFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    PageFrame.ScrollBarThickness = 3
+    PageFrame.ScrollBarImageColor3 = Theme.Accent
     PageFrame.Parent = ContentContainer
 
     if TabData.Name == "Main" then
@@ -1061,8 +1066,9 @@ end)
     PagePadding.PaddingRight = UDim.new(0, 6)
     PagePadding.Parent = PageFrame
 
+    -- Configurado para atualizar o tamanho do canvas automaticamente via UIListLayout
     ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        PageFrame.Size = UDim2.new(1, 0, 0, ListLayout.AbsoluteContentSize.Y + 16)
+        PageFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 20)
     end)
 
     TabFrames[Index] = PageFrame
