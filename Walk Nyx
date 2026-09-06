@@ -412,8 +412,10 @@ local CONFIG_FARM = {
 }
 
 -- ==================================
--- 🚜 BOTÃO AUTO FARM
+-- 🚜 BOTÃO AUTO FARM + SLIDER
 -- ==================================
+
+-- 🟢 BOTÃO LIGAR/DESLIGAR AUTO FARM
 local AutoFarmCard = Instance.new("Frame")
 AutoFarmCard.Name = "AutoFarmCard"
 AutoFarmCard.Size = UDim2.new(1, -6, 0, 50)
@@ -483,9 +485,7 @@ AutoFarmToggleButton.Activated:Connect(function()
     TweenService:Create(AutoFarmCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
 end)
 
--- ==================================
--- 🎚️ SLIDER DE VELOCIDADE
--- ==================================
+-- 🟢 SLIDER DE VELOCIDADE
 local FarmSpeedCard = Instance.new("Frame")
 FarmSpeedCard.Name = "FarmSpeedCard"
 FarmSpeedCard.Size = UDim2.new(1, -6, 0, 60)
