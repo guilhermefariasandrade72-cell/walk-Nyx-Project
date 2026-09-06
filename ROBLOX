@@ -6,6 +6,7 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
@@ -19,6 +20,9 @@ if OldGui then OldGui:Destroy() end
 
 local OldFloat = PlayerGui:FindFirstChild("WN_FloatGui")
 if OldFloat then OldFloat:Destroy() end
+
+local OldInvisFloat = PlayerGui:FindFirstChild("WN_InvisFloatGui")
+if OldInvisFloat then OldInvisFloat:Destroy() end
 
 --==============================================================--
 -- THEME
@@ -66,11 +70,10 @@ local WindowOpen      = true
 local WindowAnimating = false
 
 local DraggingWindow = false
-local DraggingFloat  = false
 local Resizing       = false
 
 --==============================================================--
--- MAPA DE ÃCONES DE IMAGEM
+-- MAPA DE ÍCONES DE IMAGEM
 --==============================================================--
 
 local IconAssets = {
@@ -81,7 +84,7 @@ local IconAssets = {
 }
 
 --==============================================================--
--- CRIAÃ‡ÃƒO DE ÃCONE
+-- CRIAÇÃO DE ÍCONE
 --==============================================================--
 
 local function CreateLucideIcon(Parent, IconName, IconColor, IconSize)
@@ -126,7 +129,7 @@ local function CreateDirectPlayerIcon(Parent, IconColor)
     Container.AnchorPoint = Vector2.new(0.5, 0.5)
     Container.Position = UDim2.fromScale(0.5, 0.5)
     Container.BackgroundTransparency = 1
-    Container.Parent = Parent
+    Container.Parent = Container
 
     local Head = Instance.new("Frame")
     Head.Name = "Head"
@@ -375,7 +378,6 @@ local TabButtons = {}
 
 for Index, TabData in ipairs(TabsData) do
 
-    -- Transformado em ScrollingFrame para crescer automaticamente e permitir scroll se necessÃ¡rio
     local PageFrame = Instance.new("ScrollingFrame")
     PageFrame.Name = TabData.Name .. "Page"
     PageFrame.Size = UDim2.new(1, 0, 1, 0)
@@ -389,79 +391,60 @@ for Index, TabData in ipairs(TabsData) do
     PageFrame.Parent = ContentContainer
 
     if TabData.Name == "Main" then
-        -- (ConteÃºdo da aba Main)
+        -- Conteúdo Main
 
     elseif TabData.Name == "Auto Farm" then
-        -- (ConteÃºdo da aba Auto Farm)
+        -- Conteúdo Auto Farm
 
     elseif TabData.Name == "ESP" then
-        -- (ConteÃºdo da aba ESP)
+        -- Conteúdo ESP
 
+-- =================================================
+--               ABA PLAYER
     elseif TabData.Name == "Player" then
+-- =================================================
 
 -- ================================================
--- INVISÃVEL - VARIÃVEIS
+-- VARIÁVEIS DO INVISÍVEL E BOTÃO FLUTUANTE
 -- ================================================
 local InvisivelAtivo = false
+local InvisFloatAtivo = false
 local Personagem = nil
 local Humanoid = nil
 local Raiz = nil
 local PartesCorpo = {}
 
--- ================================================
--- BOTÃƒO FLUTUANTE INVISÃVEL - VARIÃVEIS
--- ================================================
-local FloatingInvisAtivo = false
-local FloatSize = 120 -- Tamanho inicial padrÃ£o do botÃ£o flutuante quadrado
-local DraggingFloatInvis = false
-local FloatInvisDragInput, FloatInvisDragStart, FloatInvisStartPos
+local InvisFloatGui = nil
+local InvisFloatButton = nil
+local InvisFloatLine = nil
 
-        -- ============================
-        -- VARIÃVEIS DA ABA SPEED
-        -- ============================
-        local SpeedEnabled = false
-        local CurrentSpeed = 16
-        local SpeedMinVal = 16
-        local SpeedMaxVal = 30
-        local SpeedSliding = false
-        local SpeedActiveInput = nil
-
--- ===================
--- VARIAVEIS DO SPEED GLITH 
--- ===================
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-
-local player = Players.LocalPlayer
-
-_G.SpeedNoPulo = false
+-- ============================
+-- VARIÁVEIS DA ABA SPEED
+-- ============================
+local SpeedEnabled = false
+local CurrentSpeed = 16
+local SpeedMinVal = 16
+local SpeedMaxVal = 30
+local SpeedSliding = false
+local SpeedActiveInput = nil
 
 local VelocidadeNoPulo = 300
 local VelocidadePadrao = 16
+_G.SpeedNoPulo = false
 
-        -- ============================
-        -- VARIÃVEIS DA ABA JUMP
-        -- ============================
-        local JampEnabled = false
-        local CurrentJamp = 50
-        local JampMinVal = 50
-        local JampMaxVal = 100
-        local JampSliding = false
-        local JampActiveInput = nil
-
--- ===========================
--- VARIÃVEIS DO PULO INFINITO 
--- ===========================
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-
-local player = Players.LocalPlayer
-
+-- ============================
+-- VARIÁVEIS DA ABA JUMP
+-- ============================
+local JampEnabled = false
+local CurrentJamp = 50
+local JampMinVal = 50
+local JampMaxVal = 100
+local JampSliding = false
+local JampActiveInput = nil
 _G.PuloInfinito = false
 
 -- ============================
--- VARIÃVEIS DA ABA FLY
+-- VARIÁVEIS DA ABA FLY
 -- ============================
 local FlyAtivo = false
 local FlyVelocidade = 16
@@ -470,20 +453,13 @@ local FlyMaxVal = 150
 local FlySliding = false
 local FlyActiveInput = nil
 
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
 local bv, bg, con
-local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+local controls = require(Player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
 
--- =============================
--- ANTI-FLING (VariÃ¡veis)
--- =============================
 _G.AntiFling = false
 
 -- ===============================
--- TITULO MOVIMENTO
+-- TITULO EXTRAS
 -- ===============================
 local SectionLabel = Instance.new("TextLabel")
 SectionLabel.Name = "MovementLabel"
@@ -494,367 +470,10 @@ SectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
 SectionLabel.TextSize = 20
 SectionLabel.Font = Enum.Font.GothamBold
 SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
-SectionLabel.TextTransparency = 0
 SectionLabel.Parent = PageFrame
 
 -- ================================================
--- BOTÃƒO FLUTUANTE INVISÃVEL - CARD NA UI (Toggle + Slider)
--- ================================================
-local FloatSettingCard = Instance.new("Frame")
-FloatSettingCard.Name = "FloatSettingCard"
-FloatSettingCard.Size = UDim2.new(1, -6, 0, 85)
-FloatSettingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-FloatSettingCard.BorderSizePixel = 0
-FloatSettingCard.Parent = PageFrame
-
-local FloatSettingCorner = Instance.new("UICorner")
-FloatSettingCorner.CornerRadius = UDim.new(0, 10)
-FloatSettingCorner.Parent = FloatSettingCard
-
-local FloatSettingStroke = Instance.new("UIStroke")
-FloatSettingStroke.Color = Color3.fromRGB(39, 40, 48)
-FloatSettingStroke.Thickness = 1
-FloatSettingStroke.Parent = FloatSettingCard
-
-local FloatSettingTitle = Instance.new("TextLabel")
-FloatSettingTitle.Name = "Title"
-FloatSettingTitle.Size = UDim2.new(1, -60, 0, 36)
-FloatSettingTitle.Position = UDim2.fromOffset(12, 0)
-FloatSettingTitle.BackgroundTransparency = 1
-FloatSettingTitle.Text = "Floating Invisible Button"
-FloatSettingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
-FloatSettingTitle.TextSize = 12
-FloatSettingTitle.Font = Enum.Font.GothamSemibold
-FloatSettingTitle.TextXAlignment = Enum.TextXAlignment.Left
-FloatSettingTitle.Parent = FloatSettingCard
-
--- ============================
--- TOGGLE - MESMO PADRÃƒO DO SPEED
--- ============================
-local FloatSettingToggle = Instance.new("TextButton")
-FloatSettingToggle.Name = "ToggleButton"
-FloatSettingToggle.Size = UDim2.fromOffset(26, 26)
-FloatSettingToggle.AnchorPoint = Vector2.new(1, 0)
-FloatSettingToggle.Position = UDim2.new(1, -12, 0, 5)
-FloatSettingToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-FloatSettingToggle.BorderSizePixel = 0
-FloatSettingToggle.Text = ""
-FloatSettingToggle.AutoButtonColor = false
-FloatSettingToggle.Parent = FloatSettingCard
-
-local FloatSettingBtnCorner = Instance.new("UICorner")
-FloatSettingBtnCorner.CornerRadius = UDim.new(0, 6)
-FloatSettingBtnCorner.Parent = FloatSettingToggle
-
-local FloatSettingBtnStroke = Instance.new("UIStroke")
-FloatSettingBtnStroke.Color = Color3.fromRGB(39, 40, 48)
-FloatSettingBtnStroke.Thickness = 1
-FloatSettingBtnStroke.Parent = FloatSettingToggle
-
-local FloatSettingCheck = Instance.new("TextLabel")
-FloatSettingCheck.Name = "CheckMark"
-FloatSettingCheck.Size = UDim2.fromScale(1, 1)
-FloatSettingCheck.BackgroundTransparency = 1
-FloatSettingCheck.Text = "âœ”"
-FloatSettingCheck.TextColor3 = Color3.new(1, 1, 1)
-FloatSettingCheck.TextSize = 14
-FloatSettingCheck.Font = Enum.Font.GothamBold
-FloatSettingCheck.TextTransparency = 1
-FloatSettingCheck.Parent = FloatSettingToggle
-
--- ============================
--- SLIDER - MESMO PADRÃƒO DO SPEED
--- ============================
-local SliderContainer = Instance.new("Frame")
-SliderContainer.Name = "SliderContainer"
-SliderContainer.Size = UDim2.new(1, -24, 0, 30)
-SliderContainer.Position = UDim2.fromOffset(12, 44)
-SliderContainer.BackgroundTransparency = 1
-SliderContainer.Parent = FloatSettingCard
-
-local SliderLabel = Instance.new("TextLabel")
-SliderLabel.Name = "SliderLabel"
-SliderLabel.Size = UDim2.new(1, 0, 0, 14)
-SliderLabel.BackgroundTransparency = 1
-SliderLabel.Text = "Tamanho: " .. tostring(FloatSize)
-SliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
-SliderLabel.TextSize = 10
-SliderLabel.Font = Enum.Font.GothamMedium
-SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
-SliderLabel.Parent = SliderContainer
-
-local SliderBg = Instance.new("Frame")
-SliderBg.Name = "SliderTrack"
-SliderBg.Size = UDim2.new(1, 0, 0, 6)
-SliderBg.Position = UDim2.fromOffset(0, 18)
-SliderBg.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-SliderBg.BorderSizePixel = 0
-SliderBg.Parent = SliderContainer
-
-local SliderBgCorner = Instance.new("UICorner")
-SliderBgCorner.CornerRadius = UDim.new(1, 0)
-SliderBgCorner.Parent = SliderBg
-
-local SliderFill = Instance.new("Frame")
-SliderFill.Name = "SliderFill"
-SliderFill.Size = UDim2.new(math.clamp((FloatSize - 80) / 120, 0, 1), 0, 1, 0)
-SliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
-SliderFill.BorderSizePixel = 0
-SliderFill.Parent = SliderBg
-
-local SliderFillCorner = Instance.new("UICorner")
-SliderFillCorner.CornerRadius = UDim.new(1, 0)
-SliderFillCorner.Parent = SliderFill
-
-local SliderButton = Instance.new("TextButton")
-SliderButton.Name = "SliderButton"
-SliderButton.Size = UDim2.new(1, 10, 1, 10)
-SliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
-SliderButton.Position = UDim2.new(math.clamp((FloatSize - 80) / 120, 0, 1), 0, 0.5, 0)
-SliderButton.BackgroundTransparency = 1
-SliderButton.Text = ""
-SliderButton.AutoButtonColor = false
-SliderButton.Parent = SliderBg
-
--- ============================
--- BOTÃƒO FLUTUANTE
--- ============================
-local FloatScreenGui = Instance.new("ScreenGui")
-FloatScreenGui.Name = "FloatInvisGui"
-FloatScreenGui.Enabled = false
-FloatScreenGui.ResetOnSpawn = false
-FloatScreenGui.IgnoreGuiInset = true
-FloatScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-FloatScreenGui.DisplayOrder = 2147483647
-FloatScreenGui.Parent = PlayerGui
-
-local FloatingButton = Instance.new("TextButton")
-FloatingButton.Name = "FloatingButton"
-FloatingButton.Size = UDim2.fromOffset(FloatSize, FloatSize)
-FloatingButton.AnchorPoint = Vector2.new(0.5, 0.5)
-FloatingButton.Position = UDim2.new(0.5, 0, 0.25, 0)
-FloatingButton.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-FloatingButton.BorderSizePixel = 0
-FloatingButton.Text = "Invisible"
-FloatingButton.TextColor3 = Color3.fromRGB(245, 245, 248)
-FloatingButton.TextSize = 13
-FloatingButton.Font = Enum.Font.GothamBold
-FloatingButton.AutoButtonColor = false
-FloatingButton.Active = true
-FloatingButton.Parent = FloatScreenGui
-
-local FloatCorner = Instance.new("UICorner")
-FloatCorner.CornerRadius = UDim.new(0, 10)
-FloatCorner.Parent = FloatingButton
-
-local FloatStroke = Instance.new("UIStroke")
-FloatStroke.Color = Color3.fromRGB(39, 40, 48)
-FloatStroke.Thickness = 1.5
-FloatStroke.Parent = FloatingButton
-
-local StatusLine = Instance.new("Frame")
-StatusLine.Name = "StatusLine"
-StatusLine.Size = UDim2.new(0, 4, 1, -12)
-StatusLine.Position = UDim2.fromOffset(6, 6)
-StatusLine.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
-StatusLine.BorderSizePixel = 0
-StatusLine.Parent = FloatingButton
-
-local StatusLineCorner = Instance.new("UICorner")
-StatusLineCorner.CornerRadius = UDim.new(1, 0)
-StatusLineCorner.Parent = StatusLine
-
--- ============================
--- TOGGLE DO CARD
--- ============================
-local FloatMenuAtivo = false
-
-FloatSettingToggle.Activated:Connect(function()
-    FloatMenuAtivo = not FloatMenuAtivo
-    FloatScreenGui.Enabled = FloatMenuAtivo
-
-    local targetBg = FloatMenuAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-    local targetStroke = FloatMenuAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-    local targetTrans = FloatMenuAtivo and 0 or 1
-
-    TweenService:Create(FloatSettingToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-        BackgroundColor3 = targetBg
-    }):Play()
-
-    TweenService:Create(FloatSettingBtnStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-        Color = targetStroke
-    }):Play()
-
-    TweenService:Create(FloatSettingCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-        TextTransparency = targetTrans
-    }):Play()
-end)
-
--- ============================
--- ARRASTE DO BOTÃƒO FLUTUANTE
--- ============================
-local FloatDragging = false
-local FloatMoved = false
-local FloatDragInput = nil
-local FloatDragStart = nil
-local FloatButtonStartPosition = nil
-
-FloatingButton.InputBegan:Connect(function(Input)
-    if Input.UserInputType ~= Enum.UserInputType.Touch
-        and Input.UserInputType ~= Enum.UserInputType.MouseButton1 then
-        return
-    end
-
-    FloatDragging = true
-    FloatMoved = false
-    FloatDragInput = Input
-    FloatDragStart = Input.Position
-    FloatButtonStartPosition = FloatingButton.Position
-end)
-
-UserInputService.TouchMoved:Connect(function(Input)
-    if not FloatDragging then return end
-    if Input ~= FloatDragInput then return end
-
-    local Delta = Input.Position - FloatDragStart
-
-    if Delta.Magnitude > 6 then
-        FloatMoved = true
-    end
-
-    FloatingButton.Position = UDim2.new(
-        FloatButtonStartPosition.X.Scale,
-        FloatButtonStartPosition.X.Offset + Delta.X,
-        FloatButtonStartPosition.Y.Scale,
-        FloatButtonStartPosition.Y.Offset + Delta.Y
-    )
-end)
-
-UserInputService.InputChanged:Connect(function(Input)
-    if not FloatDragging then return end
-    if FloatDragInput.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
-    if Input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
-
-    local Delta = Input.Position - FloatDragStart
-
-    if Delta.Magnitude > 6 then
-        FloatMoved = true
-    end
-
-    FloatingButton.Position = UDim2.new(
-        FloatButtonStartPosition.X.Scale,
-        FloatButtonStartPosition.X.Offset + Delta.X,
-        FloatButtonStartPosition.Y.Scale,
-        FloatButtonStartPosition.Y.Offset + Delta.Y
-    )
-end)
-
-UserInputService.InputEnded:Connect(function(Input)
-    if Input ~= FloatDragInput then return end
-    FloatDragging = false
-    FloatDragInput = nil
-end)
-
--- ============================
--- CLIQUE DO BOTÃƒO + ANIMAÃ‡ÃƒO
--- ============================
-FloatingButton.Activated:Connect(function()
-    if FloatMoved then
-        FloatMoved = false
-        return
-    end
-
-    local novoEstado = not FloatingInvisAtivo
-    AtualizarEstadoFloatingInvis(novoEstado)
-
-    local corLinha = novoEstado and Color3.fromRGB(40, 225, 100) or Color3.fromRGB(225, 40, 56)
-    TweenService:Create(StatusLine, TweenInfo.new(0.2), {
-        BackgroundColor3 = corLinha
-    }):Play()
-
-    local NormalSize = FloatSize
-    local PressSize = math.max(40, NormalSize - 6)
-
-    local PressTween = TweenService:Create(FloatingButton, TweenInfo.new(0.07, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        Size = UDim2.fromOffset(PressSize, PressSize)
-    })
-
-    PressTween:Play()
-
-    PressTween.Completed:Connect(function()
-        if FloatingButton and FloatingButton.Parent then
-            TweenService:Create(FloatingButton, TweenInfo.new(0.10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.fromOffset(NormalSize, NormalSize)
-            }):Play()
-        end
-    end)
-end)
-
--- ============================
--- SLIDER - SOMENTE UM TOQUE POR VEZ
--- ============================
-local SliderActiveInput = nil
-local SliderDragging = false
-
-local function AtualizarSlider(InputX)
-    local TrackPosition = SliderBg.AbsolutePosition.X
-    local TrackSize = SliderBg.AbsoluteSize.X
-
-    if TrackSize <= 0 then return end
-
-    local Percentage = math.clamp((InputX - TrackPosition) / TrackSize, 0, 1)
-
-    FloatSize = math.floor(80 + (Percentage * 120) + 0.5)
-
-    SliderLabel.Text = "Tamanho: " .. tostring(FloatSize)
-    SliderFill.Size = UDim2.new(Percentage, 0, 1, 0)
-    SliderButton.Position = UDim2.new(Percentage, 0, 0.5, 0)
-
-    if not FloatingButton or not FloatingButton.Parent then return end
-    if FloatMenuAtivo then
-        FloatingButton.Size = UDim2.fromOffset(FloatSize, FloatSize)
-    end
-end
-
-local function ComecarSlider(Input)
-    if SliderActiveInput then return end
-
-    local InputType = Input.UserInputType
-    if InputType ~= Enum.UserInputType.Touch
-        and InputType ~= Enum.UserInputType.MouseButton1 then
-        return
-    end
-
-    SliderActiveInput = Input
-    SliderDragging = true
-    AtualizarSlider(Input.Position.X)
-end
-
-SliderButton.InputBegan:Connect(ComecarSlider)
-SliderBg.InputBegan:Connect(ComecarSlider)
-
-UserInputService.TouchMoved:Connect(function(Input)
-    if not SliderDragging then return end
-    if SliderActiveInput ~= Input then return end
-    AtualizarSlider(Input.Position.X)
-end)
-
-UserInputService.InputChanged:Connect(function(Input)
-    if not SliderDragging then return end
-    if not SliderActiveInput then return end
-    if SliderActiveInput.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
-    if Input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
-    AtualizarSlider(Input.Position.X)
-end)
-
-UserInputService.InputEnded:Connect(function(Input)
-    if Input ~= SliderActiveInput then return end
-    SliderDragging = false
-    SliderActiveInput = nil
-end)
-
--- ================================================
--- INVISÃVEL - BOTÃƒO
+-- INVISÍVEL - BOTÃO PRINCIPAL
 -- ================================================
 local InvisivelCard = Instance.new("Frame")
 InvisivelCard.Name = "InvisivelCard"
@@ -877,7 +496,7 @@ InvisivelTitle.Name = "Title"
 InvisivelTitle.Size = UDim2.new(1, -60, 1, 0)
 InvisivelTitle.Position = UDim2.fromOffset(12, 0)
 InvisivelTitle.BackgroundTransparency = 1
-InvisivelTitle.Text = "InvisÃ­vel"
+InvisivelTitle.Text = "Invisível"
 InvisivelTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
 InvisivelTitle.TextSize = 12
 InvisivelTitle.Font = Enum.Font.GothamSemibold
@@ -899,7 +518,7 @@ local InvisivelBtnCorner = Instance.new("UICorner")
 InvisivelBtnCorner.CornerRadius = UDim.new(0, 6)
 InvisivelBtnCorner.Parent = InvisivelToggle
 
-InvisivelBtnStroke = Instance.new("UIStroke")
+local InvisivelBtnStroke = Instance.new("UIStroke")
 InvisivelBtnStroke.Color = Color3.fromRGB(39, 40, 48)
 InvisivelBtnStroke.Thickness = 1
 InvisivelBtnStroke.Parent = InvisivelToggle
@@ -908,42 +527,211 @@ local InvisivelCheck = Instance.new("TextLabel")
 InvisivelCheck.Name = "CheckMark"
 InvisivelCheck.Size = UDim2.fromScale(1, 1)
 InvisivelCheck.BackgroundTransparency = 1
-InvisivelCheck.Text = "âœ”"
+InvisivelCheck.Text = "✔"
 InvisivelCheck.TextColor3 = Color3.new(1, 1, 1)
 InvisivelCheck.TextSize = 14
 InvisivelCheck.Font = Enum.Font.GothamBold
 InvisivelCheck.TextTransparency = 1
 InvisivelCheck.Parent = InvisivelToggle
 
-InvisivelToggle.Activated:Connect(function()
-    InvisivelAtivo = not InvisivelAtivo
+-- ================================================
+-- NOVO: INVISÍVEL - BOTÃO FLUTUANTE TOGGLE (LOGO ABAIXO)
+-- ================================================
+local InvisFloatCard = Instance.new("Frame")
+InvisFloatCard.Name = "InvisFloatCard"
+InvisFloatCard.Size = UDim2.new(1, -6, 0, 50)
+InvisFloatCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+InvisFloatCard.BorderSizePixel = 0
+InvisFloatCard.Parent = PageFrame
 
-    local targetBg = InvisivelAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-    local targetStroke = InvisivelAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-    local targetTrans = InvisivelAtivo and 0 or 1
+local InvisFloatCorner = Instance.new("UICorner")
+InvisFloatCorner.CornerRadius = UDim.new(0, 10)
+InvisFloatCorner.Parent = InvisFloatCard
 
-    TweenService:Create(InvisivelToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
-    TweenService:Create(InvisivelBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
-    TweenService:Create(InvisivelCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+local InvisFloatStroke = Instance.new("UIStroke")
+InvisFloatStroke.Color = Color3.fromRGB(39, 40, 48)
+InvisFloatStroke.Thickness = 1
+InvisFloatStroke.Parent = InvisFloatCard
+
+local InvisFloatTitle = Instance.new("TextLabel")
+InvisFloatTitle.Name = "Title"
+InvisFloatTitle.Size = UDim2.new(1, -60, 1, 0)
+InvisFloatTitle.Position = UDim2.fromOffset(12, 0)
+InvisFloatTitle.BackgroundTransparency = 1
+InvisFloatTitle.Text = "Botão Flutuante Invisível"
+InvisFloatTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+InvisFloatTitle.TextSize = 12
+InvisFloatTitle.Font = Enum.Font.GothamSemibold
+InvisFloatTitle.TextXAlignment = Enum.TextXAlignment.Left
+InvisFloatTitle.Parent = InvisFloatCard
+
+local InvisFloatToggle = Instance.new("TextButton")
+InvisFloatToggle.Name = "ToggleButton"
+InvisFloatToggle.Size = UDim2.fromOffset(26, 26)
+InvisFloatToggle.AnchorPoint = Vector2.new(1, 0.5)
+InvisFloatToggle.Position = UDim2.new(1, -12, 0.5, 0)
+InvisFloatToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+InvisFloatToggle.BorderSizePixel = 0
+InvisFloatToggle.Text = ""
+InvisFloatToggle.AutoButtonColor = false
+InvisFloatToggle.Parent = InvisFloatCard
+
+local InvisFloatBtnCorner = Instance.new("UICorner")
+InvisFloatBtnCorner.CornerRadius = UDim.new(0, 6)
+InvisFloatBtnCorner.Parent = InvisFloatToggle
+
+local InvisFloatBtnStroke = Instance.new("UIStroke")
+InvisFloatBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+InvisFloatBtnStroke.Thickness = 1
+InvisFloatBtnStroke.Parent = InvisFloatToggle
+
+local InvisFloatCheck = Instance.new("TextLabel")
+InvisFloatCheck.Name = "CheckMark"
+InvisFloatCheck.Size = UDim2.fromScale(1, 1)
+InvisFloatCheck.BackgroundTransparency = 1
+InvisFloatCheck.Text = "✔"
+InvisFloatCheck.TextColor3 = Color3.new(1, 1, 1)
+InvisFloatCheck.TextSize = 14
+InvisFloatCheck.Font = Enum.Font.GothamBold
+InvisFloatCheck.TextTransparency = 1
+InvisFloatCheck.Parent = InvisFloatToggle
+
+-- Função para criar o botão flutuante na tela do usuário
+local function CriarInvisFloatGui()
+    if InvisFloatGui then InvisFloatGui:Destroy() end
+
+    InvisFloatGui = Instance.new("ScreenGui")
+    InvisFloatGui.Name = "WN_InvisFloatGui"
+    InvisFloatGui.ResetOnSpawn = false
+    InvisFloatGui.IgnoreGuiInset = true
+    InvisFloatGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    InvisFloatGui.DisplayOrder = 2147483645
+    InvisFloatGui.Parent = PlayerGui
+
+    InvisFloatButton = Instance.new("TextButton")
+    InvisFloatButton.Name = "InvisFloatButton"
+    InvisFloatButton.Size = UDim2.fromOffset(54, 54)
+    InvisFloatButton.AnchorPoint = Vector2.new(0, 0)
+    InvisFloatButton.Position = UDim2.new(0.5, -27, 0, 40)
+    InvisFloatButton.BackgroundColor3 = Theme.Window
+    InvisFloatButton.BorderSizePixel = 0
+    InvisFloatButton.Text = "INV"
+    InvisFloatButton.TextColor3 = Theme.Text
+    InvisFloatButton.TextSize = 12
+    InvisFloatButton.Font = Enum.Font.GothamBold
+    InvisFloatButton.AutoButtonColor = false
+    InvisFloatButton.Active = true
+    InvisFloatButton.Parent = InvisFloatGui
+
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 14)
+    BtnCorner.Parent = InvisFloatButton
+
+    local BtnStroke = Instance.new("UIStroke")
+    BtnStroke.Color = Theme.Border
+    BtnStroke.Thickness = 1.5
+    BtnStroke.Parent = InvisFloatButton
+
+    -- Linha lateral indicadora (Vermelha = Desligado, Verde = Ligado)
+    InvisFloatLine = Instance.new("Frame")
+    InvisFloatLine.Name = "SideLine"
+    InvisFloatLine.Size = UDim2.new(0, 4, 1, -16)
+    InvisFloatLine.Position = UDim2.fromOffset(6, 8)
+    InvisFloatLine.BackgroundColor3 = Color3.fromRGB(225, 40, 56) -- Vermelho inicial
+    InvisFloatLine.BorderSizePixel = 0
+    InvisFloatLine.Parent = InvisFloatButton
+
+    local LineCorner = Instance.new("UICorner")
+    LineCorner.CornerRadius = UDim.new(1, 0)
+    LineCorner.Parent = InvisFloatLine
+
+    -- Sistema de arrastar e clicar com animação de escala (crescer e voltar ao normal)
+    local dragging = false
+    local dragStart, startPos, dragInput
+    local hasMoved = false
+
+    InvisFloatButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            hasMoved = false
+            dragStart = input.Position
+            startPos = InvisFloatButton.Position
+
+            -- Animação ao segurar / pressionar (Cresce)
+            TweenService:Create(InvisFloatButton, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = UDim2.fromOffset(62, 62)
+            }):Play()
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                    -- Animação ao soltar (Volta ao normal)
+                    TweenService:Create(InvisFloatButton, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                        Size = UDim2.fromOffset(54, 54)
+                    }):Play()
+
+                    if not hasMoved then
+                        -- Ação ao clicar no botão flutuante (Liga/Desliga Invisível)
+                        InvisivelAtivo = not InvisivelAtivo
+
+                        local targetBg = InvisivelAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+                        local targetStroke = InvisivelAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+                        local targetTrans = InvisivelAtivo and 0 or 1
+                        local lineCol = InvisivelAtivo and Color3.fromRGB(40, 225, 100) or Color3.fromRGB(225, 40, 56)
+
+                        TweenService:Create(InvisivelToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+                        TweenService:Create(InvisivelBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+                        TweenService:Create(InvisivelCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+                        TweenService:Create(InvisFloatLine, TweenInfo.new(0.2), {BackgroundColor3 = lineCol}):Play()
+                    end
+                end
+            end)
+        end
+    end)
+
+    InvisFloatButton.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            if delta.Magnitude > 5 then
+                hasMoved = true
+            end
+            InvisFloatButton.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + delta.X,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+InvisFloatToggle.Activated:Connect(function()
+    InvisFloatAtivo = not InvisFloatAtivo
+
+    local targetBg = InvisFloatAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = InvisFloatAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = InvisFloatAtivo and 0 or 1
+
+    TweenService:Create(InvisFloatToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(InvisFloatBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(InvisFloatCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+
+    if InvisFloatAtivo then
+        CriarInvisFloatGui()
+    else
+        if InvisFloatGui then InvisFloatGui:Destroy() end
+    end
 end)
 
 -- ================================================
--- BOTÃƒO FLUTUANTE INVISÃVEL - SISTEMA
--- ================================================
--- (Assume que as funÃ§Ãµes e variÃ¡veis de invisibilidade globais jÃ¡ foram definidas no script anterior)
-local function AtualizarEstadoFloatingInvis(estado)
-    FloatingInvisAtivo = estado
-    -- Sincroniza com a funÃ§Ã£o de invisibilidade principal existente
-    if type(InvisivelAtivo) ~= "nil" then
-        InvisivelAtivo = estado
-    end
-end
-
--- ================================================
--- INVISÃVEL - SISTEMA
+-- INVISÍVEL - SISTEMA
 -- ================================================
 local function ConfigurarPersonagem()
-    Personagem = player.Character or player.CharacterAdded:Wait()
+    Personagem = Player.Character or Player.CharacterAdded:Wait()
     Humanoid = Personagem:WaitForChild("Humanoid")
     Raiz = Personagem:WaitForChild("HumanoidRootPart")
     
@@ -955,7 +743,7 @@ local function ConfigurarPersonagem()
     end
 end
 
-player.CharacterAdded:Connect(function(novoChar)
+Player.CharacterAdded:Connect(function(novoChar)
     task.wait(0.5)
     ConfigurarPersonagem()
 end)
@@ -1005,24 +793,39 @@ task.spawn(function()
     end
 end)
 
-if player.Character then
+if Player.Character then
     ConfigurarPersonagem()
 end
+
+InvisivelToggle.Activated:Connect(function()
+    InvisivelAtivo = not InvisivelAtivo
+
+    local targetBg = InvisivelAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = InvisivelAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = InvisivelAtivo and 0 or 1
+    local lineCol = InvisivelAtivo and Color3.fromRGB(40, 225, 100) or Color3.fromRGB(225, 40, 56)
+
+    TweenService:Create(InvisivelToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(InvisivelBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(InvisivelCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+    if InvisFloatLine then
+        TweenService:Create(InvisFloatLine, TweenInfo.new(0.2), {BackgroundColor3 = lineCol}):Play()
+    end
+end)
 
 -- ===============================
 -- TITULO MOVIMENTO
 -- ===============================
-local SectionLabel = Instance.new("TextLabel")
-SectionLabel.Name = "MovementLabel"
-SectionLabel.Size = UDim2.new(1, -6, 0, 30)
-SectionLabel.BackgroundTransparency = 1
-SectionLabel.Text = "MOVEMENT"
-SectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
-SectionLabel.TextSize = 20
-SectionLabel.Font = Enum.Font.GothamBold
-SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
-SectionLabel.TextTransparency = 0
-SectionLabel.Parent = PageFrame
+local SectionLabel2 = Instance.new("TextLabel")
+SectionLabel2.Name = "MovementLabel2"
+SectionLabel2.Size = UDim2.new(1, -6, 0, 30)
+SectionLabel2.BackgroundTransparency = 1
+SectionLabel2.Text = "MOVEMENT"
+SectionLabel2.TextColor3 = Color3.fromRGB(180, 180, 195)
+SectionLabel2.TextSize = 20
+SectionLabel2.Font = Enum.Font.GothamBold
+SectionLabel2.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel2.Parent = PageFrame
 
         -- ============================
         -- BOTAO SPEED
@@ -1079,7 +882,7 @@ SectionLabel.Parent = PageFrame
         SpeedCheckMark.Name = "CheckMark"
         SpeedCheckMark.Size = UDim2.fromScale(1, 1)
         SpeedCheckMark.BackgroundTransparency = 1
-        SpeedCheckMark.Text = "âœ”"
+        SpeedCheckMark.Text = "✔"
         SpeedCheckMark.TextColor3 = Color3.new(1, 1, 1)
         SpeedCheckMark.TextSize = 14
         SpeedCheckMark.Font = Enum.Font.GothamBold
@@ -1138,15 +941,14 @@ SectionLabel.Parent = PageFrame
         SpeedSliderButton.Parent = SpeedSliderTrack
 
 -- =======================
--- BOTAO DO SPEED GLITH
+-- BOTAO DO SPEED GLITCH
 -- =======================
--- (Insira este cÃ³digo dentro da sua aba/container da Player)
 local SpeedJumpCard = Instance.new("Frame")
 SpeedJumpCard.Name = "SpeedJumpCard"
 SpeedJumpCard.Size = UDim2.new(1, -6, 0, 50)
 SpeedJumpCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
 SpeedJumpCard.BorderSizePixel = 0
-SpeedJumpCard.Parent = PageFrame -- Altere para a sua pÃ¡gina/container
+SpeedJumpCard.Parent = PageFrame
 
 local SpeedJumpCardCorner = Instance.new("UICorner")
 SpeedJumpCardCorner.CornerRadius = UDim.new(0, 10)
@@ -1193,7 +995,7 @@ local SpeedJumpCheck = Instance.new("TextLabel")
 SpeedJumpCheck.Name = "CheckMark"
 SpeedJumpCheck.Size = UDim2.fromScale(1, 1)
 SpeedJumpCheck.BackgroundTransparency = 1
-SpeedJumpCheck.Text = "âœ”"
+SpeedJumpCheck.Text = "✔"
 SpeedJumpCheck.TextColor3 = Color3.new(1, 1, 1)
 SpeedJumpCheck.TextSize = 14
 SpeedJumpCheck.Font = Enum.Font.GothamBold
@@ -1266,7 +1068,7 @@ end)
         JampCheckMark.Name = "CheckMark"
         JampCheckMark.Size = UDim2.fromScale(1, 1)
         JampCheckMark.BackgroundTransparency = 1
-        JampCheckMark.Text = "âœ”"
+        JampCheckMark.Text = "✔"
         JampCheckMark.TextColor3 = Color3.new(1, 1, 1)
         JampCheckMark.TextSize = 14
         JampCheckMark.Font = Enum.Font.GothamBold
@@ -1327,13 +1129,12 @@ end)
 -- ========================
 -- BOTAO DO PULO INFINITO 
 -- ========================
--- (Insira este card dentro da sua ScrollingFrame/Page da aba Player)
 local InfJumpCard = Instance.new("Frame")
 InfJumpCard.Name = "InfJumpCard"
 InfJumpCard.Size = UDim2.new(1, -6, 0, 50)
 InfJumpCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
 InfJumpCard.BorderSizePixel = 0
-InfJumpCard.Parent = PageFrame -- Altere para o nome da sua pÃ¡gina/container da aba Player se precisar
+InfJumpCard.Parent = PageFrame
 
 local InfJumpCardCorner = Instance.new("UICorner")
 InfJumpCardCorner.CornerRadius = UDim.new(0, 10)
@@ -1380,7 +1181,7 @@ local InfJumpCheckMark = Instance.new("TextLabel")
 InfJumpCheckMark.Name = "CheckMark"
 InfJumpCheckMark.Size = UDim2.fromScale(1, 1)
 InfJumpCheckMark.BackgroundTransparency = 1
-InfJumpCheckMark.Text = "âœ”"
+InfJumpCheckMark.Text = "✔"
 InfJumpCheckMark.TextColor3 = Color3.new(1, 1, 1)
 InfJumpCheckMark.TextSize = 14
 InfJumpCheckMark.Font = Enum.Font.GothamBold
@@ -1389,7 +1190,6 @@ InfJumpCheckMark.Parent = InfJumpToggleButton
 
 InfJumpToggleButton.Activated:Connect(function()
     _G.PuloInfinito = not _G.PuloInfinito
-    
     local targetBgColor = _G.PuloInfinito and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
     local targetStrokeColor = _G.PuloInfinito and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
     local targetTextTrans = _G.PuloInfinito and 0 or 1
@@ -1400,7 +1200,7 @@ InfJumpToggleButton.Activated:Connect(function()
 end)
 
 -- ============================
--- BOTÃƒO FLY
+-- BOTÃO FLY
 -- ============================
 local FlyCard = Instance.new("Frame")
 FlyCard.Name = "FlyCard"
@@ -1454,7 +1254,7 @@ local FlyCheckMark = Instance.new("TextLabel")
 FlyCheckMark.Name = "CheckMark"
 FlyCheckMark.Size = UDim2.fromScale(1, 1)
 FlyCheckMark.BackgroundTransparency = 1
-FlyCheckMark.Text = "âœ”"
+FlyCheckMark.Text = "✔"
 FlyCheckMark.TextColor3 = Color3.new(1, 1, 1)
 FlyCheckMark.TextSize = 14
 FlyCheckMark.Font = Enum.Font.GothamBold
@@ -1513,18 +1313,14 @@ FlySliderButton.AutoButtonColor = false
 FlySliderButton.Parent = FlySliderTrack
 
 -- =============================
--- 1. VARIÃVEIS DO WALK FLING
+-- WALK FLING
 -- =============================
 local WalkFlingAtivo = false
 local FlingPower = 50000
 local FlingConnection = nil
 
--- =============================
--- 2. SISTEMA DO WALK FLING (FunÃ§Ã£o declarada ANTES do botÃ£o)
--- =============================
 local function ToggleWalkFling(state)
     WalkFlingAtivo = state
-
     if not WalkFlingAtivo then
         if FlingConnection then
             FlingConnection:Disconnect()
@@ -1535,8 +1331,7 @@ local function ToggleWalkFling(state)
 
     FlingConnection = RunService.Heartbeat:Connect(function()
         if not WalkFlingAtivo then return end
-
-        local char = player.Character
+        local char = Player.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
         local humanoid = char and char:FindFirstChildOfClass("Humanoid")
 
@@ -1546,7 +1341,6 @@ local function ToggleWalkFling(state)
                     part.CanCollide = false
                 end
             end
-
             local oldCFrame = hrp.CFrame
             local vel = hrp.AssemblyLinearVelocity
 
@@ -1566,16 +1360,6 @@ local function ToggleWalkFling(state)
     end)
 end
 
-player.CharacterAdded:Connect(function()
-    if WalkFlingAtivo then
-        task.wait(1.5)
-        ToggleWalkFling(true)
-    end
-end)
-
--- =============================
--- 3. BOTÃƒO DO WALK FLING (Criado DEPOIS da funÃ§Ã£o existir)
--- =============================
 local WalkFlingCard = Instance.new("Frame")
 WalkFlingCard.Name = "WalkFlingCard"
 WalkFlingCard.Size = UDim2.new(1, -6, 0, 50)
@@ -1628,7 +1412,7 @@ local WalkFlingCheck = Instance.new("TextLabel")
 WalkFlingCheck.Name = "CheckMark"
 WalkFlingCheck.Size = UDim2.fromScale(1, 1)
 WalkFlingCheck.BackgroundTransparency = 1
-WalkFlingCheck.Text = "âœ”"
+WalkFlingCheck.Text = "✔"
 WalkFlingCheck.TextColor3 = Color3.new(1, 1, 1)
 WalkFlingCheck.TextSize = 14
 WalkFlingCheck.Font = Enum.Font.GothamBold
@@ -1649,7 +1433,7 @@ WalkFlingToggle.Activated:Connect(function()
 end)
 
 -- =============================
--- ANTI-FLING (BotÃ£o)
+-- ANTI-FLING
 -- =============================
 local AntiFlingCard = Instance.new("Frame")
 AntiFlingCard.Name = "AntiFlingCard"
@@ -1703,7 +1487,7 @@ local AntiFlingCheck = Instance.new("TextLabel")
 AntiFlingCheck.Name = "CheckMark"
 AntiFlingCheck.Size = UDim2.fromScale(1, 1)
 AntiFlingCheck.BackgroundTransparency = 1
-AntiFlingCheck.Text = "âœ”"
+AntiFlingCheck.Text = "✔"
 AntiFlingCheck.TextColor3 = Color3.new(1, 1, 1)
 AntiFlingCheck.TextSize = 14
 AntiFlingCheck.Font = Enum.Font.GothamBold
@@ -1722,7 +1506,7 @@ AntiFlingToggle.Activated:Connect(function()
 end)
 
         -- ============================
-        -- LÃ“GICA DO SLIDER DE SPEED
+        -- LÓGICA SLIDER SPEED
         -- ============================
         local function UpdateSpeedSlider(InputPosition)
             local TrackPos = SpeedSliderTrack.AbsolutePosition.X
@@ -1767,7 +1551,6 @@ end)
 
         SpeedToggleButton.Activated:Connect(function()
             SpeedEnabled = not SpeedEnabled
-
             local targetBgColor = SpeedEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
             local targetStrokeColor = SpeedEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
             local targetTextTrans = SpeedEnabled and 0 or 1
@@ -1782,7 +1565,7 @@ end)
         end)
 
         -- ============================
-        -- LÃ“GICA DO SLIDER DE JUMP
+        -- LÓGICA SLIDER JUMP
         -- ============================
         local function UpdateJampSlider(InputPosition)
             local TrackPos = JampSliderTrack.AbsolutePosition.X
@@ -1827,7 +1610,6 @@ end)
 
         JampToggleButton.Activated:Connect(function()
             JampEnabled = not JampEnabled
-
             local targetBgColor = JampEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
             local targetStrokeColor = JampEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
             local targetTextTrans = JampEnabled and 0 or 1
@@ -1893,7 +1675,6 @@ end)
             while true do
                 if Player.Character and Player.Character:FindFirstChild("Humanoid") then
                     local Humanoid = Player.Character.Humanoid
-                    
                     if SpeedEnabled then
                         Humanoid.WalkSpeed = CurrentSpeed
                     else
@@ -1911,18 +1692,10 @@ end)
             end
         end)
 
--- ====================
--- SISTEMA DO SPEED GLITH 
--- ====================
 RunService.Stepped:Connect(function()
-    local Char = player.Character
-
-    if not Char or not Char:FindFirstChild("Humanoid") then
-        return
-    end
-
+    local Char = Player.Character
+    if not Char or not Char:FindFirstChild("Humanoid") then return end
     local Hum = Char.Humanoid
-
     if _G.SpeedNoPulo then
         if Hum.FloorMaterial == Enum.Material.Air then
             Hum.WalkSpeed = VelocidadeNoPulo
@@ -1932,26 +1705,17 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- ======================
--- SISTEMA DO PULO INFINITO 
--- ======================
 UserInputService.JumpRequest:Connect(function()
     if _G.PuloInfinito then
-        local Char = player.Character
-
+        local Char = Player.Character
         if Char and Char:FindFirstChild("Humanoid") then
-            Char.Humanoid:ChangeState(
-                Enum.HumanoidStateType.Jumping
-            )
+            Char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
     end
 end)
 
--- ============================
--- SISTEMA DO FLY
--- ============================
 local function StartFly()
-    local c = player.Character
+    local c = Player.Character
     if not c then return end
     local h = c:FindFirstChild("Humanoid")
     local r = c:FindFirstChild("HumanoidRootPart")
@@ -1981,7 +1745,6 @@ local function StartFly()
         local cam = workspace.CurrentCamera
         local m = controls:GetMoveVector()
         local dir = (cam.CFrame.RightVector * m.X) + (cam.CFrame.LookVector * -m.Z)
-        
         bv.Velocity = dir * FlyVelocidade
         bg.CFrame = cam.CFrame
     end)
@@ -1993,50 +1756,31 @@ local function StopFly()
     if bv then bv:Destroy() bv = nil end
     if bg then bg:Destroy() bg = nil end
 
-    local c = player.Character
+    local c = Player.Character
     if c and c:FindFirstChild("Humanoid") then
         c.Humanoid.PlatformStand = false
     end
 end
 
-local function ToggleFly(state)
-    FlyAtivo = state
-    if FlyAtivo then
-        StartFly()
-    else
-        StopFly()
-    end
-end
-
 FlyToggleButton.Activated:Connect(function()
-    local newState = not FlyAtivo
-    ToggleFly(newState)
+    FlyAtivo = not FlyAtivo
+    if FlyAtivo then StartFly() else StopFly() end
 
-    local targetBgColor = newState and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-    local targetStrokeColor = newState and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-    local targetTextTrans = newState and 0 or 1
+    local targetBgColor = FlyAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = FlyAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = FlyAtivo and 0 or 1
 
     TweenService:Create(FlyToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
     TweenService:Create(FlyToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
     TweenService:Create(FlyCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
 end)
 
-player.CharacterAdded:Connect(function()
-    task.wait(0.8)
-    if FlyAtivo then 
-        StartFly() 
-    end
-end)
-
--- =============================
--- ANTI-FLING (Sistema)
--- =============================
 task.spawn(function()
     while true do
         if _G.AntiFling then
             pcall(function()
-                for _, OtherPlayer in ipairs(game:GetService("Players"):GetPlayers()) do
-                    if OtherPlayer ~= player and OtherPlayer.Character then
+                for _, OtherPlayer in ipairs(Players:GetPlayers()) do
+                    if OtherPlayer ~= Player and OtherPlayer.Character then
                         for _, Part in ipairs(OtherPlayer.Character:GetChildren()) do
                             if Part:IsA("BasePart") then
                                 Part.CanCollide = false
@@ -2048,7 +1792,7 @@ task.spawn(function()
                 end
             end)
         end
-        game:GetService("RunService").Stepped:Wait()
+        RunService.Stepped:Wait()
     end
 end)
 
@@ -2056,9 +1800,7 @@ end)
 -- ABA SETTINGS
 -- ================================================
     elseif TabData.Name == "Settings" then
-
-
-
+        -- Settings
     end
 
     local ListLayout = Instance.new("UIListLayout")
@@ -2072,7 +1814,6 @@ end)
     PagePadding.PaddingRight = UDim.new(0, 6)
     PagePadding.Parent = PageFrame
 
-    -- Configurado para atualizar o tamanho do canvas automaticamente via UIListLayout
     ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         PageFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 20)
     end)
@@ -2168,14 +1909,6 @@ end)
                     elseif ImageIcon:IsA("TextLabel") then
                         ImageIcon.TextColor3 = TargetColor
                     end
-                end
-
-                local DirectIcon = OtherIconHolder:FindFirstChild("DirectPlayerIcon")
-                if DirectIcon then
-                    local Head = DirectIcon:FindFirstChild("Head")
-                    local BodyPart = DirectIcon:FindFirstChild("BodyPart")
-                    if Head then Head.BackgroundColor3 = TargetColor end
-                    if BodyPart then BodyPart.BackgroundColor3 = TargetColor end
                 end
             end
 
@@ -2324,7 +2057,7 @@ ResizeButton.InputBegan:Connect(function(Input)
 end)
 
 --==============================================================--
--- CONFIRMAÃ‡ÃƒO / FECHAMENTO
+-- CONFIRMAÇÃO / FECHAMENTO
 --==============================================================--
 
 local ConfirmOverlay = Instance.new("Frame")
@@ -2438,7 +2171,7 @@ NoCorner.CornerRadius = UDim.new(0, 9)
 NoCorner.Parent = NoButton
 
 --==============================================================--
--- BOTÃƒO FLUTUANTE WN
+-- BOTÃO FLUTUANTE PRINCIPAL (WN)
 --==============================================================--
 
 local DraggingFloat = false
@@ -2494,13 +2227,10 @@ FloatStroke.Parent = FloatButton
 local function ClampFloatButton(Position)
     local Camera = workspace.CurrentCamera
     if not Camera then return Position end
-
     local ViewportSize = Camera.ViewportSize
     local ButtonSize = FloatButton.AbsoluteSize
-
     local MaxX = math.max(0, ViewportSize.X - ButtonSize.X)
     local MaxY = math.max(0, ViewportSize.Y - ButtonSize.Y)
-
     return Vector2.new(math.clamp(Position.X, 0, MaxX), math.clamp(Position.Y, 0, MaxY))
 end
 
@@ -2640,6 +2370,7 @@ YesButton.Activated:Connect(function()
     ClearFloatDragConnections()
     if ScreenGui then ScreenGui:Destroy() end
     if FloatGui then FloatGui:Destroy() end
+    if InvisFloatGui then InvisFloatGui:Destroy() end
 end)
 
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
