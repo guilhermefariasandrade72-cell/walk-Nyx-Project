@@ -396,6 +396,423 @@ for Index, TabData in ipairs(TabsData) do
     elseif TabData.Name == "Auto Farm" then
 -- ================================================
 
+-- ====================================================
+-- 🚜 VARIÁVEIS DO AUTO FARM — IGUALZINHO AO SEU
+-- ====================================================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+
+-- Configurações Base do Auto Farm
+local CONFIG_FARM = {
+    velocidade = 18,
+    alcance_maximo = 500,
+    raio_perigo_murder = 30
+}
+
+local AutoFarmAtivo = false
+local BolsaCheia = false
+local collectedCoins = {}
+local moedasIgnoradasInvisivel = {}
+
+local cachedCoinContainer = nil
+local ultimoCheckBolsa = 0
+local resultadoUltimoCheckBolsa = false
+
+-- ====================================================
+-- 🚜 SISTEMA DO AUTO FARM — IGUALZINHO AO SEU
+-- ====================================================
+
+-- 🔍 DETECTOR DO MURDERER
+local function ObterMurderer()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local char = p.Character
+            local hum = char:FindFirstChild("Humanoid")
+            
+            if hum and hum.Health > 0 then
+                local temFaca = char:FindFirstChild("Knife") or (p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Knife"))
+                local eMurder = p:GetAttribute("Role") == "Murderer" or temFaca
+                
+                if eMurder then
+                    return char
+                end
+            end
+        end
+    end
+    return nil
+end
+
+-- 🔄 RESETS AUTOMÁTICOS DE RODADA
+local function ResetarEstadoFarm()
+    BolsaCheia = false
+    table.clear(collectedCoins)
+    table.clear(moedasIgnoradasInvisivel)
+    cachedCoinContainer = nil
+end
+
+player.CharacterAdded:Connect(ResetarEstadoFarm)
+
+player:GetAttributeChangedSignal("Alive"):Connect(function()
+    if player:GetAttribute("Alive") == true then
+        ResetarEstadoFarm()
+    end
+end)
+
+-- 💰 DETECTOR DE BOLSA CHEIA
+local function VerificarTextoBolsaCheia()
+    local agora = os.clock()
+    if agora - ultimoCheckBolsa < 0.5 then 
+        return resultadoUltimoCheckBolsa 
+    end
+    ultimoCheckBolsa = agora
+
+    local playerGui = player:FindFirstChild("PlayerGui")
+    if not playerGui then return false end
+
+    local mainGui = playerGui:FindFirstChild("MainGUI") or playerGui:FindFirstChild("GUI")
+    if not mainGui then return false end
+
+    for _, gui in ipairs(mainGui:GetDescendants()) do
+        if gui:IsA("TextLabel") and gui.Visible and gui.Text ~= "" then
+            local texto = string.lower(gui.Text)
+            if (string.find(texto, "saco") and string.find(texto, "cheio")) or 
+               (string.find(texto, "bag") and string.find(texto, "full")) or
+               string.find(texto, "full coin") or string.find(texto, "max coins") then 
+                resultadoUltimoCheckBolsa = true
+                return true
+            end
+        end
+    end
+
+    resultadoUltimoCheckBolsa = false
+    return false
+end
+
+-- Detecção via Remote Event nativo
+task.spawn(function()
+    local Remotes = ReplicatedStorage:FindFirstChild("Remotes", true) or ReplicatedStorage:FindFirstChild("Gameplay", true)
+    if Remotes then
+        local coinCollectedRemote = Remotes:FindFirstChild("CoinCollected", true)
+        if coinCollectedRemote and coinCollectedRemote:IsA("RemoteEvent") then
+            coinCollectedRemote.OnClientEvent:Connect(function(coletador, atual, maximo)
+                if coletador == player or (typeof(coletador) == "string" and coletador == player.Name) then
+                    if tonumber(atual) and tonumber(maximo) then
+                        BolsaCheia = (tonumber(atual) >= tonumber(maximo))
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- ✅ VERIFICAÇÃO DE PARTIDA RIGOROSA
+local function EmPartida()
+    local c = player.Character
+    if not c or not c:FindFirstChild("Humanoid") or c.Humanoid.Health <= 0 then return false end
+    if not c:FindFirstChild("HumanoidRootPart") then return false end
+    
+    local aliveAttr = player:GetAttribute("Alive")
+    if aliveAttr ~= nil and aliveAttr == false then
+        return false
+    end
+    
+    if Workspace:FindFirstChild("Lobby") then
+        local distLobby = (c.HumanoidRootPart.Position - Workspace.Lobby:GetPivot().Position).Magnitude
+        if distLobby < 100 then
+            return false
+        end
+    end
+    
+    return true
+end
+
+-- 🪙 BUSCA DE MOEDA MAIS PRÓXIMA
+local function getNearestCoin(minhaPos)
+    local melhorMoeda, menorDistancia = nil, math.huge
+
+    if not cachedCoinContainer or not cachedCoinContainer.Parent then
+        cachedCoinContainer = Workspace:FindFirstChild("CoinContainer", true)
+    end
+    
+    if not cachedCoinContainer then return nil end
+
+    local charMurderer = ObterMurderer()
+    local hrpMurderer = charMurderer and charMurderer:FindFirstChild("HumanoidRootPart")
+
+    for _, moeda in ipairs(cachedCoinContainer:GetChildren()) do
+        if moeda:IsA("BasePart") 
+        and moeda.Name == "Coin_Server"
+        and moeda:FindFirstChild("TouchInterest") 
+        and not collectedCoins[moeda] 
+        and not moeda:GetAttribute("Collected") then
+
+            if hrpMurderer then
+                local distMurder = (moeda.Position - hrpMurderer.Position).Magnitude
+                if distMurder <= CONFIG_FARM.raio_perigo_murder then
+                    continue
+                end
+            end
+
+            local distancia = (minhaPos - moeda.Position).Magnitude
+            if distancia < CONFIG_FARM.alcance_maximo and distancia < menorDistancia then
+                menorDistancia = distancia
+                melhorMoeda = moeda
+            end
+        end
+    end
+    return melhorMoeda
+end
+
+-- 🔄 LOOP PRINCIPAL
+task.spawn(function()
+    while true do
+        if AutoFarmAtivo then
+            local c = player.Character
+            local hrp = c and c:FindFirstChild("HumanoidRootPart")
+
+            if not EmPartida() or not hrp then
+                task.wait(0.5)
+                continue
+            end
+
+            if BolsaCheia or VerificarTextoBolsaCheia() then
+                BolsaCheia = true
+                task.wait(0.5)
+                continue
+            end
+
+            local alvo = getNearestCoin(hrp.Position)
+
+            if alvo then
+                while AutoFarmAtivo and EmPartida() and alvo and alvo.Parent 
+                and not BolsaCheia and not VerificarTextoBolsaCheia()
+                and not alvo:GetAttribute("Collected") 
+                and not collectedCoins[alvo] do
+                    
+                    local minhaPosAtual = hrp.Position
+                    local moedaMaisPertoAgora = getNearestCoin(minhaPosAtual)
+                    if moedaMaisPertoAgora and moedaMaisPertoAgora ~= alvo then
+                        alvo = moedaMaisPertoAgora
+                    end
+
+                    if not alvo:IsDescendantOf(Workspace) or alvo:GetAttribute("Collected") then
+                        break
+                    end
+
+                    local posAlvo = alvo.Position
+                    local direcao = (posAlvo - minhaPosAtual)
+                    local distancia = direcao.Magnitude
+
+                    if distancia <= 0.8 then
+                        collectedCoins[alvo] = true
+                        break
+                    end
+
+                    local velAtual = math.clamp(CONFIG_FARM.velocidade, 16, 25)
+                    local dt = RunService.Heartbeat:Wait()
+                    local passo = math.min(velAtual * dt, distancia)
+                    local novaPos = minhaPosAtual + (direcao.Unit * passo)
+
+                    hrp.CFrame = CFrame.new(novaPos)
+                    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                end
+            else
+                task.wait(0.2)
+            end
+        else
+            task.wait(0.5)
+        end
+    end
+end)
+
+-- ====================================================
+-- 🚜 BOTÕES DO AUTO FARM — SEU ESTILO
+-- ====================================================
+
+-- CARD PRINCIPAL
+local AutoFarmCard = Instance.new("Frame")
+AutoFarmCard.Name = "AutoFarmCard"
+AutoFarmCard.Size = UDim2.new(1, -6, 0, 85)
+AutoFarmCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+AutoFarmCard.BorderSizePixel = 0
+AutoFarmCard.Parent = PageFrame
+
+local AutoFarmCorner = Instance.new("UICorner")
+AutoFarmCorner.CornerRadius = UDim.new(0, 10)
+AutoFarmCorner.Parent = AutoFarmCard
+
+local AutoFarmStroke = Instance.new("UIStroke")
+AutoFarmStroke.Color = Color3.fromRGB(39, 40, 48)
+AutoFarmStroke.Thickness = 1
+AutoFarmStroke.Parent = AutoFarmCard
+
+-- TÍTULO
+local AutoFarmTitle = Instance.new("TextLabel")
+AutoFarmTitle.Size = UDim2.new(1, -55, 0, 25)
+AutoFarmTitle.Position = UDim2.fromOffset(12, 7)
+AutoFarmTitle.BackgroundTransparency = 1
+AutoFarmTitle.Text = "Auto Farm"
+AutoFarmTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+AutoFarmTitle.TextSize = 12
+AutoFarmTitle.Font = Enum.Font.GothamSemibold
+AutoFarmTitle.TextXAlignment = Enum.TextXAlignment.Left
+AutoFarmTitle.Parent = AutoFarmCard
+
+-- TOGGLE LIGAR/DESLIGAR
+local AutoFarmToggle = Instance.new("TextButton")
+AutoFarmToggle.Size = UDim2.fromOffset(26, 26)
+AutoFarmToggle.Position = UDim2.new(1, -38, 0, 7)
+AutoFarmToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+AutoFarmToggle.BorderSizePixel = 0
+AutoFarmToggle.Text = ""
+AutoFarmToggle.AutoButtonColor = false
+AutoFarmToggle.Parent = AutoFarmCard
+
+local AutoFarmToggleCorner = Instance.new("UICorner")
+AutoFarmToggleCorner.CornerRadius = UDim.new(0, 6)
+AutoFarmToggleCorner.Parent = AutoFarmToggle
+
+local AutoFarmToggleStroke = Instance.new("UIStroke")
+AutoFarmToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+AutoFarmToggleStroke.Thickness = 1
+AutoFarmToggleStroke.Parent = AutoFarmToggle
+
+local AutoFarmCheck = Instance.new("TextLabel")
+AutoFarmCheck.Size = UDim2.fromScale(1, 1)
+AutoFarmCheck.BackgroundTransparency = 1
+AutoFarmCheck.Text = "✔"
+AutoFarmCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoFarmCheck.TextSize = 14
+AutoFarmCheck.Font = Enum.Font.GothamBold
+AutoFarmCheck.TextTransparency = 1
+AutoFarmCheck.Parent = AutoFarmToggle
+
+AutoFarmToggle.Activated:Connect(function()
+    AutoFarmAtivo = not AutoFarmAtivo
+    if AutoFarmAtivo then
+        AutoFarmToggle.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+        AutoFarmToggleStroke.Color = Color3.fromRGB(255, 65, 80)
+        AutoFarmCheck.TextTransparency = 0
+    else
+        AutoFarmToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        AutoFarmToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+        AutoFarmCheck.TextTransparency = 1
+    end
+end)
+
+-- SLIDER DE VELOCIDADE
+local FarmSliderContainer = Instance.new("Frame")
+FarmSliderContainer.Size = UDim2.new(1, -24, 0, 30)
+FarmSliderContainer.Position = UDim2.fromOffset(12, 44)
+FarmSliderContainer.BackgroundTransparency = 1
+FarmSliderContainer.Parent = AutoFarmCard
+
+local FarmSliderLabel = Instance.new("TextLabel")
+FarmSliderLabel.Size = UDim2.new(1, 0, 0, 14)
+FarmSliderLabel.BackgroundTransparency = 1
+FarmSliderLabel.Text = "Velocidade"
+FarmSliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+FarmSliderLabel.TextSize = 10
+FarmSliderLabel.Font = Enum.Font.Gotham
+FarmSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+FarmSliderLabel.Parent = FarmSliderContainer
+
+local FarmSliderValue = Instance.new("TextLabel")
+FarmSliderValue.Size = UDim2.fromOffset(40, 14)
+FarmSliderValue.Position = UDim2.new(1, -40, 0, 0)
+FarmSliderValue.BackgroundTransparency = 1
+FarmSliderValue.Text = "18"
+FarmSliderValue.TextColor3 = Color3.fromRGB(165, 166, 177)
+FarmSliderValue.TextSize = 10
+FarmSliderValue.Font = Enum.Font.Gotham
+FarmSliderValue.TextXAlignment = Enum.TextXAlignment.Right
+FarmSliderValue.Parent = FarmSliderContainer
+
+local FarmSliderBg = Instance.new("Frame")
+FarmSliderBg.Size = UDim2.new(1, 0, 0, 6)
+FarmSliderBg.Position = UDim2.fromOffset(0, 20)
+FarmSliderBg.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+FarmSliderBg.BorderSizePixel = 0
+FarmSliderBg.Parent = FarmSliderContainer
+
+local FarmSliderBgCorner = Instance.new("UICorner")
+FarmSliderBgCorner.CornerRadius = UDim.new(0, 3)
+FarmSliderBgCorner.Parent = FarmSliderBg
+
+local FarmSliderFill = Instance.new("Frame")
+FarmSliderFill.Size = UDim2.new(0.4, 0, 1, 0)
+FarmSliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+FarmSliderFill.BorderSizePixel = 0
+FarmSliderFill.Parent = FarmSliderBg
+
+local FarmSliderFillCorner = Instance.new("UICorner")
+FarmSliderFillCorner.CornerRadius = UDim.new(0, 3)
+FarmSliderFillCorner.Parent = FarmSliderFill
+
+local FarmSliderButton = Instance.new("TextButton")
+FarmSliderButton.Size = UDim2.new(1, 10, 1, 10)
+FarmSliderButton.Position = UDim2.fromScale(0.4, 0.5)
+FarmSliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+FarmSliderButton.BackgroundTransparency = 1
+FarmSliderButton.Text = ""
+FarmSliderButton.Parent = FarmSliderBg
+
+-- LÓGICA DO SLIDER
+local FarmSliding = false
+local FarmActiveInput = nil
+local FarmMin = 16
+local FarmMax = 25
+local FarmValue = 18
+
+local function AtualizarFarmSlider(valor)
+    valor = math.clamp(valor, FarmMin, FarmMax)
+    FarmValue = math.floor(valor + 0.5)
+    local porcentagem = (FarmValue - FarmMin) / (FarmMax - FarmMin)
+    FarmSliderFill.Size = UDim2.new(porcentagem, 0, 1, 0)
+    FarmSliderButton.Position = UDim2.new(porcentagem, 0, 0.5, 0)
+    FarmSliderValue.Text = tostring(FarmValue)
+    CONFIG_FARM.velocidade = FarmValue
+end
+
+AtualizarFarmSlider(FarmValue)
+
+FarmSliderButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        if FarmSliding then return end
+        FarmSliding = true
+        FarmActiveInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if not FarmSliding then return end
+    if FarmActiveInput
+    and FarmActiveInput.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType ~= Enum.UserInputType.Touch then return end
+    elseif input.UserInputType ~= Enum.UserInputType.MouseMovement then
+        return
+    end
+    local mouseX = input.Position.X
+    local startX = FarmSliderBg.AbsolutePosition.X
+    local width = FarmSliderBg.AbsoluteSize.X
+    local porcentagem = math.clamp((mouseX - startX) / width, 0, 1)
+    local valor = FarmMin + ((FarmMax - FarmMin) * porcentagem)
+    AtualizarFarmSlider(valor)
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input == FarmActiveInput
+    or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        FarmSliding = false
+        FarmActiveInput = nil
+    end
+end)
+
 
 -- ============================================
 --               ABA ESP
