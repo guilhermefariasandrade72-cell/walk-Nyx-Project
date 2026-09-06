@@ -391,8 +391,330 @@ for Index, TabData in ipairs(TabsData) do
     if TabData.Name == "Main" then
         -- (Conteúdo da aba Main)
 
+-- ================================================
+--              ABA AUTO FARM
     elseif TabData.Name == "Auto Farm" then
-        -- (Conteúdo da aba Auto Farm)
+-- ================================================
+
+-- ==================================
+-- 🚜 VARIÁVEIS DO AUTO FARM
+-- ==================================
+local AutoFarmAtivo = false
+local collectedCoins = {}
+local cachedCoinContainer = nil
+
+local CONFIG_FARM = {
+    velocidade = 20,
+    limite_moedas = 40,
+    alcance_maximo = 500,
+    raio_perigo_murder = 15, -- Não chega perto do Murderer
+    offsetY = -1.5
+}
+
+-- ==================================
+-- 🚜 BOTÃO AUTO FARM
+-- ==================================
+local AutoFarmCard = Instance.new("Frame")
+AutoFarmCard.Name = "AutoFarmCard"
+AutoFarmCard.Size = UDim2.new(1, -6, 0, 50)
+AutoFarmCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+AutoFarmCard.BorderSizePixel = 0
+AutoFarmCard.Parent = PageFrame
+
+local AutoFarmCardCorner = Instance.new("UICorner")
+AutoFarmCardCorner.CornerRadius = UDim.new(0, 10)
+AutoFarmCardCorner.Parent = AutoFarmCard
+
+local AutoFarmCardStroke = Instance.new("UIStroke")
+AutoFarmCardStroke.Color = Color3.fromRGB(39, 40, 48)
+AutoFarmCardStroke.Thickness = 1
+AutoFarmCardStroke.Parent = AutoFarmCard
+
+local AutoFarmTitle = Instance.new("TextLabel")
+AutoFarmTitle.Name = "Title"
+AutoFarmTitle.Size = UDim2.new(1, -60, 1, 0)
+AutoFarmTitle.Position = UDim2.fromOffset(12, 0)
+AutoFarmTitle.BackgroundTransparency = 1
+AutoFarmTitle.Text = "🚜 Auto Farm Moedas"
+AutoFarmTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+AutoFarmTitle.TextSize = 12
+AutoFarmTitle.Font = Enum.Font.GothamSemibold
+AutoFarmTitle.TextXAlignment = Enum.TextXAlignment.Left
+AutoFarmTitle.Parent = AutoFarmCard
+
+local AutoFarmToggleButton = Instance.new("TextButton")
+AutoFarmToggleButton.Name = "ToggleButton"
+AutoFarmToggleButton.Size = UDim2.fromOffset(26, 26)
+AutoFarmToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+AutoFarmToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+AutoFarmToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+AutoFarmToggleButton.BorderSizePixel = 0
+AutoFarmToggleButton.Text = ""
+AutoFarmToggleButton.AutoButtonColor = false
+AutoFarmToggleButton.Parent = AutoFarmCard
+
+local AutoFarmToggleCorner = Instance.new("UICorner")
+AutoFarmToggleCorner.CornerRadius = UDim.new(0, 6)
+AutoFarmToggleCorner.Parent = AutoFarmToggleButton
+
+local AutoFarmToggleStroke = Instance.new("UIStroke")
+AutoFarmToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+AutoFarmToggleStroke.Thickness = 1
+AutoFarmToggleStroke.Parent = AutoFarmToggleButton
+
+local AutoFarmCheckMark = Instance.new("TextLabel")
+AutoFarmCheckMark.Name = "CheckMark"
+AutoFarmCheckMark.Size = UDim2.fromScale(1, 1)
+AutoFarmCheckMark.BackgroundTransparency = 1
+AutoFarmCheckMark.Text = "✔"
+AutoFarmCheckMark.TextColor3 = Color3.new(1, 1, 1)
+AutoFarmCheckMark.TextSize = 14
+AutoFarmCheckMark.Font = Enum.Font.GothamBold
+AutoFarmCheckMark.TextTransparency = 1
+AutoFarmCheckMark.Parent = AutoFarmToggleButton
+
+AutoFarmToggleButton.Activated:Connect(function()
+    AutoFarmAtivo = not AutoFarmAtivo
+    
+    local targetBgColor = AutoFarmAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = AutoFarmAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = AutoFarmAtivo and 0 or 1
+
+    TweenService:Create(AutoFarmToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(AutoFarmToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(AutoFarmCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
+
+-- ==================================
+-- 🎚️ SLIDER DE VELOCIDADE DO FARM
+-- ==================================
+local FarmSpeedCard = Instance.new("Frame")
+FarmSpeedCard.Name = "FarmSpeedCard"
+FarmSpeedCard.Size = UDim2.new(1, -6, 0, 60)
+FarmSpeedCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+FarmSpeedCard.BorderSizePixel = 0
+FarmSpeedCard.Parent = PageFrame
+
+local FarmSpeedCardCorner = Instance.new("UICorner")
+FarmSpeedCardCorner.CornerRadius = UDim.new(0, 10)
+FarmSpeedCardCorner.Parent = FarmSpeedCard
+
+local FarmSpeedCardStroke = Instance.new("UIStroke")
+FarmSpeedCardStroke.Color = Color3.fromRGB(39, 40, 48)
+FarmSpeedCardStroke.Thickness = 1
+FarmSpeedCardStroke.Parent = FarmSpeedCard
+
+local FarmSpeedTitle = Instance.new("TextLabel")
+FarmSpeedTitle.Name = "Title"
+FarmSpeedTitle.Size = UDim2.new(1, -12, 0, 25)
+FarmSpeedTitle.Position = UDim2.fromOffset(12, 5)
+FarmSpeedTitle.BackgroundTransparency = 1
+FarmSpeedTitle.Text = "⚡ Velocidade do Farm"
+FarmSpeedTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+FarmSpeedTitle.TextSize = 12
+FarmSpeedTitle.Font = Enum.Font.GothamSemibold
+FarmSpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+FarmSpeedTitle.Parent = FarmSpeedCard
+
+local FarmSpeedValue = Instance.new("TextLabel")
+FarmSpeedValue.Name = "Value"
+FarmSpeedValue.Size = UDim2.fromOffset(40, 20)
+FarmSpeedValue.Position = UDim2.new(1, -52, 0, 5)
+FarmSpeedValue.BackgroundTransparency = 1
+FarmSpeedValue.Text = "20"
+FarmSpeedValue.TextColor3 = Color3.fromRGB(245, 245, 248)
+FarmSpeedValue.TextSize = 11
+FarmSpeedValue.Font = Enum.Font.GothamBold
+FarmSpeedValue.TextXAlignment = Enum.TextXAlignment.Right
+FarmSpeedValue.Parent = FarmSpeedCard
+
+local FarmSpeedSliderBg = Instance.new("Frame")
+FarmSpeedSliderBg.Name = "SliderBg"
+FarmSpeedSliderBg.Size = UDim2.new(1, -24, 0, 6)
+FarmSpeedSliderBg.Position = UDim2.fromOffset(12, 38)
+FarmSpeedSliderBg.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+FarmSpeedSliderBg.Parent = FarmSpeedCard
+
+local FarmSpeedSliderCorner = Instance.new("UICorner")
+FarmSpeedSliderCorner.CornerRadius = UDim.new(0, 3)
+FarmSpeedSliderCorner.Parent = FarmSpeedSliderBg
+
+local FarmSpeedSliderFill = Instance.new("Frame")
+FarmSpeedSliderFill.Name = "SliderFill"
+FarmSpeedSliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+FarmSpeedSliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+FarmSpeedSliderFill.Parent = FarmSpeedSliderBg
+
+local FarmSpeedSliderButton = Instance.new("TextButton")
+FarmSpeedSliderButton.Name = "SliderButton"
+FarmSpeedSliderButton.Size = UDim2.fromOffset(16, 16)
+FarmSpeedSliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+FarmSpeedSliderButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+FarmSpeedSliderButton.BackgroundColor3 = Color3.fromRGB(255, 65, 80)
+FarmSpeedSliderButton.BorderSizePixel = 0
+FarmSpeedSliderButton.Text = ""
+FarmSpeedSliderButton.AutoButtonColor = false
+FarmSpeedSliderButton.Parent = FarmSpeedSliderBg
+
+local FarmSpeedButtonCorner = Instance.new("UICorner")
+FarmSpeedButtonCorner.CornerRadius = UDim.new(0, 8)
+FarmSpeedButtonCorner.Parent = FarmSpeedSliderButton
+
+-- Lógica do slider
+local dragStart, startPos, atualPos
+local minVal, maxVal, defVal = 16, 25, 20
+
+local function UpdateSliderFromValue(val)
+    val = math.clamp(val, minVal, maxVal)
+    local percent = (val - minVal) / (maxVal - minVal)
+    FarmSpeedSliderFill.Size = UDim2.new(percent, 0, 1, 0)
+    FarmSpeedSliderButton.Position = UDim2.new(percent, 0, 0.5, 0)
+    FarmSpeedValue.Text = tostring(math.floor(val))
+    AtualizarVelocidadeFarm(val)
+end
+
+FarmSpeedSliderButton.MouseButton1Down:Connect(function(x)
+    dragStart = x
+    startPos = FarmSpeedSliderButton.AbsolutePosition
+    atualPos = FarmSpeedSliderButton.Position
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragStart and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        local totalW = FarmSpeedSliderBg.AbsoluteSize.X
+        local newX = math.clamp(atualPos.X.Scale + delta.X / totalW, 0, 1)
+        local newVal = minVal + (maxVal - minVal) * newX
+        UpdateSliderFromValue(newVal)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1Down then
+        dragStart = nil
+    end
+end)
+
+-- Clique direto na barra
+FarmSpeedSliderBg.MouseButton1Down:Connect(function(x)
+    local posX = (x - FarmSpeedSliderBg.AbsolutePosition.X) / FarmSpeedSliderBg.AbsoluteSize.X
+    local newVal = minVal + (maxVal - minVal) * math.clamp(posX, 0, 1)
+    UpdateSliderFromValue(newVal)
+end)
+
+-- ==================================
+-- 🚜 SISTEMA DO AUTO FARM (SEM INVISIBILIDADE)
+-- ==================================
+local function EmPartida()
+    local c = player.Character
+    if not c or not c:FindFirstChild("Humanoid") or c.Humanoid.Health <= 0 then return false end
+    local Dados = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
+    if not Dados then return false end
+    local Sucesso, Info = pcall(function() return Dados:InvokeServer() end)
+    if not Sucesso or not Info then return false end
+    return Info.Alive == true
+end
+
+local function ObterMurderer()
+    local Dados = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
+    if not Dados then return nil end
+    local Sucesso, Info = pcall(function() return Dados:InvokeServer() end)
+    if not Sucesso or not Info then return nil end
+    for Nome, DadosJogador in pairs(Info) do
+        if DadosJogador.Role == "Murderer" then
+            return Players:FindFirstChild(Nome)
+        end
+    end
+    return nil
+end
+
+local function getNearestCoin(minhaPos)
+    local melhorMoeda, menorDistancia = nil, math.huge
+
+    if not cachedCoinContainer or not cachedCoinContainer.Parent then
+        cachedCoinContainer = Workspace:FindFirstChild("CoinContainer", true)
+    end
+    if not cachedCoinContainer then return nil end
+
+    local charMurderer = ObterMurderer()
+    local hrpMurderer = charMurderer and charMurderer:FindFirstChild("HumanoidRootPart")
+
+    for _, moeda in ipairs(cachedCoinContainer:GetChildren()) do
+        if moeda:IsA("BasePart")
+        and moeda.Name == "Coin_Server"
+        and moeda:FindFirstChild("TouchInterest")
+        and not collectedCoins[moeda]
+        and not moeda:GetAttribute("Collected") then
+
+            -- Filtro: não pega moedas perto do Murderer
+            if hrpMurderer then
+                local distMurder = (moeda.Position - hrpMurderer.Position).Magnitude
+                if distMurder <= CONFIG_FARM.raio_perigo_murder then
+                    continue
+                end
+            end
+
+            local distancia = (minhaPos - moeda.Position).Magnitude
+            if distancia < CONFIG_FARM.alcance_maximo and distancia < menorDistancia then
+                menorDistancia = distancia
+                melhorMoeda = moeda
+            end
+        end
+    end
+    return melhorMoeda
+end
+
+-- Loop principal do Auto Farm
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+
+        if not AutoFarmAtivo then
+            collectedCoins = {}
+            continue
+        end
+
+        -- Verifica se está em partida
+        if not EmPartida() then
+            task.wait(1)
+            continue
+        end
+
+        -- Verifica personagem
+        local char = player.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChild("Humanoid")
+        if not hrp or not hum then
+            task.wait(0.5)
+            continue
+        end
+
+        -- Limite de moedas coletadas
+        if #collectedCoins >= CONFIG_FARM.limite_moedas then
+            task.wait(1)
+            table.clear(collectedCoins)
+            continue
+        end
+
+        -- Encontra moeda mais próxima
+        local MoedaAlvo = getNearestCoin(hrp.Position)
+        if not MoedaAlvo then
+            task.wait(0.3)
+            continue
+        end
+
+        -- Move até a moeda
+        hum:MoveTo(MoedaAlvo.Position + Vector3.new(0, CONFIG_FARM.offsetY, 0), MoedaAlvo)
+        collectedCoins[MoedaAlvo] = true
+
+        task.wait(0.3)
+    end
+end)
+
+-- Atualiza velocidade quando o slider muda
+function AtualizarVelocidadeFarm(vel)
+    CONFIG_FARM.velocidade = vel
+end
 
 -- ============================================
 --               ABA ESP
