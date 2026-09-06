@@ -600,17 +600,19 @@ local function CreateInvisivelButton()
     GuiBtn.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     GuiBtn.Parent = ParentGui
 
+    -- Botão flutuante maior (140x65)
     local Btn = Instance.new("ImageButton")
-    Btn.Size = UDim2.new(0, 60, 0, 60)
-    Btn.Position = UDim2.new(0.5, -30, 0.3, -30)
-    Btn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-    Btn.BackgroundTransparency = 0.2
+    Btn.Size = UDim2.new(0, 140, 0, 65)
+    Btn.Position = UDim2.new(0.5, -70, 0.3, -32)
+    Btn.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    Btn.BackgroundTransparency = 0.1
     Btn.Parent = GuiBtn
 
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 14)
     Corner.Parent = Btn
 
+    -- Linha em volta com gradiente (Esquerda Vermelho/Verde e Direita Preto)
     local Borda = Instance.new("UIStroke")
     Borda.Thickness = 3
     Borda.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -618,20 +620,34 @@ local function CreateInvisivelButton()
 
     local GradienteBorda = Instance.new("UIGradient")
     GradienteBorda.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- Vermelho na esquerda
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))   -- Preto na direita
     })
-    GradienteBorda.Rotation = 45
+    GradienteBorda.Rotation = 0 -- Horizontal: Esquerda para Direita
     GradienteBorda.Parent = Borda
 
+    -- Texto "Invisible" no topo
     local Texto = Instance.new("TextLabel")
-    Texto.Size = UDim2.new(1, 0, 1, 0)
+    Texto.Size = UDim2.new(1, 0, 0, 25)
+    Texto.Position = UDim2.new(0, 0, 0, 8)
     Texto.BackgroundTransparency = 1
     Texto.Text = "Invisible"
     Texto.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Texto.TextSize = 11
+    Texto.TextSize = 13
     Texto.Font = Enum.Font.GothamBold
     Texto.Parent = Btn
+
+    -- Texto "Off" / "On" abaixo do "Invisible"
+    local StatusTexto = Instance.new("TextLabel")
+    StatusTexto.Name = "StatusText"
+    StatusTexto.Size = UDim2.new(1, 0, 0, 20)
+    StatusTexto.Position = UDim2.new(0, 0, 0, 32)
+    StatusTexto.BackgroundTransparency = 1
+    StatusTexto.Text = "Off"
+    StatusTexto.TextColor3 = Color3.fromRGB(255, 65, 80)
+    StatusTexto.TextSize = 11
+    StatusTexto.Font = Enum.Font.GothamSemibold
+    StatusTexto.Parent = Btn
 
     local dragThreshold = 10
     local dragStartMousePos, buttonStartPosScreen
@@ -661,14 +677,18 @@ local function CreateInvisivelButton()
 
                 if InvisivelAtivo then
                     GradienteBorda.Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
-                        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)), -- Verde na esquerda
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))   -- Preto na direita
                     })
+                    StatusTexto.Text = "On"
+                    StatusTexto.TextColor3 = Color3.fromRGB(0, 255, 0)
                 else
                     GradienteBorda.Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-                        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- Vermelho na esquerda
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))   -- Preto na direita
                     })
+                    StatusTexto.Text = "Off"
+                    StatusTexto.TextColor3 = Color3.fromRGB(255, 65, 80)
                 end
             end
             dragStartMousePos = nil
@@ -681,7 +701,7 @@ end
 
 
 -- ================================================
--- 👻 CRIAÇÃO DO CARD E DO TOGGLE NA ABA
+-- 👻 CRIAÇÃO DO CARD E DO TOGGLE NA ABA (ESTILO SOLICITADO)
 -- ================================================
 local InvisivelCard = Instance.new("Frame")
 InvisivelCard.Name = "InvisivelCard"
@@ -735,20 +755,18 @@ local InvisivelCheck = Instance.new("TextLabel")
 InvisivelCheck.Name = "CheckMark"
 InvisivelCheck.Size = UDim2.fromScale(1, 1)
 InvisivelCheck.BackgroundTransparency = 1
-InvisivelCheck.Text = "✓"
+InvisivelCheck.Text = "✔"
 InvisivelCheck.TextColor3 = Color3.new(1, 1, 1)
 InvisivelCheck.TextSize = 14
 InvisivelCheck.Font = Enum.Font.GothamBold
 InvisivelCheck.TextTransparency = 1
-InvisivelCheck.Active = false
-InvisivelCheck.Selectable = false
 InvisivelCheck.Parent = InvisivelToggle
 
 
 -- ================================================
--- 👻 EVENTO DE CLIQUE DO TOGGLE (AGORA DEPOIS DAS FUNÇÕES)
+-- 👻 EVENTO DE CLIQUE DO TOGGLE
 -- ================================================
-InvisivelToggle.MouseButton1Click:Connect(function()
+InvisivelToggle.Activated:Connect(function()
     local Ligado = (InvisivelButtonGui ~= nil)
     
     if not Ligado then
