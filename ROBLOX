@@ -1,0 +1,2649 @@
+--==============================================================--
+--                      WALK NYX PROJECT                        --
+--              PREMIUM UI / MOBILE / LUCIDE                  --
+--==============================================================--
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+--==============================================================--
+-- REMOVE GUI ANTIGA
+--==============================================================--
+
+local OldGui = PlayerGui:FindFirstChild("WN_Premium")
+if OldGui then OldGui:Destroy() end
+
+local OldFloat = PlayerGui:FindFirstChild("WN_FloatGui")
+if OldFloat then OldFloat:Destroy() end
+
+--==============================================================--
+-- THEME
+--==============================================================--
+
+local Theme = {
+    Background = Color3.fromRGB(7, 8, 11),
+    Window     = Color3.fromRGB(11, 12, 16),
+    Sidebar    = Color3.fromRGB(9, 10, 14),
+
+    Card       = Color3.fromRGB(16, 17, 22),
+    CardHover  = Color3.fromRGB(23, 24, 30),
+
+    Accent       = Color3.fromRGB(225, 40, 56),
+    AccentBright = Color3.fromRGB(255, 65, 80),
+    AccentDark   = Color3.fromRGB(120, 15, 27),
+
+    Text          = Color3.fromRGB(245, 245, 248),
+    TextSecondary = Color3.fromRGB(165, 166, 177),
+    TextMuted     = Color3.fromRGB(91, 93, 104),
+
+    Border = Color3.fromRGB(39, 40, 48),
+}
+
+--==============================================================--
+-- CONFIG
+--==============================================================--
+
+local DEFAULT_WIDTH  = 445
+local DEFAULT_HEIGHT = 320
+
+local MIN_WIDTH  = 360
+local MIN_HEIGHT = 60 + (5 * 48) + 16
+
+local MAX_WIDTH  = 700
+local MAX_HEIGHT = 520
+
+local CurrentWidth  = DEFAULT_WIDTH
+local CurrentHeight = DEFAULT_HEIGHT
+
+local SidebarExpanded = false
+local CurrentTabIndex = 1
+
+local WindowOpen      = true
+local WindowAnimating = false
+
+local DraggingWindow = false
+local DraggingFloat  = false
+local Resizing       = false
+
+--==============================================================--
+-- MAPA DE ÃCONES DE IMAGEM
+--==============================================================--
+
+local IconAssets = {
+    house    = "rbxassetid://10723407389",
+    eye      = "rbxassetid://6031075929",
+    settings = "rbxassetid://10734950309",
+    x        = "rbxassetid://10747384394",
+}
+
+--==============================================================--
+-- CRIAÃ‡ÃƒO DE ÃCONE
+--==============================================================--
+
+local function CreateLucideIcon(Parent, IconName, IconColor, IconSize)
+    IconSize = IconSize or 20
+
+    local Image = Instance.new("ImageLabel")
+    Image.Name = "Icon"
+    Image.Size = UDim2.fromOffset(IconSize, IconSize)
+    Image.AnchorPoint = Vector2.new(0.5, 0.5)
+    Image.Position = UDim2.fromScale(0.5, 0.5)
+    Image.BackgroundTransparency = 1
+    Image.Image = IconAssets[IconName] or IconAssets.house
+    Image.ImageColor3 = IconColor
+    Image.ScaleType = Enum.ScaleType.Fit
+    Image.Parent = Parent
+
+    return Image
+end
+
+local function CreateDollarIcon(Parent, IconColor, IconSize)
+    IconSize = IconSize or 32
+
+    local TextLabel = Instance.new("TextLabel")
+    TextLabel.Name = "Icon"
+    TextLabel.Size = UDim2.fromOffset(34, 34)
+    TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+    TextLabel.Position = UDim2.fromScale(0.5, 0.5)
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.Text = "$"
+    TextLabel.TextColor3 = IconColor
+    TextLabel.TextSize = IconSize
+    TextLabel.Font = Enum.Font.GothamBold
+    TextLabel.Parent = Parent
+
+    return TextLabel
+end
+
+local function CreateDirectPlayerIcon(Parent, IconColor)
+    local Container = Instance.new("Frame")
+    Container.Name = "DirectPlayerIcon"
+    Container.Size = UDim2.fromOffset(24, 24)
+    Container.AnchorPoint = Vector2.new(0.5, 0.5)
+    Container.Position = UDim2.fromScale(0.5, 0.5)
+    Container.BackgroundTransparency = 1
+    Container.Parent = Parent
+
+    local Head = Instance.new("Frame")
+    Head.Name = "Head"
+    Head.Size = UDim2.fromOffset(9, 9)
+    Head.Position = UDim2.fromOffset(7, 1)
+    Head.BackgroundColor3 = IconColor
+    Head.BorderSizePixel = 0
+    Head.Parent = Container
+
+    local HeadCorner = Instance.new("UICorner")
+    HeadCorner.CornerRadius = UDim.new(1, 0)
+    HeadCorner.Parent = Head
+
+    local BodyPart = Instance.new("Frame")
+    BodyPart.Name = "BodyPart"
+    BodyPart.Size = UDim2.fromOffset(17, 9)
+    BodyPart.Position = UDim2.fromOffset(3, 12)
+    BodyPart.BackgroundColor3 = IconColor
+    BodyPart.BorderSizePixel = 0
+    BodyPart.Parent = Container
+
+    local BodyCorner = Instance.new("UICorner")
+    BodyCorner.CornerRadius = UDim.new(0, 5)
+    BodyCorner.Parent = BodyPart
+
+    return Container
+end
+
+--==============================================================--
+-- TABS
+--==============================================================--
+
+local TabsData = {
+    { Name = "Main",      Icon = "house",              IsCustom = false },
+    { Name = "Auto Farm", Icon = "circle-dollar-sign", IsCustom = false, IsTextIcon = true, CustomSize = 32 },
+    { Name = "ESP",       Icon = "eye",                IsCustom = false },
+    { Name = "Player",    Icon = "user",               IsCustom = true  },
+    { Name = "Settings",  Icon = "settings",           IsCustom = false },
+}
+
+--==============================================================--
+-- SCREEN GUI
+--==============================================================--
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "WN_Premium"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 2147483647
+ScreenGui.Parent = PlayerGui
+
+local WindowGroup = Instance.new("CanvasGroup")
+WindowGroup.Name = "WindowGroup"
+WindowGroup.Size = UDim2.fromScale(1, 1)
+WindowGroup.BackgroundTransparency = 1
+WindowGroup.GroupTransparency = 0
+WindowGroup.Parent = ScreenGui
+
+--==============================================================--
+-- MAIN
+--==============================================================--
+
+local Main = Instance.new("Frame")
+Main.Name = "Main"
+Main.Size = UDim2.fromOffset(DEFAULT_WIDTH, DEFAULT_HEIGHT)
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.Position = UDim2.fromScale(0.5, 0.5)
+Main.BackgroundColor3 = Theme.Window
+Main.BorderSizePixel = 0
+Main.ClipsDescendants = true
+Main.Parent = WindowGroup
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 18)
+MainCorner.Parent = Main
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Theme.Border
+MainStroke.Thickness = 1
+MainStroke.Transparency = 0.12
+MainStroke.Parent = Main
+
+--==============================================================--
+-- LINHA SUPERIOR
+--==============================================================--
+
+local TopLine = Instance.new("Frame")
+TopLine.Name = "TopRedLine"
+TopLine.Size = UDim2.new(1, -28, 0, 2)
+TopLine.Position = UDim2.fromOffset(14, 0)
+TopLine.BackgroundColor3 = Theme.Accent
+TopLine.BorderSizePixel = 0
+TopLine.ZIndex = 30
+TopLine.Parent = Main
+
+local TopLineCorner = Instance.new("UICorner")
+TopLineCorner.CornerRadius = UDim.new(1, 0)
+TopLineCorner.Parent = TopLine
+
+local TopLineGradient = Instance.new("UIGradient")
+TopLineGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Theme.AccentDark),
+    ColorSequenceKeypoint.new(0.25, Theme.Accent),
+    ColorSequenceKeypoint.new(0.5, Theme.AccentBright),
+    ColorSequenceKeypoint.new(0.75, Theme.Accent),
+    ColorSequenceKeypoint.new(1, Theme.AccentDark),
+})
+TopLineGradient.Parent = TopLine
+
+--==============================================================--
+-- HEADER
+--==============================================================--
+
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1, 0, 0, 58)
+Header.Position = UDim2.fromOffset(0, 2)
+Header.BackgroundTransparency = 1
+Header.Active = true
+Header.Parent = Main
+
+local MM2Button = Instance.new("TextButton")
+MM2Button.Name = "MM2Button"
+MM2Button.Size = UDim2.fromOffset(34, 34)
+MM2Button.Position = UDim2.fromOffset(10, 12)
+MM2Button.BackgroundColor3 = Theme.Accent
+MM2Button.BorderSizePixel = 0
+MM2Button.Text = "MM2"
+MM2Button.TextColor3 = Color3.new(1, 1, 1)
+MM2Button.TextSize = 9
+MM2Button.Font = Enum.Font.GothamBold
+MM2Button.AutoButtonColor = false
+MM2Button.Parent = Header
+
+local MM2Corner = Instance.new("UICorner")
+MM2Corner.CornerRadius = UDim.new(0, 8)
+MM2Corner.Parent = MM2Button
+
+local MM2Stroke = Instance.new("UIStroke")
+MM2Stroke.Color = Theme.AccentBright
+MM2Stroke.Thickness = 1
+MM2Stroke.Parent = MM2Button
+
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.fromOffset(200, 23)
+Title.Position = UDim2.fromOffset(55, 9)
+Title.BackgroundTransparency = 1
+Title.Text = "WALK NYX PROJECT"
+Title.TextColor3 = Theme.Text
+Title.TextSize = 14
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Header
+
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Name = "Subtitle"
+Subtitle.Size = UDim2.fromOffset(200, 15)
+Subtitle.Position = UDim2.fromOffset(55, 30)
+Subtitle.BackgroundTransparency = 1
+Subtitle.Text = "PREMIUM INTERFACE"
+Subtitle.TextColor3 = Theme.TextMuted
+Subtitle.TextSize = 8
+Subtitle.Font = Enum.Font.GothamMedium
+Subtitle.TextXAlignment = Enum.TextXAlignment.Left
+Subtitle.Parent = Header
+
+local Version = Instance.new("TextLabel")
+Version.Name = "Version"
+Version.Size = UDim2.fromOffset(35, 20)
+Version.Position = UDim2.new(1, -82, 0, 19)
+Version.BackgroundTransparency = 1
+Version.Text = "V9"
+Version.TextColor3 = Theme.TextMuted
+Version.TextSize = 9
+Version.Font = Enum.Font.GothamBold
+Version.Parent = Header
+
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "Close"
+CloseButton.Size = UDim2.fromOffset(30, 30)
+CloseButton.Position = UDim2.new(1, -42, 0, 14)
+CloseButton.BackgroundColor3 = Theme.Card
+CloseButton.BorderSizePixel = 0
+CloseButton.Text = ""
+CloseButton.AutoButtonColor = false
+CloseButton.Parent = Header
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseButton
+
+local CloseStroke = Instance.new("UIStroke")
+CloseStroke.Color = Theme.Border
+CloseStroke.Thickness = 1
+CloseStroke.Parent = CloseButton
+
+CreateLucideIcon(CloseButton, "x", Theme.TextSecondary, 16)
+
+--==============================================================--
+-- BODY
+--==============================================================--
+
+local Body = Instance.new("Frame")
+Body.Name = "Body"
+Body.Size = UDim2.new(1, 0, 1, -60)
+Body.Position = UDim2.fromOffset(0, 60)
+Body.BackgroundTransparency = 1
+Body.Parent = Main
+
+local Sidebar = Instance.new("Frame")
+Sidebar.Name = "Sidebar"
+Sidebar.Size = UDim2.new(0, 66, 1, 0)
+Sidebar.BackgroundColor3 = Theme.Sidebar
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = Body
+
+local SidebarCorner = Instance.new("UICorner")
+SidebarCorner.CornerRadius = UDim.new(0, 16)
+SidebarCorner.Parent = Sidebar
+
+local SidebarLine = Instance.new("Frame")
+SidebarLine.Name = "SidebarLine"
+SidebarLine.Size = UDim2.new(0, 1, 1, -24)
+SidebarLine.Position = UDim2.new(1, -1, 0, 12)
+SidebarLine.BackgroundColor3 = Theme.Border
+SidebarLine.BackgroundTransparency = 0.45
+SidebarLine.BorderSizePixel = 0
+SidebarLine.Parent = Sidebar
+
+--==============================================================--
+-- CONTENT
+--==============================================================--
+
+local ContentContainer = Instance.new("Frame")
+ContentContainer.Name = "ContentContainer"
+ContentContainer.Size = UDim2.new(1, -80, 1, -10)
+ContentContainer.Position = UDim2.fromOffset(72, 0)
+ContentContainer.BackgroundTransparency = 1
+ContentContainer.ClipsDescendants = false
+ContentContainer.Parent = Body
+
+local TabFrames = {}
+local TabButtons = {}
+
+for Index, TabData in ipairs(TabsData) do
+
+    -- Transformado em ScrollingFrame para crescer automaticamente e permitir scroll se necessÃ¡rio
+    local PageFrame = Instance.new("ScrollingFrame")
+    PageFrame.Name = TabData.Name .. "Page"
+    PageFrame.Size = UDim2.new(1, 0, 1, 0)
+    PageFrame.BackgroundTransparency = 1
+    PageFrame.BorderSizePixel = 0
+    PageFrame.Visible = (Index == 1)
+    PageFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    PageFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    PageFrame.ScrollBarThickness = 3
+    PageFrame.ScrollBarImageColor3 = Theme.Accent
+    PageFrame.Parent = ContentContainer
+
+    if TabData.Name == "Main" then
+        -- (ConteÃºdo da aba Main)
+
+    elseif TabData.Name == "Auto Farm" then
+        -- (ConteÃºdo da aba Auto Farm)
+
+    elseif TabData.Name == "ESP" then
+        -- (ConteÃºdo da aba ESP)
+
+    elseif TabData.Name == "Player" then
+
+-- ================================================
+-- INVISÃVEL - VARIÃVEIS
+-- ================================================
+local InvisivelAtivo = false
+local Personagem = nil
+local Humanoid = nil
+local Raiz = nil
+local PartesCorpo = {}
+
+-- ================================================
+-- BOTÃƒO FLUTUANTE INVISÃVEL - VARIÃVEIS
+-- ================================================
+local FloatingInvisAtivo = false
+local FloatSize = 120 -- Tamanho inicial padrÃ£o do botÃ£o flutuante quadrado
+local DraggingFloatInvis = false
+local FloatInvisDragInput, FloatInvisDragStart, FloatInvisStartPos
+
+        -- ============================
+        -- VARIÃVEIS DA ABA SPEED
+        -- ============================
+        local SpeedEnabled = false
+        local CurrentSpeed = 16
+        local SpeedMinVal = 16
+        local SpeedMaxVal = 30
+        local SpeedSliding = false
+        local SpeedActiveInput = nil
+
+-- ===================
+-- VARIAVEIS DO SPEED GLITH 
+-- ===================
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+
+_G.SpeedNoPulo = false
+
+local VelocidadeNoPulo = 300
+local VelocidadePadrao = 16
+
+        -- ============================
+        -- VARIÃVEIS DA ABA JUMP
+        -- ============================
+        local JampEnabled = false
+        local CurrentJamp = 50
+        local JampMinVal = 50
+        local JampMaxVal = 100
+        local JampSliding = false
+        local JampActiveInput = nil
+
+-- ===========================
+-- VARIÃVEIS DO PULO INFINITO 
+-- ===========================
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+
+_G.PuloInfinito = false
+
+-- ============================
+-- VARIÃVEIS DA ABA FLY
+-- ============================
+local FlyAtivo = false
+local FlyVelocidade = 16
+local FlyMinVal = 16
+local FlyMaxVal = 150
+local FlySliding = false
+local FlyActiveInput = nil
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local bv, bg, con
+local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+
+-- =============================
+-- ANTI-FLING (VariÃ¡veis)
+-- =============================
+_G.AntiFling = false
+
+-- ===============================
+-- TITULO MOVIMENTO
+-- ===============================
+local SectionLabel = Instance.new("TextLabel")
+SectionLabel.Name = "MovementLabel"
+SectionLabel.Size = UDim2.new(1, -6, 0, 30)
+SectionLabel.BackgroundTransparency = 1
+SectionLabel.Text = "EXTRAS"
+SectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
+SectionLabel.TextSize = 20
+SectionLabel.Font = Enum.Font.GothamBold
+SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel.TextTransparency = 0
+SectionLabel.Parent = PageFrame
+
+-- ================================================
+-- BOTÃƒO FLUTUANTE INVISÃVEL - CARD NA UI (Toggle + Slider)
+-- ================================================
+local FloatSettingCard = Instance.new("Frame")
+FloatSettingCard.Name = "FloatSettingCard"
+FloatSettingCard.Size = UDim2.new(1, -6, 0, 85)
+FloatSettingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+FloatSettingCard.BorderSizePixel = 0
+FloatSettingCard.Parent = PageFrame
+
+local FloatSettingCorner = Instance.new("UICorner")
+FloatSettingCorner.CornerRadius = UDim.new(0, 10)
+FloatSettingCorner.Parent = FloatSettingCard
+
+local FloatSettingStroke = Instance.new("UIStroke")
+FloatSettingStroke.Color = Color3.fromRGB(39, 40, 48)
+FloatSettingStroke.Thickness = 1
+FloatSettingStroke.Parent = FloatSettingCard
+
+local FloatSettingTitle = Instance.new("TextLabel")
+FloatSettingTitle.Name = "Title"
+FloatSettingTitle.Size = UDim2.new(1, -60, 0, 36)
+FloatSettingTitle.Position = UDim2.fromOffset(12, 0)
+FloatSettingTitle.BackgroundTransparency = 1
+FloatSettingTitle.Text = "Floating Invisible Button"
+FloatSettingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+FloatSettingTitle.TextSize = 12
+FloatSettingTitle.Font = Enum.Font.GothamSemibold
+FloatSettingTitle.TextXAlignment = Enum.TextXAlignment.Left
+FloatSettingTitle.Parent = FloatSettingCard
+
+-- ============================
+-- TOGGLE - MESMO PADRÃƒO DO SPEED
+-- ============================
+local FloatSettingToggle = Instance.new("TextButton")
+FloatSettingToggle.Name = "ToggleButton"
+FloatSettingToggle.Size = UDim2.fromOffset(26, 26)
+FloatSettingToggle.AnchorPoint = Vector2.new(1, 0)
+FloatSettingToggle.Position = UDim2.new(1, -12, 0, 5)
+FloatSettingToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+FloatSettingToggle.BorderSizePixel = 0
+FloatSettingToggle.Text = ""
+FloatSettingToggle.AutoButtonColor = false
+FloatSettingToggle.Parent = FloatSettingCard
+
+local FloatSettingBtnCorner = Instance.new("UICorner")
+FloatSettingBtnCorner.CornerRadius = UDim.new(0, 6)
+FloatSettingBtnCorner.Parent = FloatSettingToggle
+
+local FloatSettingBtnStroke = Instance.new("UIStroke")
+FloatSettingBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+FloatSettingBtnStroke.Thickness = 1
+FloatSettingBtnStroke.Parent = FloatSettingToggle
+
+local FloatSettingCheck = Instance.new("TextLabel")
+FloatSettingCheck.Name = "CheckMark"
+FloatSettingCheck.Size = UDim2.fromScale(1, 1)
+FloatSettingCheck.BackgroundTransparency = 1
+FloatSettingCheck.Text = "âœ”"
+FloatSettingCheck.TextColor3 = Color3.new(1, 1, 1)
+FloatSettingCheck.TextSize = 14
+FloatSettingCheck.Font = Enum.Font.GothamBold
+FloatSettingCheck.TextTransparency = 1
+FloatSettingCheck.Parent = FloatSettingToggle
+
+-- ============================
+-- SLIDER - MESMO PADRÃƒO DO SPEED
+-- ============================
+local SliderContainer = Instance.new("Frame")
+SliderContainer.Name = "SliderContainer"
+SliderContainer.Size = UDim2.new(1, -24, 0, 30)
+SliderContainer.Position = UDim2.fromOffset(12, 44)
+SliderContainer.BackgroundTransparency = 1
+SliderContainer.Parent = FloatSettingCard
+
+local SliderLabel = Instance.new("TextLabel")
+SliderLabel.Name = "SliderLabel"
+SliderLabel.Size = UDim2.new(1, 0, 0, 14)
+SliderLabel.BackgroundTransparency = 1
+SliderLabel.Text = "Tamanho: " .. tostring(FloatSize)
+SliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+SliderLabel.TextSize = 10
+SliderLabel.Font = Enum.Font.GothamMedium
+SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+SliderLabel.Parent = SliderContainer
+
+local SliderBg = Instance.new("Frame")
+SliderBg.Name = "SliderTrack"
+SliderBg.Size = UDim2.new(1, 0, 0, 6)
+SliderBg.Position = UDim2.fromOffset(0, 18)
+SliderBg.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+SliderBg.BorderSizePixel = 0
+SliderBg.Parent = SliderContainer
+
+local SliderBgCorner = Instance.new("UICorner")
+SliderBgCorner.CornerRadius = UDim.new(1, 0)
+SliderBgCorner.Parent = SliderBg
+
+local SliderFill = Instance.new("Frame")
+SliderFill.Name = "SliderFill"
+SliderFill.Size = UDim2.new(math.clamp((FloatSize - 80) / 120, 0, 1), 0, 1, 0)
+SliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+SliderFill.BorderSizePixel = 0
+SliderFill.Parent = SliderBg
+
+local SliderFillCorner = Instance.new("UICorner")
+SliderFillCorner.CornerRadius = UDim.new(1, 0)
+SliderFillCorner.Parent = SliderFill
+
+local SliderButton = Instance.new("TextButton")
+SliderButton.Name = "SliderButton"
+SliderButton.Size = UDim2.new(1, 10, 1, 10)
+SliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+SliderButton.Position = UDim2.new(math.clamp((FloatSize - 80) / 120, 0, 1), 0, 0.5, 0)
+SliderButton.BackgroundTransparency = 1
+SliderButton.Text = ""
+SliderButton.AutoButtonColor = false
+SliderButton.Parent = SliderBg
+
+-- ============================
+-- BOTÃƒO FLUTUANTE
+-- ============================
+local FloatScreenGui = Instance.new("ScreenGui")
+FloatScreenGui.Name = "FloatInvisGui"
+FloatScreenGui.Enabled = false
+FloatScreenGui.ResetOnSpawn = false
+FloatScreenGui.IgnoreGuiInset = true
+FloatScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+FloatScreenGui.DisplayOrder = 2147483647
+FloatScreenGui.Parent = PlayerGui
+
+local FloatingButton = Instance.new("TextButton")
+FloatingButton.Name = "FloatingButton"
+FloatingButton.Size = UDim2.fromOffset(FloatSize, FloatSize)
+FloatingButton.AnchorPoint = Vector2.new(0.5, 0.5)
+FloatingButton.Position = UDim2.new(0.5, 0, 0.25, 0)
+FloatingButton.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+FloatingButton.BorderSizePixel = 0
+FloatingButton.Text = "Invisible"
+FloatingButton.TextColor3 = Color3.fromRGB(245, 245, 248)
+FloatingButton.TextSize = 13
+FloatingButton.Font = Enum.Font.GothamBold
+FloatingButton.AutoButtonColor = false
+FloatingButton.Active = true
+FloatingButton.Parent = FloatScreenGui
+
+local FloatCorner = Instance.new("UICorner")
+FloatCorner.CornerRadius = UDim.new(0, 10)
+FloatCorner.Parent = FloatingButton
+
+local FloatStroke = Instance.new("UIStroke")
+FloatStroke.Color = Color3.fromRGB(39, 40, 48)
+FloatStroke.Thickness = 1.5
+FloatStroke.Parent = FloatingButton
+
+local StatusLine = Instance.new("Frame")
+StatusLine.Name = "StatusLine"
+StatusLine.Size = UDim2.new(0, 4, 1, -12)
+StatusLine.Position = UDim2.fromOffset(6, 6)
+StatusLine.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+StatusLine.BorderSizePixel = 0
+StatusLine.Parent = FloatingButton
+
+local StatusLineCorner = Instance.new("UICorner")
+StatusLineCorner.CornerRadius = UDim.new(1, 0)
+StatusLineCorner.Parent = StatusLine
+
+-- ============================
+-- TOGGLE DO CARD
+-- ============================
+local FloatMenuAtivo = false
+
+FloatSettingToggle.Activated:Connect(function()
+    FloatMenuAtivo = not FloatMenuAtivo
+    FloatScreenGui.Enabled = FloatMenuAtivo
+
+    local targetBg = FloatMenuAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = FloatMenuAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = FloatMenuAtivo and 0 or 1
+
+    TweenService:Create(FloatSettingToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        BackgroundColor3 = targetBg
+    }):Play()
+
+    TweenService:Create(FloatSettingBtnStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        Color = targetStroke
+    }):Play()
+
+    TweenService:Create(FloatSettingCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        TextTransparency = targetTrans
+    }):Play()
+end)
+
+-- ============================
+-- ARRASTE DO BOTÃƒO FLUTUANTE
+-- ============================
+local FloatDragging = false
+local FloatMoved = false
+local FloatDragInput = nil
+local FloatDragStart = nil
+local FloatButtonStartPosition = nil
+
+FloatingButton.InputBegan:Connect(function(Input)
+    if Input.UserInputType ~= Enum.UserInputType.Touch
+        and Input.UserInputType ~= Enum.UserInputType.MouseButton1 then
+        return
+    end
+
+    FloatDragging = true
+    FloatMoved = false
+    FloatDragInput = Input
+    FloatDragStart = Input.Position
+    FloatButtonStartPosition = FloatingButton.Position
+end)
+
+UserInputService.TouchMoved:Connect(function(Input)
+    if not FloatDragging then return end
+    if Input ~= FloatDragInput then return end
+
+    local Delta = Input.Position - FloatDragStart
+
+    if Delta.Magnitude > 6 then
+        FloatMoved = true
+    end
+
+    FloatingButton.Position = UDim2.new(
+        FloatButtonStartPosition.X.Scale,
+        FloatButtonStartPosition.X.Offset + Delta.X,
+        FloatButtonStartPosition.Y.Scale,
+        FloatButtonStartPosition.Y.Offset + Delta.Y
+    )
+end)
+
+UserInputService.InputChanged:Connect(function(Input)
+    if not FloatDragging then return end
+    if FloatDragInput.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+    if Input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
+
+    local Delta = Input.Position - FloatDragStart
+
+    if Delta.Magnitude > 6 then
+        FloatMoved = true
+    end
+
+    FloatingButton.Position = UDim2.new(
+        FloatButtonStartPosition.X.Scale,
+        FloatButtonStartPosition.X.Offset + Delta.X,
+        FloatButtonStartPosition.Y.Scale,
+        FloatButtonStartPosition.Y.Offset + Delta.Y
+    )
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input ~= FloatDragInput then return end
+    FloatDragging = false
+    FloatDragInput = nil
+end)
+
+-- ============================
+-- CLIQUE DO BOTÃƒO + ANIMAÃ‡ÃƒO
+-- ============================
+FloatingButton.Activated:Connect(function()
+    if FloatMoved then
+        FloatMoved = false
+        return
+    end
+
+    local novoEstado = not FloatingInvisAtivo
+    AtualizarEstadoFloatingInvis(novoEstado)
+
+    local corLinha = novoEstado and Color3.fromRGB(40, 225, 100) or Color3.fromRGB(225, 40, 56)
+    TweenService:Create(StatusLine, TweenInfo.new(0.2), {
+        BackgroundColor3 = corLinha
+    }):Play()
+
+    local NormalSize = FloatSize
+    local PressSize = math.max(40, NormalSize - 6)
+
+    local PressTween = TweenService:Create(FloatingButton, TweenInfo.new(0.07, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(PressSize, PressSize)
+    })
+
+    PressTween:Play()
+
+    PressTween.Completed:Connect(function()
+        if FloatingButton and FloatingButton.Parent then
+            TweenService:Create(FloatingButton, TweenInfo.new(0.10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.fromOffset(NormalSize, NormalSize)
+            }):Play()
+        end
+    end)
+end)
+
+-- ============================
+-- SLIDER - SOMENTE UM TOQUE POR VEZ
+-- ============================
+local SliderActiveInput = nil
+local SliderDragging = false
+
+local function AtualizarSlider(InputX)
+    local TrackPosition = SliderBg.AbsolutePosition.X
+    local TrackSize = SliderBg.AbsoluteSize.X
+
+    if TrackSize <= 0 then return end
+
+    local Percentage = math.clamp((InputX - TrackPosition) / TrackSize, 0, 1)
+
+    FloatSize = math.floor(80 + (Percentage * 120) + 0.5)
+
+    SliderLabel.Text = "Tamanho: " .. tostring(FloatSize)
+    SliderFill.Size = UDim2.new(Percentage, 0, 1, 0)
+    SliderButton.Position = UDim2.new(Percentage, 0, 0.5, 0)
+
+    if not FloatingButton or not FloatingButton.Parent then return end
+    if FloatMenuAtivo then
+        FloatingButton.Size = UDim2.fromOffset(FloatSize, FloatSize)
+    end
+end
+
+local function ComecarSlider(Input)
+    if SliderActiveInput then return end
+
+    local InputType = Input.UserInputType
+    if InputType ~= Enum.UserInputType.Touch
+        and InputType ~= Enum.UserInputType.MouseButton1 then
+        return
+    end
+
+    SliderActiveInput = Input
+    SliderDragging = true
+    AtualizarSlider(Input.Position.X)
+end
+
+SliderButton.InputBegan:Connect(ComecarSlider)
+SliderBg.InputBegan:Connect(ComecarSlider)
+
+UserInputService.TouchMoved:Connect(function(Input)
+    if not SliderDragging then return end
+    if SliderActiveInput ~= Input then return end
+    AtualizarSlider(Input.Position.X)
+end)
+
+UserInputService.InputChanged:Connect(function(Input)
+    if not SliderDragging then return end
+    if not SliderActiveInput then return end
+    if SliderActiveInput.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+    if Input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
+    AtualizarSlider(Input.Position.X)
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input ~= SliderActiveInput then return end
+    SliderDragging = false
+    SliderActiveInput = nil
+end)
+
+-- ================================================
+-- INVISÃVEL - BOTÃƒO
+-- ================================================
+local InvisivelCard = Instance.new("Frame")
+InvisivelCard.Name = "InvisivelCard"
+InvisivelCard.Size = UDim2.new(1, -6, 0, 50)
+InvisivelCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+InvisivelCard.BorderSizePixel = 0
+InvisivelCard.Parent = PageFrame
+
+local InvisivelCorner = Instance.new("UICorner")
+InvisivelCorner.CornerRadius = UDim.new(0, 10)
+InvisivelCorner.Parent = InvisivelCard
+
+local InvisivelStroke = Instance.new("UIStroke")
+InvisivelStroke.Color = Color3.fromRGB(39, 40, 48)
+InvisivelStroke.Thickness = 1
+InvisivelStroke.Parent = InvisivelCard
+
+local InvisivelTitle = Instance.new("TextLabel")
+InvisivelTitle.Name = "Title"
+InvisivelTitle.Size = UDim2.new(1, -60, 1, 0)
+InvisivelTitle.Position = UDim2.fromOffset(12, 0)
+InvisivelTitle.BackgroundTransparency = 1
+InvisivelTitle.Text = "InvisÃ­vel"
+InvisivelTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+InvisivelTitle.TextSize = 12
+InvisivelTitle.Font = Enum.Font.GothamSemibold
+InvisivelTitle.TextXAlignment = Enum.TextXAlignment.Left
+InvisivelTitle.Parent = InvisivelCard
+
+local InvisivelToggle = Instance.new("TextButton")
+InvisivelToggle.Name = "ToggleButton"
+InvisivelToggle.Size = UDim2.fromOffset(26, 26)
+InvisivelToggle.AnchorPoint = Vector2.new(1, 0.5)
+InvisivelToggle.Position = UDim2.new(1, -12, 0.5, 0)
+InvisivelToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+InvisivelToggle.BorderSizePixel = 0
+InvisivelToggle.Text = ""
+InvisivelToggle.AutoButtonColor = false
+InvisivelToggle.Parent = InvisivelCard
+
+local InvisivelBtnCorner = Instance.new("UICorner")
+InvisivelBtnCorner.CornerRadius = UDim.new(0, 6)
+InvisivelBtnCorner.Parent = InvisivelToggle
+
+InvisivelBtnStroke = Instance.new("UIStroke")
+InvisivelBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+InvisivelBtnStroke.Thickness = 1
+InvisivelBtnStroke.Parent = InvisivelToggle
+
+local InvisivelCheck = Instance.new("TextLabel")
+InvisivelCheck.Name = "CheckMark"
+InvisivelCheck.Size = UDim2.fromScale(1, 1)
+InvisivelCheck.BackgroundTransparency = 1
+InvisivelCheck.Text = "âœ”"
+InvisivelCheck.TextColor3 = Color3.new(1, 1, 1)
+InvisivelCheck.TextSize = 14
+InvisivelCheck.Font = Enum.Font.GothamBold
+InvisivelCheck.TextTransparency = 1
+InvisivelCheck.Parent = InvisivelToggle
+
+InvisivelToggle.Activated:Connect(function()
+    InvisivelAtivo = not InvisivelAtivo
+
+    local targetBg = InvisivelAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = InvisivelAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = InvisivelAtivo and 0 or 1
+
+    TweenService:Create(InvisivelToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(InvisivelBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(InvisivelCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
+
+-- ================================================
+-- BOTÃƒO FLUTUANTE INVISÃVEL - SISTEMA
+-- ================================================
+-- (Assume que as funÃ§Ãµes e variÃ¡veis de invisibilidade globais jÃ¡ foram definidas no script anterior)
+local function AtualizarEstadoFloatingInvis(estado)
+    FloatingInvisAtivo = estado
+    -- Sincroniza com a funÃ§Ã£o de invisibilidade principal existente
+    if type(InvisivelAtivo) ~= "nil" then
+        InvisivelAtivo = estado
+    end
+end
+
+-- ================================================
+-- INVISÃVEL - SISTEMA
+-- ================================================
+local function ConfigurarPersonagem()
+    Personagem = player.Character or player.CharacterAdded:Wait()
+    Humanoid = Personagem:WaitForChild("Humanoid")
+    Raiz = Personagem:WaitForChild("HumanoidRootPart")
+    
+    PartesCorpo = {}
+    for _, obj in ipairs(Personagem:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            table.insert(PartesCorpo, obj)
+        end
+    end
+end
+
+player.CharacterAdded:Connect(function(novoChar)
+    task.wait(0.5)
+    ConfigurarPersonagem()
+end)
+
+RunService.Heartbeat:Connect(function()
+    if not InvisivelAtivo then return end
+    
+    if not Personagem or not Personagem.Parent or not Raiz or not Humanoid or Humanoid.Health <= 0 then
+        ConfigurarPersonagem()
+        return
+    end
+
+    for _, parte in ipairs(PartesCorpo) do
+        if parte and parte.Parent then
+            if parte.Name == "HumanoidRootPart" then
+                parte.Transparency = 1
+            else
+                parte.Transparency = 0.5
+            end
+        end
+    end
+
+    local PosOriginal = Raiz.CFrame
+    local CamOffset = Humanoid.CameraOffset
+    
+    Raiz.CFrame = PosOriginal * CFrame.new(0, -200000, 0)
+    Humanoid.CameraOffset = Raiz.CFrame:ToObjectSpace(CFrame.new(PosOriginal.Position)).Position
+    
+    RunService.RenderStepped:Wait()
+    
+    if Raiz and Raiz.Parent then
+        Raiz.CFrame = PosOriginal
+        Humanoid.CameraOffset = CamOffset
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if not InvisivelAtivo and Personagem and Humanoid and Humanoid.Health > 0 then
+            for _, parte in ipairs(PartesCorpo) do
+                if parte and parte.Parent and parte.Name ~= "HumanoidRootPart" then
+                    parte.Transparency = 0
+                end
+            end
+        end
+    end
+end)
+
+if player.Character then
+    ConfigurarPersonagem()
+end
+
+-- ===============================
+-- TITULO MOVIMENTO
+-- ===============================
+local SectionLabel = Instance.new("TextLabel")
+SectionLabel.Name = "MovementLabel"
+SectionLabel.Size = UDim2.new(1, -6, 0, 30)
+SectionLabel.BackgroundTransparency = 1
+SectionLabel.Text = "MOVEMENT"
+SectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
+SectionLabel.TextSize = 20
+SectionLabel.Font = Enum.Font.GothamBold
+SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel.TextTransparency = 0
+SectionLabel.Parent = PageFrame
+
+        -- ============================
+        -- BOTAO SPEED
+        -- ============================
+        local SpeedCard = Instance.new("Frame")
+        SpeedCard.Name = "SpeedCard"
+        SpeedCard.Size = UDim2.new(1, -6, 0, 85)
+        SpeedCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+        SpeedCard.BorderSizePixel = 0
+        SpeedCard.Parent = PageFrame
+
+        local SpeedCardCorner = Instance.new("UICorner")
+        SpeedCardCorner.CornerRadius = UDim.new(0, 10)
+        SpeedCardCorner.Parent = SpeedCard
+
+        local SpeedCardStroke = Instance.new("UIStroke")
+        SpeedCardStroke.Color = Color3.fromRGB(39, 40, 48)
+        SpeedCardStroke.Thickness = 1
+        SpeedCardStroke.Parent = SpeedCard
+
+        local SpeedTitle = Instance.new("TextLabel")
+        SpeedTitle.Name = "Title"
+        SpeedTitle.Size = UDim2.new(1, -60, 0, 36)
+        SpeedTitle.Position = UDim2.fromOffset(12, 0)
+        SpeedTitle.BackgroundTransparency = 1
+        SpeedTitle.Text = "Speed Hack (Walk)"
+        SpeedTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+        SpeedTitle.TextSize = 12
+        SpeedTitle.Font = Enum.Font.GothamSemibold
+        SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+        SpeedTitle.Parent = SpeedCard
+
+        local SpeedToggleButton = Instance.new("TextButton")
+        SpeedToggleButton.Name = "ToggleButton"
+        SpeedToggleButton.Size = UDim2.fromOffset(26, 26)
+        SpeedToggleButton.AnchorPoint = Vector2.new(1, 0)
+        SpeedToggleButton.Position = UDim2.new(1, -12, 0, 5)
+        SpeedToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        SpeedToggleButton.BorderSizePixel = 0
+        SpeedToggleButton.Text = ""
+        SpeedToggleButton.AutoButtonColor = false
+        SpeedToggleButton.Parent = SpeedCard
+
+        local SpeedToggleCorner = Instance.new("UICorner")
+        SpeedToggleCorner.CornerRadius = UDim.new(0, 6)
+        SpeedToggleCorner.Parent = SpeedToggleButton
+
+        local SpeedToggleStroke = Instance.new("UIStroke")
+        SpeedToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+        SpeedToggleStroke.Thickness = 1
+        SpeedToggleStroke.Parent = SpeedToggleButton
+
+        local SpeedCheckMark = Instance.new("TextLabel")
+        SpeedCheckMark.Name = "CheckMark"
+        SpeedCheckMark.Size = UDim2.fromScale(1, 1)
+        SpeedCheckMark.BackgroundTransparency = 1
+        SpeedCheckMark.Text = "âœ”"
+        SpeedCheckMark.TextColor3 = Color3.new(1, 1, 1)
+        SpeedCheckMark.TextSize = 14
+        SpeedCheckMark.Font = Enum.Font.GothamBold
+        SpeedCheckMark.TextTransparency = 1
+        SpeedCheckMark.Parent = SpeedToggleButton
+
+        local SpeedSliderContainer = Instance.new("Frame")
+        SpeedSliderContainer.Name = "SliderContainer"
+        SpeedSliderContainer.Size = UDim2.new(1, -24, 0, 30)
+        SpeedSliderContainer.Position = UDim2.fromOffset(12, 44)
+        SpeedSliderContainer.BackgroundTransparency = 1
+        SpeedSliderContainer.Parent = SpeedCard
+
+        local SpeedSliderLabel = Instance.new("TextLabel")
+        SpeedSliderLabel.Name = "SliderLabel"
+        SpeedSliderLabel.Size = UDim2.new(1, 0, 0, 14)
+        SpeedSliderLabel.BackgroundTransparency = 1
+        SpeedSliderLabel.Text = "Velocidade: 16"
+        SpeedSliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+        SpeedSliderLabel.TextSize = 10
+        SpeedSliderLabel.Font = Enum.Font.GothamMedium
+        SpeedSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+        SpeedSliderLabel.Parent = SpeedSliderContainer
+
+        local SpeedSliderTrack = Instance.new("Frame")
+        SpeedSliderTrack.Name = "SliderTrack"
+        SpeedSliderTrack.Size = UDim2.new(1, 0, 0, 6)
+        SpeedSliderTrack.Position = UDim2.fromOffset(0, 18)
+        SpeedSliderTrack.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        SpeedSliderTrack.BorderSizePixel = 0
+        SpeedSliderTrack.Parent = SpeedSliderContainer
+
+        local SpeedSliderTrackCorner = Instance.new("UICorner")
+        SpeedSliderTrackCorner.CornerRadius = UDim.new(1, 0)
+        SpeedSliderTrackCorner.Parent = SpeedSliderTrack
+
+        local SpeedSliderFill = Instance.new("Frame")
+        SpeedSliderFill.Name = "SliderFill"
+        SpeedSliderFill.Size = UDim2.new(0, 0, 1, 0)
+        SpeedSliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+        SpeedSliderFill.BorderSizePixel = 0
+        SpeedSliderFill.Parent = SpeedSliderTrack
+
+        local SpeedSliderFillCorner = Instance.new("UICorner")
+        SpeedSliderFillCorner.CornerRadius = UDim.new(1, 0)
+        SpeedSliderFillCorner.Parent = SpeedSliderFill
+
+        local SpeedSliderButton = Instance.new("TextButton")
+        SpeedSliderButton.Name = "SliderButton"
+        SpeedSliderButton.Size = UDim2.new(1, 10, 1, 10)
+        SpeedSliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        SpeedSliderButton.Position = UDim2.new(0, 0, 0.5, 0)
+        SpeedSliderButton.BackgroundTransparency = 1
+        SpeedSliderButton.Text = ""
+        SpeedSliderButton.AutoButtonColor = false
+        SpeedSliderButton.Parent = SpeedSliderTrack
+
+-- =======================
+-- BOTAO DO SPEED GLITH
+-- =======================
+-- (Insira este cÃ³digo dentro da sua aba/container da Player)
+local SpeedJumpCard = Instance.new("Frame")
+SpeedJumpCard.Name = "SpeedJumpCard"
+SpeedJumpCard.Size = UDim2.new(1, -6, 0, 50)
+SpeedJumpCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+SpeedJumpCard.BorderSizePixel = 0
+SpeedJumpCard.Parent = PageFrame -- Altere para a sua pÃ¡gina/container
+
+local SpeedJumpCardCorner = Instance.new("UICorner")
+SpeedJumpCardCorner.CornerRadius = UDim.new(0, 10)
+SpeedJumpCardCorner.Parent = SpeedJumpCard
+
+local SpeedJumpCardStroke = Instance.new("UIStroke")
+SpeedJumpCardStroke.Color = Color3.fromRGB(39, 40, 48)
+SpeedJumpCardStroke.Thickness = 1
+SpeedJumpCardStroke.Parent = SpeedJumpCard
+
+local SpeedJumpTitle = Instance.new("TextLabel")
+SpeedJumpTitle.Name = "Title"
+SpeedJumpTitle.Size = UDim2.new(1, -60, 1, 0)
+SpeedJumpTitle.Position = UDim2.fromOffset(12, 0)
+SpeedJumpTitle.BackgroundTransparency = 1
+SpeedJumpTitle.Text = "Speed Glitch (Pulo)"
+SpeedJumpTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+SpeedJumpTitle.TextSize = 12
+SpeedJumpTitle.Font = Enum.Font.GothamSemibold
+SpeedJumpTitle.TextXAlignment = Enum.TextXAlignment.Left
+SpeedJumpTitle.Parent = SpeedJumpCard
+
+local SpeedJumpToggle = Instance.new("TextButton")
+SpeedJumpToggle.Name = "ToggleButton"
+SpeedJumpToggle.Size = UDim2.fromOffset(26, 26)
+SpeedJumpToggle.AnchorPoint = Vector2.new(1, 0.5)
+SpeedJumpToggle.Position = UDim2.new(1, -12, 0.5, 0)
+SpeedJumpToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+SpeedJumpToggle.BorderSizePixel = 0
+SpeedJumpToggle.Text = ""
+SpeedJumpToggle.AutoButtonColor = false
+SpeedJumpToggle.Parent = SpeedJumpCard
+
+local SpeedJumpCorner = Instance.new("UICorner")
+SpeedJumpCorner.CornerRadius = UDim.new(0, 6)
+SpeedJumpCorner.Parent = SpeedJumpToggle
+
+local SpeedJumpStroke = Instance.new("UIStroke")
+SpeedJumpStroke.Color = Color3.fromRGB(39, 40, 48)
+SpeedJumpStroke.Thickness = 1
+SpeedJumpStroke.Parent = SpeedJumpToggle
+
+local SpeedJumpCheck = Instance.new("TextLabel")
+SpeedJumpCheck.Name = "CheckMark"
+SpeedJumpCheck.Size = UDim2.fromScale(1, 1)
+SpeedJumpCheck.BackgroundTransparency = 1
+SpeedJumpCheck.Text = "âœ”"
+SpeedJumpCheck.TextColor3 = Color3.new(1, 1, 1)
+SpeedJumpCheck.TextSize = 14
+SpeedJumpCheck.Font = Enum.Font.GothamBold
+SpeedJumpCheck.TextTransparency = 1
+SpeedJumpCheck.Parent = SpeedJumpToggle
+
+SpeedJumpToggle.Activated:Connect(function()
+    _G.SpeedNoPulo = not _G.SpeedNoPulo
+    local targetBg = _G.SpeedNoPulo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = _G.SpeedNoPulo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = _G.SpeedNoPulo and 0 or 1
+
+    TweenService:Create(SpeedJumpToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(SpeedJumpStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(SpeedJumpCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
+
+        -- ============================
+        -- BOTAO JUMP
+        -- ============================
+        local JampCard = Instance.new("Frame")
+        JampCard.Name = "JampCard"
+        JampCard.Size = UDim2.new(1, -6, 0, 85)
+        JampCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+        JampCard.BorderSizePixel = 0
+        JampCard.Parent = PageFrame
+
+        local JampCardCorner = Instance.new("UICorner")
+        JampCardCorner.CornerRadius = UDim.new(0, 10)
+        JampCardCorner.Parent = JampCard
+
+        local JampCardStroke = Instance.new("UIStroke")
+        JampCardStroke.Color = Color3.fromRGB(39, 40, 48)
+        JampCardStroke.Thickness = 1
+        JampCardStroke.Parent = JampCard
+
+        local JampTitle = Instance.new("TextLabel")
+        JampTitle.Name = "Title"
+        JampTitle.Size = UDim2.new(1, -60, 0, 36)
+        JampTitle.Position = UDim2.fromOffset(12, 0)
+        JampTitle.BackgroundTransparency = 1
+        JampTitle.Text = "Jump Power"
+        JampTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+        JampTitle.TextSize = 12
+        JampTitle.Font = Enum.Font.GothamSemibold
+        JampTitle.TextXAlignment = Enum.TextXAlignment.Left
+        JampTitle.Parent = JampCard
+
+        local JampToggleButton = Instance.new("TextButton")
+        JampToggleButton.Name = "ToggleButton"
+        JampToggleButton.Size = UDim2.fromOffset(26, 26)
+        JampToggleButton.AnchorPoint = Vector2.new(1, 0)
+        JampToggleButton.Position = UDim2.new(1, -12, 0, 5)
+        JampToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        JampToggleButton.BorderSizePixel = 0
+        JampToggleButton.Text = ""
+        JampToggleButton.AutoButtonColor = false
+        JampToggleButton.Parent = JampCard
+
+        local JampToggleCorner = Instance.new("UICorner")
+        JampToggleCorner.CornerRadius = UDim.new(0, 6)
+        JampToggleCorner.Parent = JampToggleButton
+
+        local JampToggleStroke = Instance.new("UIStroke")
+        JampToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+        JampToggleStroke.Thickness = 1
+        JampToggleStroke.Parent = JampToggleButton
+
+        local JampCheckMark = Instance.new("TextLabel")
+        JampCheckMark.Name = "CheckMark"
+        JampCheckMark.Size = UDim2.fromScale(1, 1)
+        JampCheckMark.BackgroundTransparency = 1
+        JampCheckMark.Text = "âœ”"
+        JampCheckMark.TextColor3 = Color3.new(1, 1, 1)
+        JampCheckMark.TextSize = 14
+        JampCheckMark.Font = Enum.Font.GothamBold
+        JampCheckMark.TextTransparency = 1
+        JampCheckMark.Parent = JampToggleButton
+
+        local JampSliderContainer = Instance.new("Frame")
+        JampSliderContainer.Name = "SliderContainer"
+        JampSliderContainer.Size = UDim2.new(1, -24, 0, 30)
+        JampSliderContainer.Position = UDim2.fromOffset(12, 44)
+        JampSliderContainer.BackgroundTransparency = 1
+        JampSliderContainer.Parent = JampCard
+
+        local JampSliderLabel = Instance.new("TextLabel")
+        JampSliderLabel.Name = "SliderLabel"
+        JampSliderLabel.Size = UDim2.new(1, 0, 0, 14)
+        JampSliderLabel.BackgroundTransparency = 1
+        JampSliderLabel.Text = "Jump: 50"
+        JampSliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+        JampSliderLabel.TextSize = 10
+        JampSliderLabel.Font = Enum.Font.GothamMedium
+        JampSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+        JampSliderLabel.Parent = JampSliderContainer
+
+        local JampSliderTrack = Instance.new("Frame")
+        JampSliderTrack.Name = "SliderTrack"
+        JampSliderTrack.Size = UDim2.new(1, 0, 0, 6)
+        JampSliderTrack.Position = UDim2.fromOffset(0, 18)
+        JampSliderTrack.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        JampSliderTrack.BorderSizePixel = 0
+        JampSliderTrack.Parent = JampSliderContainer
+
+        local JampSliderTrackCorner = Instance.new("UICorner")
+        JampSliderTrackCorner.CornerRadius = UDim.new(1, 0)
+        JampSliderTrackCorner.Parent = JampSliderTrack
+
+        local JampSliderFill = Instance.new("Frame")
+        JampSliderFill.Name = "SliderFill"
+        JampSliderFill.Size = UDim2.new(0, 0, 1, 0)
+        JampSliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+        JampSliderFill.BorderSizePixel = 0
+        JampSliderFill.Parent = JampSliderTrack
+
+        local JampSliderFillCorner = Instance.new("UICorner")
+        JampSliderFillCorner.CornerRadius = UDim.new(1, 0)
+        JampSliderFillCorner.Parent = JampSliderFill
+
+        local JampSliderButton = Instance.new("TextButton")
+        JampSliderButton.Name = "SliderButton"
+        JampSliderButton.Size = UDim2.new(1, 10, 1, 10)
+        JampSliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        JampSliderButton.Position = UDim2.new(0, 0, 0.5, 0)
+        JampSliderButton.BackgroundTransparency = 1
+        JampSliderButton.Text = ""
+        JampSliderButton.AutoButtonColor = false
+        JampSliderButton.Parent = JampSliderTrack
+
+-- ========================
+-- BOTAO DO PULO INFINITO 
+-- ========================
+-- (Insira este card dentro da sua ScrollingFrame/Page da aba Player)
+local InfJumpCard = Instance.new("Frame")
+InfJumpCard.Name = "InfJumpCard"
+InfJumpCard.Size = UDim2.new(1, -6, 0, 50)
+InfJumpCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+InfJumpCard.BorderSizePixel = 0
+InfJumpCard.Parent = PageFrame -- Altere para o nome da sua pÃ¡gina/container da aba Player se precisar
+
+local InfJumpCardCorner = Instance.new("UICorner")
+InfJumpCardCorner.CornerRadius = UDim.new(0, 10)
+InfJumpCardCorner.Parent = InfJumpCard
+
+local InfJumpCardStroke = Instance.new("UIStroke")
+InfJumpCardStroke.Color = Color3.fromRGB(39, 40, 48)
+InfJumpCardStroke.Thickness = 1
+InfJumpCardStroke.Parent = InfJumpCard
+
+local InfJumpTitle = Instance.new("TextLabel")
+InfJumpTitle.Name = "Title"
+InfJumpTitle.Size = UDim2.new(1, -60, 1, 0)
+InfJumpTitle.Position = UDim2.fromOffset(12, 0)
+InfJumpTitle.BackgroundTransparency = 1
+InfJumpTitle.Text = "Pulo Infinito (Inf Jump)"
+InfJumpTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+InfJumpTitle.TextSize = 12
+InfJumpTitle.Font = Enum.Font.GothamSemibold
+InfJumpTitle.TextXAlignment = Enum.TextXAlignment.Left
+InfJumpTitle.Parent = InfJumpCard
+
+local InfJumpToggleButton = Instance.new("TextButton")
+InfJumpToggleButton.Name = "ToggleButton"
+InfJumpToggleButton.Size = UDim2.fromOffset(26, 26)
+InfJumpToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+InfJumpToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+InfJumpToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+InfJumpToggleButton.BorderSizePixel = 0
+InfJumpToggleButton.Text = ""
+InfJumpToggleButton.AutoButtonColor = false
+InfJumpToggleButton.Parent = InfJumpCard
+
+local InfJumpToggleCorner = Instance.new("UICorner")
+InfJumpToggleCorner.CornerRadius = UDim.new(0, 6)
+InfJumpToggleCorner.Parent = InfJumpToggleButton
+
+local InfJumpToggleStroke = Instance.new("UIStroke")
+InfJumpToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+InfJumpToggleStroke.Thickness = 1
+InfJumpToggleStroke.Parent = InfJumpToggleButton
+
+local InfJumpCheckMark = Instance.new("TextLabel")
+InfJumpCheckMark.Name = "CheckMark"
+InfJumpCheckMark.Size = UDim2.fromScale(1, 1)
+InfJumpCheckMark.BackgroundTransparency = 1
+InfJumpCheckMark.Text = "âœ”"
+InfJumpCheckMark.TextColor3 = Color3.new(1, 1, 1)
+InfJumpCheckMark.TextSize = 14
+InfJumpCheckMark.Font = Enum.Font.GothamBold
+InfJumpCheckMark.TextTransparency = 1
+InfJumpCheckMark.Parent = InfJumpToggleButton
+
+InfJumpToggleButton.Activated:Connect(function()
+    _G.PuloInfinito = not _G.PuloInfinito
+    
+    local targetBgColor = _G.PuloInfinito and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = _G.PuloInfinito and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = _G.PuloInfinito and 0 or 1
+
+    TweenService:Create(InfJumpToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(InfJumpToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(InfJumpCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
+
+-- ============================
+-- BOTÃƒO FLY
+-- ============================
+local FlyCard = Instance.new("Frame")
+FlyCard.Name = "FlyCard"
+FlyCard.Size = UDim2.new(1, -6, 0, 85)
+FlyCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+FlyCard.BorderSizePixel = 0
+FlyCard.Parent = PageFrame
+
+local FlyCardCorner = Instance.new("UICorner")
+FlyCardCorner.CornerRadius = UDim.new(0, 10)
+FlyCardCorner.Parent = FlyCard
+
+local FlyCardStroke = Instance.new("UIStroke")
+FlyCardStroke.Color = Color3.fromRGB(39, 40, 48)
+FlyCardStroke.Thickness = 1
+FlyCardStroke.Parent = FlyCard
+
+local FlyTitle = Instance.new("TextLabel")
+FlyTitle.Name = "Title"
+FlyTitle.Size = UDim2.new(1, -60, 0, 36)
+FlyTitle.Position = UDim2.fromOffset(12, 0)
+FlyTitle.BackgroundTransparency = 1
+FlyTitle.Text = "Fly (Voo)"
+FlyTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+FlyTitle.TextSize = 12
+FlyTitle.Font = Enum.Font.GothamSemibold
+FlyTitle.TextXAlignment = Enum.TextXAlignment.Left
+FlyTitle.Parent = FlyCard
+
+local FlyToggleButton = Instance.new("TextButton")
+FlyToggleButton.Name = "ToggleButton"
+FlyToggleButton.Size = UDim2.fromOffset(26, 26)
+FlyToggleButton.AnchorPoint = Vector2.new(1, 0)
+FlyToggleButton.Position = UDim2.new(1, -12, 0, 5)
+FlyToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+FlyToggleButton.BorderSizePixel = 0
+FlyToggleButton.Text = ""
+FlyToggleButton.AutoButtonColor = false
+FlyToggleButton.Parent = FlyCard
+
+local FlyToggleCorner = Instance.new("UICorner")
+FlyToggleCorner.CornerRadius = UDim.new(0, 6)
+FlyToggleCorner.Parent = FlyToggleButton
+
+local FlyToggleStroke = Instance.new("UIStroke")
+FlyToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+FlyToggleStroke.Thickness = 1
+FlyToggleStroke.Parent = FlyToggleButton
+
+local FlyCheckMark = Instance.new("TextLabel")
+FlyCheckMark.Name = "CheckMark"
+FlyCheckMark.Size = UDim2.fromScale(1, 1)
+FlyCheckMark.BackgroundTransparency = 1
+FlyCheckMark.Text = "âœ”"
+FlyCheckMark.TextColor3 = Color3.new(1, 1, 1)
+FlyCheckMark.TextSize = 14
+FlyCheckMark.Font = Enum.Font.GothamBold
+FlyCheckMark.TextTransparency = 1
+FlyCheckMark.Parent = FlyToggleButton
+
+local FlySliderContainer = Instance.new("Frame")
+FlySliderContainer.Name = "SliderContainer"
+FlySliderContainer.Size = UDim2.new(1, -24, 0, 30)
+FlySliderContainer.Position = UDim2.fromOffset(12, 44)
+FlySliderContainer.BackgroundTransparency = 1
+FlySliderContainer.Parent = FlyCard
+
+local FlySliderLabel = Instance.new("TextLabel")
+FlySliderLabel.Name = "SliderLabel"
+FlySliderLabel.Size = UDim2.new(1, 0, 0, 14)
+FlySliderLabel.BackgroundTransparency = 1
+FlySliderLabel.Text = "Velocidade Voo: 50"
+FlySliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+FlySliderLabel.TextSize = 10
+FlySliderLabel.Font = Enum.Font.GothamMedium
+FlySliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+FlySliderLabel.Parent = FlySliderContainer
+
+local FlySliderTrack = Instance.new("Frame")
+FlySliderTrack.Name = "SliderTrack"
+FlySliderTrack.Size = UDim2.new(1, 0, 0, 6)
+FlySliderTrack.Position = UDim2.fromOffset(0, 18)
+FlySliderTrack.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+FlySliderTrack.BorderSizePixel = 0
+FlySliderTrack.Parent = FlySliderContainer
+
+local FlySliderTrackCorner = Instance.new("UICorner")
+FlySliderTrackCorner.CornerRadius = UDim.new(1, 0)
+FlySliderTrackCorner.Parent = FlySliderTrack
+
+local FlySliderFill = Instance.new("Frame")
+FlySliderFill.Name = "SliderFill"
+FlySliderFill.Size = UDim2.new(0, 0, 1, 0)
+FlySliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+FlySliderFill.BorderSizePixel = 0
+FlySliderFill.Parent = FlySliderTrack
+
+local FlySliderFillCorner = Instance.new("UICorner")
+FlySliderFillCorner.CornerRadius = UDim.new(1, 0)
+FlySliderFillCorner.Parent = FlySliderFill
+
+local FlySliderButton = Instance.new("TextButton")
+FlySliderButton.Name = "SliderButton"
+FlySliderButton.Size = UDim2.new(1, 10, 1, 10)
+FlySliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+FlySliderButton.Position = UDim2.new(0, 0, 0.5, 0)
+FlySliderButton.BackgroundTransparency = 1
+FlySliderButton.Text = ""
+FlySliderButton.AutoButtonColor = false
+FlySliderButton.Parent = FlySliderTrack
+
+-- =============================
+-- 1. VARIÃVEIS DO WALK FLING
+-- =============================
+local WalkFlingAtivo = false
+local FlingPower = 50000
+local FlingConnection = nil
+
+-- =============================
+-- 2. SISTEMA DO WALK FLING (FunÃ§Ã£o declarada ANTES do botÃ£o)
+-- =============================
+local function ToggleWalkFling(state)
+    WalkFlingAtivo = state
+
+    if not WalkFlingAtivo then
+        if FlingConnection then
+            FlingConnection:Disconnect()
+            FlingConnection = nil
+        end
+        return
+    end
+
+    FlingConnection = RunService.Heartbeat:Connect(function()
+        if not WalkFlingAtivo then return end
+
+        local char = player.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+
+        if hrp and humanoid then
+            for _, part in ipairs(char:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+
+            local oldCFrame = hrp.CFrame
+            local vel = hrp.AssemblyLinearVelocity
+
+            hrp.CFrame = oldCFrame * CFrame.Angles(0, math.rad(math.random(1, 360)), 0)
+            hrp.AssemblyAngularVelocity = Vector3.new(0, FlingPower, 0)
+
+            RunService.RenderStepped:Wait()
+            if hrp then
+                hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                if humanoid.MoveDirection.Magnitude > 0 then
+                    hrp.AssemblyLinearVelocity = vel
+                else
+                    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                end
+            end
+        end
+    end)
+end
+
+player.CharacterAdded:Connect(function()
+    if WalkFlingAtivo then
+        task.wait(1.5)
+        ToggleWalkFling(true)
+    end
+end)
+
+-- =============================
+-- 3. BOTÃƒO DO WALK FLING (Criado DEPOIS da funÃ§Ã£o existir)
+-- =============================
+local WalkFlingCard = Instance.new("Frame")
+WalkFlingCard.Name = "WalkFlingCard"
+WalkFlingCard.Size = UDim2.new(1, -6, 0, 50)
+WalkFlingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+WalkFlingCard.BorderSizePixel = 0
+WalkFlingCard.Parent = PageFrame
+
+local WalkFlingCorner = Instance.new("UICorner")
+WalkFlingCorner.CornerRadius = UDim.new(0, 10)
+WalkFlingCorner.Parent = WalkFlingCard
+
+local WalkFlingStroke = Instance.new("UIStroke")
+WalkFlingStroke.Color = Color3.fromRGB(39, 40, 48)
+WalkFlingStroke.Thickness = 1
+WalkFlingStroke.Parent = WalkFlingCard
+
+local WalkFlingTitle = Instance.new("TextLabel")
+WalkFlingTitle.Name = "Title"
+WalkFlingTitle.Size = UDim2.new(1, -60, 1, 0)
+WalkFlingTitle.Position = UDim2.fromOffset(12, 0)
+WalkFlingTitle.BackgroundTransparency = 1
+WalkFlingTitle.Text = "Walk Fling"
+WalkFlingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+WalkFlingTitle.TextSize = 12
+WalkFlingTitle.Font = Enum.Font.GothamSemibold
+WalkFlingTitle.TextXAlignment = Enum.TextXAlignment.Left
+WalkFlingTitle.Parent = WalkFlingCard
+
+local WalkFlingToggle = Instance.new("TextButton")
+WalkFlingToggle.Name = "ToggleButton"
+WalkFlingToggle.Size = UDim2.fromOffset(26, 26)
+WalkFlingToggle.AnchorPoint = Vector2.new(1, 0.5)
+WalkFlingToggle.Position = UDim2.new(1, -12, 0.5, 0)
+WalkFlingToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+WalkFlingToggle.BorderSizePixel = 0
+WalkFlingToggle.Text = ""
+WalkFlingToggle.AutoButtonColor = false
+WalkFlingToggle.Parent = WalkFlingCard
+
+local WalkFlingBtnCorner = Instance.new("UICorner")
+WalkFlingBtnCorner.CornerRadius = UDim.new(0, 6)
+WalkFlingBtnCorner.Parent = WalkFlingToggle
+
+local WalkFlingBtnStroke = Instance.new("UIStroke")
+WalkFlingBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+WalkFlingBtnStroke.Thickness = 1
+WalkFlingBtnStroke.Parent = WalkFlingToggle
+
+local WalkFlingCheck = Instance.new("TextLabel")
+WalkFlingCheck.Name = "CheckMark"
+WalkFlingCheck.Size = UDim2.fromScale(1, 1)
+WalkFlingCheck.BackgroundTransparency = 1
+WalkFlingCheck.Text = "âœ”"
+WalkFlingCheck.TextColor3 = Color3.new(1, 1, 1)
+WalkFlingCheck.TextSize = 14
+WalkFlingCheck.Font = Enum.Font.GothamBold
+WalkFlingCheck.TextTransparency = 1
+WalkFlingCheck.Parent = WalkFlingToggle
+
+WalkFlingToggle.Activated:Connect(function()
+    local newState = not WalkFlingAtivo
+    ToggleWalkFling(newState)
+
+    local targetBg = newState and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = newState and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = newState and 0 or 1
+
+    TweenService:Create(WalkFlingToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(WalkFlingBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(WalkFlingCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
+
+-- =============================
+-- ANTI-FLING (BotÃ£o)
+-- =============================
+local AntiFlingCard = Instance.new("Frame")
+AntiFlingCard.Name = "AntiFlingCard"
+AntiFlingCard.Size = UDim2.new(1, -6, 0, 50)
+AntiFlingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+AntiFlingCard.BorderSizePixel = 0
+AntiFlingCard.Parent = PageFrame
+
+local AntiFlingCorner = Instance.new("UICorner")
+AntiFlingCorner.CornerRadius = UDim.new(0, 10)
+AntiFlingCorner.Parent = AntiFlingCard
+
+local AntiFlingStroke = Instance.new("UIStroke")
+AntiFlingStroke.Color = Color3.fromRGB(39, 40, 48)
+AntiFlingStroke.Thickness = 1
+AntiFlingStroke.Parent = AntiFlingCard
+
+local AntiFlingTitle = Instance.new("TextLabel")
+AntiFlingTitle.Name = "Title"
+AntiFlingTitle.Size = UDim2.new(1, -60, 1, 0)
+AntiFlingTitle.Position = UDim2.fromOffset(12, 0)
+AntiFlingTitle.BackgroundTransparency = 1
+AntiFlingTitle.Text = "Anti-Fling"
+AntiFlingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+AntiFlingTitle.TextSize = 12
+AntiFlingTitle.Font = Enum.Font.GothamSemibold
+AntiFlingTitle.TextXAlignment = Enum.TextXAlignment.Left
+AntiFlingTitle.Parent = AntiFlingCard
+
+local AntiFlingToggle = Instance.new("TextButton")
+AntiFlingToggle.Name = "ToggleButton"
+AntiFlingToggle.Size = UDim2.fromOffset(26, 26)
+AntiFlingToggle.AnchorPoint = Vector2.new(1, 0.5)
+AntiFlingToggle.Position = UDim2.new(1, -12, 0.5, 0)
+AntiFlingToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+AntiFlingToggle.BorderSizePixel = 0
+AntiFlingToggle.Text = ""
+AntiFlingToggle.AutoButtonColor = false
+AntiFlingToggle.Parent = AntiFlingCard
+
+local AntiFlingBtnCorner = Instance.new("UICorner")
+AntiFlingBtnCorner.CornerRadius = UDim.new(0, 6)
+AntiFlingBtnCorner.Parent = AntiFlingToggle
+
+local AntiFlingBtnStroke = Instance.new("UIStroke")
+AntiFlingBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+AntiFlingBtnStroke.Thickness = 1
+AntiFlingBtnStroke.Parent = AntiFlingToggle
+
+local AntiFlingCheck = Instance.new("TextLabel")
+AntiFlingCheck.Name = "CheckMark"
+AntiFlingCheck.Size = UDim2.fromScale(1, 1)
+AntiFlingCheck.BackgroundTransparency = 1
+AntiFlingCheck.Text = "âœ”"
+AntiFlingCheck.TextColor3 = Color3.new(1, 1, 1)
+AntiFlingCheck.TextSize = 14
+AntiFlingCheck.Font = Enum.Font.GothamBold
+AntiFlingCheck.TextTransparency = 1
+AntiFlingCheck.Parent = AntiFlingToggle
+
+AntiFlingToggle.Activated:Connect(function()
+    _G.AntiFling = not _G.AntiFling
+    local targetBg = _G.AntiFling and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = _G.AntiFling and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = _G.AntiFling and 0 or 1
+
+    TweenService:Create(AntiFlingToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(AntiFlingBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(AntiFlingCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
+
+        -- ============================
+        -- LÃ“GICA DO SLIDER DE SPEED
+        -- ============================
+        local function UpdateSpeedSlider(InputPosition)
+            local TrackPos = SpeedSliderTrack.AbsolutePosition.X
+            local TrackSize = SpeedSliderTrack.AbsoluteSize.X
+            local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
+            local Percentage = ClampedX / TrackSize
+
+            CurrentSpeed = math.floor(SpeedMinVal + (SpeedMaxVal - SpeedMinVal) * Percentage + 0.5)
+            SpeedSliderLabel.Text = "Velocidade: " .. tostring(CurrentSpeed)
+
+            TweenService:Create(SpeedSliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
+            TweenService:Create(SpeedSliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, 0)}):Play()
+        end
+
+        SpeedSliderButton.InputBegan:Connect(function(Input)
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not SpeedActiveInput then
+                SpeedActiveInput = Input
+                SpeedSliding = true
+            end
+        end)
+
+        SpeedSliderTrack.InputBegan:Connect(function(Input)
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not SpeedActiveInput then
+                SpeedActiveInput = Input
+                SpeedSliding = true
+                UpdateSpeedSlider(Input.Position.X)
+            end
+        end)
+
+        UserInputService.InputEnded:Connect(function(Input)
+            if Input == SpeedActiveInput then
+                SpeedSliding = false
+                SpeedActiveInput = nil
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(Input)
+            if SpeedSliding and Input == SpeedActiveInput and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+                UpdateSpeedSlider(Input.Position.X)
+            end
+        end)
+
+        SpeedToggleButton.Activated:Connect(function()
+            SpeedEnabled = not SpeedEnabled
+
+            local targetBgColor = SpeedEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+            local targetStrokeColor = SpeedEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+            local targetTextTrans = SpeedEnabled and 0 or 1
+
+            TweenService:Create(SpeedToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+            TweenService:Create(SpeedToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+            TweenService:Create(SpeedCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+            
+            if not SpeedEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                Player.Character.Humanoid.WalkSpeed = 16
+            end
+        end)
+
+        -- ============================
+        -- LÃ“GICA DO SLIDER DE JUMP
+        -- ============================
+        local function UpdateJampSlider(InputPosition)
+            local TrackPos = JampSliderTrack.AbsolutePosition.X
+            local TrackSize = JampSliderTrack.AbsoluteSize.X
+            local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
+            local Percentage = ClampedX / TrackSize
+
+            CurrentJamp = math.floor(JampMinVal + (JampMaxVal - JampMinVal) * Percentage + 0.5)
+            JampSliderLabel.Text = "Jump: " .. tostring(CurrentJamp)
+
+            TweenService:Create(JampSliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
+            TweenService:Create(JampSliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, 0)}):Play()
+        end
+
+        JampSliderButton.InputBegan:Connect(function(Input)
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not JampActiveInput then
+                JampActiveInput = Input
+                JampSliding = true
+            end
+        end)
+
+        JampSliderTrack.InputBegan:Connect(function(Input)
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not JampActiveInput then
+                JampActiveInput = Input
+                JampSliding = true
+                UpdateJampSlider(Input.Position.X)
+            end
+        end)
+
+        UserInputService.InputEnded:Connect(function(Input)
+            if Input == JampActiveInput then
+                JampSliding = false
+                JampActiveInput = nil
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(Input)
+            if JampSliding and Input == JampActiveInput and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+                UpdateJampSlider(Input.Position.X)
+            end
+        end)
+
+        JampToggleButton.Activated:Connect(function()
+            JampEnabled = not JampEnabled
+
+            local targetBgColor = JampEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+            local targetStrokeColor = JampEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+            local targetTextTrans = JampEnabled and 0 or 1
+
+            TweenService:Create(JampToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+            TweenService:Create(JampToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+            TweenService:Create(JampCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+            
+            if not JampEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                Player.Character.Humanoid.UseJumpPower = true
+                Player.Character.Humanoid.JumpPower = 50
+            end
+        end)
+
+-- ============================
+-- SLIDER DO FLY
+-- ============================
+local function UpdateFlySlider(InputPosition)
+    local TrackPos = FlySliderTrack.AbsolutePosition.X
+    local TrackSize = FlySliderTrack.AbsoluteSize.X
+    local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
+    local Percentage = ClampedX / TrackSize
+
+    FlyVelocidade = math.floor(FlyMinVal + (FlyMaxVal - FlyMinVal) * Percentage + 0.5)
+    FlySliderLabel.Text = "Velocidade Voo: " .. tostring(FlyVelocidade)
+
+    TweenService:Create(FlySliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
+    TweenService:Create(FlySliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, 0)}):Play()
+end
+
+FlySliderButton.InputBegan:Connect(function(Input)
+    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not FlyActiveInput then
+        FlyActiveInput = Input
+        FlySliding = true
+    end
+end)
+
+FlySliderTrack.InputBegan:Connect(function(Input)
+    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not FlyActiveInput then
+        FlyActiveInput = Input
+        FlySliding = true
+        UpdateFlySlider(Input.Position.X)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input == FlyActiveInput then
+        FlySliding = false
+        FlyActiveInput = nil
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(Input)
+    if FlySliding and Input == FlyActiveInput and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+        UpdateFlySlider(Input.Position.X)
+    end
+end)
+
+        -- ============================
+        -- LOOP PRINCIPAL UNIFICADO
+        -- ============================
+        task.spawn(function()
+            while true do
+                if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                    local Humanoid = Player.Character.Humanoid
+                    
+                    if SpeedEnabled then
+                        Humanoid.WalkSpeed = CurrentSpeed
+                    else
+                        Humanoid.WalkSpeed = 16
+                    end
+
+                    Humanoid.UseJumpPower = true
+                    if JampEnabled then
+                        Humanoid.JumpPower = CurrentJamp
+                    else
+                        Humanoid.JumpPower = 50
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+
+-- ====================
+-- SISTEMA DO SPEED GLITH 
+-- ====================
+RunService.Stepped:Connect(function()
+    local Char = player.Character
+
+    if not Char or not Char:FindFirstChild("Humanoid") then
+        return
+    end
+
+    local Hum = Char.Humanoid
+
+    if _G.SpeedNoPulo then
+        if Hum.FloorMaterial == Enum.Material.Air then
+            Hum.WalkSpeed = VelocidadeNoPulo
+        else
+            Hum.WalkSpeed = VelocidadePadrao
+        end
+    end
+end)
+
+-- ======================
+-- SISTEMA DO PULO INFINITO 
+-- ======================
+UserInputService.JumpRequest:Connect(function()
+    if _G.PuloInfinito then
+        local Char = player.Character
+
+        if Char and Char:FindFirstChild("Humanoid") then
+            Char.Humanoid:ChangeState(
+                Enum.HumanoidStateType.Jumping
+            )
+        end
+    end
+end)
+
+-- ============================
+-- SISTEMA DO FLY
+-- ============================
+local function StartFly()
+    local c = player.Character
+    if not c then return end
+    local h = c:FindFirstChild("Humanoid")
+    local r = c:FindFirstChild("HumanoidRootPart")
+    if not h or not r then return end
+
+    if bv then bv:Destroy() end
+    if bg then bg:Destroy() end
+
+    bv = Instance.new("BodyVelocity")
+    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    bv.Velocity = Vector3.new(0, 0, 0)
+    bv.P = 3000
+    bv.Parent = r
+
+    bg = Instance.new("BodyGyro")
+    bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+    bg.P = 30000
+    bg.D = 500
+    bg.CFrame = r.CFrame
+    bg.Parent = r
+
+    h.PlatformStand = true
+
+    if con then con:Disconnect() end
+    con = RunService.Heartbeat:Connect(function()
+        if not FlyAtivo or not bv or not bg then return end
+        local cam = workspace.CurrentCamera
+        local m = controls:GetMoveVector()
+        local dir = (cam.CFrame.RightVector * m.X) + (cam.CFrame.LookVector * -m.Z)
+        
+        bv.Velocity = dir * FlyVelocidade
+        bg.CFrame = cam.CFrame
+    end)
+end
+
+local function StopFly()
+    FlyAtivo = false
+    if con then con:Disconnect() con = nil end
+    if bv then bv:Destroy() bv = nil end
+    if bg then bg:Destroy() bg = nil end
+
+    local c = player.Character
+    if c and c:FindFirstChild("Humanoid") then
+        c.Humanoid.PlatformStand = false
+    end
+end
+
+local function ToggleFly(state)
+    FlyAtivo = state
+    if FlyAtivo then
+        StartFly()
+    else
+        StopFly()
+    end
+end
+
+FlyToggleButton.Activated:Connect(function()
+    local newState = not FlyAtivo
+    ToggleFly(newState)
+
+    local targetBgColor = newState and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = newState and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = newState and 0 or 1
+
+    TweenService:Create(FlyToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(FlyToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(FlyCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
+
+player.CharacterAdded:Connect(function()
+    task.wait(0.8)
+    if FlyAtivo then 
+        StartFly() 
+    end
+end)
+
+-- =============================
+-- ANTI-FLING (Sistema)
+-- =============================
+task.spawn(function()
+    while true do
+        if _G.AntiFling then
+            pcall(function()
+                for _, OtherPlayer in ipairs(game:GetService("Players"):GetPlayers()) do
+                    if OtherPlayer ~= player and OtherPlayer.Character then
+                        for _, Part in ipairs(OtherPlayer.Character:GetChildren()) do
+                            if Part:IsA("BasePart") then
+                                Part.CanCollide = false
+                                Part.AssemblyLinearVelocity = Vector3.zero
+                                Part.AssemblyAngularVelocity = Vector3.zero
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+        game:GetService("RunService").Stepped:Wait()
+    end
+end)
+
+-- ================================================
+-- ABA SETTINGS
+-- ================================================
+    elseif TabData.Name == "Settings" then
+
+
+
+    end
+
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ListLayout.Padding = UDim.new(0, 8)
+    ListLayout.Parent = PageFrame
+
+    local PagePadding = Instance.new("UIPadding")
+    PagePadding.PaddingTop = UDim.new(0, 4)
+    PagePadding.PaddingBottom = UDim.new(0, 8)
+    PagePadding.PaddingRight = UDim.new(0, 6)
+    PagePadding.Parent = PageFrame
+
+    -- Configurado para atualizar o tamanho do canvas automaticamente via UIListLayout
+    ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        PageFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 20)
+    end)
+
+    TabFrames[Index] = PageFrame
+
+    local Button = Instance.new("TextButton")
+    Button.Name = TabData.Name
+    Button.Size = UDim2.new(1, -12, 0, 42)
+    Button.Position = UDim2.fromOffset(6, 10 + ((Index - 1) * 48))
+    Button.BackgroundColor3 = Theme.Card
+    Button.BackgroundTransparency = (Index == 1) and 0 or 1
+    Button.BorderSizePixel = 0
+    Button.Text = ""
+    Button.AutoButtonColor = false
+    Button.Parent = Sidebar
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 10)
+    Corner.Parent = Button
+
+    local Indicator = Instance.new("Frame")
+    Indicator.Name = "Indicator"
+    Indicator.Size = UDim2.fromOffset(3, 20)
+    Indicator.Position = UDim2.new(0, 0, 0.5, -10)
+    Indicator.BackgroundColor3 = Theme.Accent
+    Indicator.BorderSizePixel = 0
+    Indicator.Visible = (Index == 1)
+    Indicator.Parent = Button
+
+    local IndicatorCorner = Instance.new("UICorner")
+    IndicatorCorner.CornerRadius = UDim.new(1, 0)
+    IndicatorCorner.Parent = Indicator
+
+    local IconHolder = Instance.new("Frame")
+    IconHolder.Name = "IconHolder"
+    IconHolder.Size = UDim2.fromOffset(30, 30)
+    IconHolder.Position = UDim2.fromOffset(8, 6)
+    IconHolder.BackgroundTransparency = 1
+    IconHolder.Parent = Button
+
+    local InitialColor = (Index == 1) and Theme.AccentBright or Theme.TextSecondary
+
+    if TabData.IsCustom then
+        CreateDirectPlayerIcon(IconHolder, InitialColor)
+    elseif TabData.IsTextIcon then
+        CreateDollarIcon(IconHolder, InitialColor, TabData.CustomSize or 32)
+    else
+        CreateLucideIcon(IconHolder, TabData.Icon, InitialColor, 20)
+    end
+
+    local NameLabel = Instance.new("TextLabel")
+    NameLabel.Name = "Name"
+    NameLabel.Size = UDim2.new(1, -48, 1, 0)
+    NameLabel.Position = UDim2.fromOffset(46, 0)
+    NameLabel.BackgroundTransparency = 1
+    NameLabel.Text = TabData.Name
+    NameLabel.TextColor3 = (Index == 1) and Theme.Text or Theme.TextSecondary
+    NameLabel.TextSize = 11
+    NameLabel.Font = Enum.Font.GothamSemibold
+    NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    NameLabel.TextTransparency = 1
+    NameLabel.Parent = Button
+
+    TabButtons[Index] = Button
+
+    Button.Activated:Connect(function()
+        if CurrentTabIndex == Index then return end
+        CurrentTabIndex = Index
+
+        for Number, OtherButton in ipairs(TabButtons) do
+            local Selected = (Number == Index)
+
+            OtherButton.BackgroundTransparency = Selected and 0 or 1
+
+            local OtherName = OtherButton:FindFirstChild("Name")
+            if OtherName then
+                OtherName.TextColor3 = Selected and Theme.Text or Theme.TextSecondary
+            end
+
+            local OtherIndicator = OtherButton:FindFirstChild("Indicator")
+            if OtherIndicator then
+                OtherIndicator.Visible = Selected
+            end
+
+            local OtherIconHolder = OtherButton:FindFirstChild("IconHolder")
+            if OtherIconHolder then
+                local TargetColor = Selected and Theme.AccentBright or Theme.TextSecondary
+                local ImageIcon = OtherIconHolder:FindFirstChild("Icon")
+                if ImageIcon then
+                    if ImageIcon:IsA("ImageLabel") then
+                        ImageIcon.ImageColor3 = TargetColor
+                    elseif ImageIcon:IsA("TextLabel") then
+                        ImageIcon.TextColor3 = TargetColor
+                    end
+                end
+
+                local DirectIcon = OtherIconHolder:FindFirstChild("DirectPlayerIcon")
+                if DirectIcon then
+                    local Head = DirectIcon:FindFirstChild("Head")
+                    local BodyPart = DirectIcon:FindFirstChild("BodyPart")
+                    if Head then Head.BackgroundColor3 = TargetColor end
+                    if BodyPart then BodyPart.BackgroundColor3 = TargetColor end
+                end
+            end
+
+            if TabFrames[Number] then
+                TabFrames[Number].Visible = Selected
+            end
+        end
+    end)
+end
+
+--==============================================================--
+-- EXPANDIR SIDEBAR
+--==============================================================--
+
+local function SetSidebarExpanded(State)
+    SidebarExpanded = State
+
+    local Width = State and 155 or 66
+    local ContentX = State and 161 or 72
+    local ContentWidth = State and -169 or -80
+
+    TweenService:Create(Sidebar, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, Width, 1, 0)
+    }):Play()
+
+    TweenService:Create(ContentContainer, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        Position = UDim2.fromOffset(ContentX, 0),
+        Size = UDim2.new(1, ContentWidth, 1, -10)
+    }):Play()
+
+    for _, Button in ipairs(TabButtons) do
+        local NameLabel = Button:FindFirstChild("Name")
+        if NameLabel then
+            TweenService:Create(NameLabel, TweenInfo.new(0.18), {
+                TextTransparency = State and 0 or 1
+            }):Play()
+        end
+    end
+end
+
+MM2Button.Activated:Connect(function()
+    SetSidebarExpanded(not SidebarExpanded)
+end)
+
+--==============================================================--
+-- ARRASTAR JANELA
+--==============================================================--
+
+Header.InputBegan:Connect(function(Input)
+    if Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch then return end
+    DraggingWindow = true
+
+    local StartPosition = Input.Position
+    local StartWindowPosition = Main.Position
+
+    TweenService:Create(Main, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(math.floor(CurrentWidth * 1.03), math.floor(CurrentHeight * 1.03))
+    }):Play()
+
+    local Changed, Ended
+    Changed = UserInputService.InputChanged:Connect(function(Change)
+        if not DraggingWindow then return end
+        if Change.UserInputType == Enum.UserInputType.MouseMovement or Change.UserInputType == Enum.UserInputType.Touch then
+            local Delta = Change.Position - StartPosition
+            local ViewportSize = workspace.CurrentCamera.ViewportSize
+
+            local RawX = StartWindowPosition.X.Offset + Delta.X
+            local RawY = StartWindowPosition.Y.Offset + Delta.Y
+
+            local HalfW = (CurrentWidth * 1.03) / 2
+            local HalfH = (CurrentHeight * 1.03) / 2
+
+            local MinX = HalfW - (ViewportSize.X * 0.5)
+            local MaxX = (ViewportSize.X * 0.5) - HalfW
+            local MinY = HalfH - (ViewportSize.Y * 0.5)
+            local MaxY = (ViewportSize.Y * 0.5) - HalfH
+
+            Main.Position = UDim2.new(0.5, math.clamp(RawX, MinX, MaxX), 0.5, math.clamp(RawY, MinY, MaxY))
+        end
+    end)
+
+    Ended = UserInputService.InputEnded:Connect(function(EndedInput)
+        if EndedInput.UserInputType == Enum.UserInputType.MouseButton1 or EndedInput.UserInputType == Enum.UserInputType.Touch then
+            DraggingWindow = false
+            TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = UDim2.fromOffset(CurrentWidth, CurrentHeight)
+            }):Play()
+            if Changed then Changed:Disconnect() end
+            if Ended then Ended:Disconnect() end
+        end
+    end)
+end)
+
+--==============================================================--
+-- RESIZE
+--==============================================================--
+
+local ResizeButton = Instance.new("TextButton")
+ResizeButton.Name = "Resize"
+ResizeButton.Size = UDim2.fromOffset(30, 30)
+ResizeButton.AnchorPoint = Vector2.new(1, 1)
+ResizeButton.Position = UDim2.new(1, -2, 1, -2)
+ResizeButton.BackgroundTransparency = 1
+ResizeButton.Text = ""
+ResizeButton.AutoButtonColor = false
+ResizeButton.ZIndex = 40
+ResizeButton.Parent = Main
+
+for i = 1, 3 do
+    local Line = Instance.new("Frame")
+    Line.Size = UDim2.fromOffset(2, 7)
+    Line.Position = UDim2.fromOffset(17 + ((i - 1) * 4), 17 - ((i - 1) * 4))
+    Line.Rotation = -45
+    Line.BackgroundColor3 = Theme.Accent
+    Line.BorderSizePixel = 0
+    Line.ZIndex = 41
+    Line.Parent = ResizeButton
+end
+
+ResizeButton.InputBegan:Connect(function(Input)
+    if Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch then return end
+    Resizing = true
+
+    local StartPosition = Input.Position
+    local StartWidth = Main.AbsoluteSize.X
+    local StartHeight = Main.AbsoluteSize.Y
+    local Changed, Ended
+
+    Changed = UserInputService.InputChanged:Connect(function(Change)
+        if not Resizing then return end
+        if Change.UserInputType == Enum.UserInputType.MouseMovement or Change.UserInputType == Enum.UserInputType.Touch then
+            local Delta = Change.Position - StartPosition
+            CurrentWidth = math.clamp(StartWidth + Delta.X, MIN_WIDTH, MAX_WIDTH)
+            CurrentHeight = math.clamp(StartHeight + Delta.Y, MIN_HEIGHT, MAX_HEIGHT)
+            Main.Size = UDim2.fromOffset(CurrentWidth, CurrentHeight)
+        end
+    end)
+
+    Ended = UserInputService.InputEnded:Connect(function(EndedInput)
+        if EndedInput.UserInputType == Enum.UserInputType.MouseButton1 or EndedInput.UserInputType == Enum.UserInputType.Touch then
+            Resizing = false
+            if Changed then Changed:Disconnect() end
+            if Ended then Ended:Disconnect() end
+        end
+    end)
+end)
+
+--==============================================================--
+-- CONFIRMAÃ‡ÃƒO / FECHAMENTO
+--==============================================================--
+
+local ConfirmOverlay = Instance.new("Frame")
+ConfirmOverlay.Name = "ConfirmOverlay"
+ConfirmOverlay.Size = UDim2.fromScale(1, 1)
+ConfirmOverlay.BackgroundColor3 = Color3.new(0, 0, 0)
+ConfirmOverlay.BackgroundTransparency = 0.38
+ConfirmOverlay.Visible = false
+ConfirmOverlay.ZIndex = 50
+ConfirmOverlay.Parent = Main
+
+local ConfirmCard = Instance.new("Frame")
+ConfirmCard.Name = "ConfirmCard"
+ConfirmCard.Size = UDim2.fromOffset(285, 155)
+ConfirmCard.AnchorPoint = Vector2.new(0.5, 0.5)
+ConfirmCard.Position = UDim2.fromScale(0.5, 0.5)
+ConfirmCard.BackgroundColor3 = Theme.Card
+ConfirmCard.BorderSizePixel = 0
+ConfirmCard.ZIndex = 51
+ConfirmCard.Parent = ConfirmOverlay
+
+local ConfirmCorner = Instance.new("UICorner")
+ConfirmCorner.CornerRadius = UDim.new(0, 15)
+ConfirmCorner.Parent = ConfirmCard
+
+local ConfirmStroke = Instance.new("UIStroke")
+ConfirmStroke.Color = Theme.Border
+ConfirmStroke.Thickness = 1
+ConfirmStroke.Parent = ConfirmCard
+
+local ConfirmRedLine = Instance.new("Frame")
+ConfirmRedLine.Name = "RedLine"
+ConfirmRedLine.Size = UDim2.new(0, 3, 1, -30)
+ConfirmRedLine.Position = UDim2.fromOffset(0, 15)
+ConfirmRedLine.BackgroundColor3 = Theme.Accent
+ConfirmRedLine.BorderSizePixel = 0
+ConfirmRedLine.ZIndex = 53
+ConfirmRedLine.Parent = ConfirmCard
+
+local ConfirmRedCorner = Instance.new("UICorner")
+ConfirmRedCorner.CornerRadius = UDim.new(1, 0)
+ConfirmRedCorner.Parent = ConfirmRedLine
+
+local ConfirmRedGradient = Instance.new("UIGradient")
+ConfirmRedGradient.Rotation = 90
+ConfirmRedGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Theme.AccentDark),
+    ColorSequenceKeypoint.new(0.5, Theme.AccentBright),
+    ColorSequenceKeypoint.new(1, Theme.AccentDark),
+})
+ConfirmRedGradient.Parent = ConfirmRedLine
+
+local ConfirmTitle = Instance.new("TextLabel")
+ConfirmTitle.Size = UDim2.new(1, -40, 0, 25)
+ConfirmTitle.Position = UDim2.fromOffset(20, 18)
+ConfirmTitle.BackgroundTransparency = 1
+ConfirmTitle.Text = "Close Walk Nyx Project?"
+ConfirmTitle.TextColor3 = Theme.Text
+ConfirmTitle.TextSize = 15
+ConfirmTitle.Font = Enum.Font.GothamBold
+ConfirmTitle.TextXAlignment = Enum.TextXAlignment.Left
+ConfirmTitle.ZIndex = 54
+ConfirmTitle.Parent = ConfirmCard
+
+local ConfirmText = Instance.new("TextLabel")
+ConfirmText.Size = UDim2.new(1, -40, 0, 30)
+ConfirmText.Position = UDim2.fromOffset(20, 47)
+ConfirmText.BackgroundTransparency = 1
+ConfirmText.Text = "Do you really want to close Walk Nyx?"
+ConfirmText.TextColor3 = Theme.TextSecondary
+ConfirmText.TextSize = 10
+ConfirmText.Font = Enum.Font.GothamMedium
+ConfirmText.TextXAlignment = Enum.TextXAlignment.Left
+ConfirmText.ZIndex = 54
+ConfirmText.Parent = ConfirmCard
+
+local YesButton = Instance.new("TextButton")
+YesButton.Name = "YesButton"
+YesButton.Size = UDim2.fromOffset(125, 35)
+YesButton.Position = UDim2.fromOffset(20, 105)
+YesButton.BackgroundColor3 = Theme.Accent
+YesButton.BorderSizePixel = 0
+YesButton.Text = "YES"
+YesButton.TextColor3 = Color3.new(1, 1, 1)
+YesButton.TextSize = 10
+YesButton.Font = Enum.Font.GothamBold
+YesButton.AutoButtonColor = false
+YesButton.ZIndex = 54
+YesButton.Parent = ConfirmCard
+
+local YesCorner = Instance.new("UICorner")
+YesCorner.CornerRadius = UDim.new(0, 9)
+YesCorner.Parent = YesButton
+
+local NoButton = Instance.new("TextButton")
+NoButton.Name = "NoButton"
+NoButton.Size = UDim2.fromOffset(110, 35)
+NoButton.Position = UDim2.new(1, -130, 0, 105)
+NoButton.BackgroundColor3 = Theme.Window
+NoButton.BorderSizePixel = 0
+NoButton.Text = "NO"
+NoButton.TextColor3 = Theme.TextSecondary
+NoButton.TextSize = 10
+NoButton.Font = Enum.Font.GothamBold
+NoButton.AutoButtonColor = false
+NoButton.ZIndex = 54
+NoButton.Parent = ConfirmCard
+
+local NoCorner = Instance.new("UICorner")
+NoCorner.CornerRadius = UDim.new(0, 9)
+NoCorner.Parent = NoButton
+
+--==============================================================--
+-- BOTÃƒO FLUTUANTE WN
+--==============================================================--
+
+local DraggingFloat = false
+local FloatDragThreshold = 6
+local FloatDragInput = nil
+local FloatDragStart = nil
+local FloatStartPosition = nil
+local FloatGrabOffset = nil
+
+local FloatMouseChangedConnection = nil
+local FloatTouchMovedConnection = nil
+local FloatInputEndedConnection = nil
+
+local OldFloatGui = PlayerGui:FindFirstChild("WN_FloatGui")
+if OldFloatGui then OldFloatGui:Destroy() end
+
+local FloatGui = Instance.new("ScreenGui")
+FloatGui.Name = "WN_FloatGui"
+FloatGui.ResetOnSpawn = false
+FloatGui.IgnoreGuiInset = true
+FloatGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+FloatGui.DisplayOrder = 2147483646
+FloatGui.Parent = PlayerGui
+
+local FloatButton = Instance.new("TextButton")
+FloatButton.Name = "WNFloat"
+FloatButton.Size = UDim2.fromOffset(54, 54)
+FloatButton.AnchorPoint = Vector2.new(0, 0)
+FloatButton.Position = UDim2.new(1, -75, 1, -90)
+FloatButton.BackgroundColor3 = Theme.Window
+FloatButton.BackgroundTransparency = 0
+FloatButton.BorderSizePixel = 0
+FloatButton.Text = "WN"
+FloatButton.TextColor3 = Theme.AccentBright
+FloatButton.TextSize = 14
+FloatButton.Font = Enum.Font.GothamBold
+FloatButton.AutoButtonColor = false
+FloatButton.Active = true
+FloatButton.Selectable = true
+FloatButton.ZIndex = 100
+FloatButton.Parent = FloatGui
+
+local FloatCorner = Instance.new("UICorner")
+FloatCorner.CornerRadius = UDim.new(0, 14)
+FloatCorner.Parent = FloatButton
+
+local FloatStroke = Instance.new("UIStroke")
+FloatStroke.Color = Theme.Accent
+FloatStroke.Thickness = 1.5
+FloatStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+FloatStroke.Parent = FloatButton
+
+local function ClampFloatButton(Position)
+    local Camera = workspace.CurrentCamera
+    if not Camera then return Position end
+
+    local ViewportSize = Camera.ViewportSize
+    local ButtonSize = FloatButton.AbsoluteSize
+
+    local MaxX = math.max(0, ViewportSize.X - ButtonSize.X)
+    local MaxY = math.max(0, ViewportSize.Y - ButtonSize.Y)
+
+    return Vector2.new(math.clamp(Position.X, 0, MaxX), math.clamp(Position.Y, 0, MaxY))
+end
+
+local function ClearFloatDragConnections()
+    if FloatMouseChangedConnection then FloatMouseChangedConnection:Disconnect(); FloatMouseChangedConnection = nil end
+    if FloatTouchMovedConnection then FloatTouchMovedConnection:Disconnect(); FloatTouchMovedConnection = nil end
+    if FloatInputEndedConnection then FloatInputEndedConnection:Disconnect(); FloatInputEndedConnection = nil end
+end
+
+local function StopFloatDrag()
+    ClearFloatDragConnections()
+    FloatDragInput = nil
+    FloatDragStart = nil
+    FloatStartPosition = nil
+    FloatGrabOffset = nil
+    task.defer(function() DraggingFloat = false end)
+end
+
+local function UpdateFloatPosition(CurrentPosition)
+    if not FloatDragStart or not FloatStartPosition then return end
+    local Delta = CurrentPosition - FloatDragStart
+
+    if not DraggingFloat then
+        if Delta.Magnitude < FloatDragThreshold then return end
+        DraggingFloat = true
+    end
+
+    local NewPosition = CurrentPosition - FloatGrabOffset
+    local ClampedPosition = ClampFloatButton(NewPosition)
+
+    FloatButton.Position = UDim2.fromOffset(math.floor(ClampedPosition.X + 0.5), math.floor(ClampedPosition.Y + 0.5))
+end
+
+FloatButton.InputBegan:Connect(function(Input)
+    local InputType = Input.UserInputType
+    if InputType ~= Enum.UserInputType.MouseButton1 and InputType ~= Enum.UserInputType.Touch then return end
+
+    ClearFloatDragConnections()
+    DraggingFloat = false
+    FloatDragInput = Input
+    FloatDragStart = Vector2.new(Input.Position.X, Input.Position.Y)
+
+    local AbsolutePosition = FloatButton.AbsolutePosition
+    FloatStartPosition = Vector2.new(AbsolutePosition.X, AbsolutePosition.Y)
+    FloatGrabOffset = FloatDragStart - FloatStartPosition
+
+    if InputType == Enum.UserInputType.MouseButton1 then
+        FloatMouseChangedConnection = UserInputService.InputChanged:Connect(function(Change)
+            if FloatDragInput ~= Input or Change.UserInputType ~= Enum.UserInputType.MouseMovement then return end
+            UpdateFloatPosition(Vector2.new(Change.Position.X, Change.Position.Y))
+        end)
+    elseif InputType == Enum.UserInputType.Touch then
+        FloatTouchMovedConnection = UserInputService.TouchMoved:Connect(function(Touch)
+            if FloatDragInput ~= Touch then return end
+            UpdateFloatPosition(Vector2.new(Touch.Position.X, Touch.Position.Y))
+        end)
+    end
+
+    FloatInputEndedConnection = UserInputService.InputEnded:Connect(function(EndedInput)
+        if EndedInput ~= FloatDragInput then return end
+        StopFloatDrag()
+    end)
+end)
+
+local function HideWindow()
+    if WindowAnimating or not WindowOpen then return end
+    WindowAnimating = true
+    WindowOpen = false
+
+    local HiddenWidth = math.floor(CurrentWidth * 0.82)
+    local HiddenHeight = math.floor(CurrentHeight * 0.82)
+
+    local SizeTween = TweenService:Create(Main, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+        Size = UDim2.fromOffset(HiddenWidth, HiddenHeight)
+    })
+    local FadeTween = TweenService:Create(WindowGroup, TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+        GroupTransparency = 1
+    })
+
+    SizeTween:Play()
+    FadeTween:Play()
+
+    FadeTween.Completed:Connect(function()
+        if not ScreenGui.Parent then return end
+        Main.Visible = false
+        Main.Size = UDim2.fromOffset(CurrentWidth, CurrentHeight)
+        WindowGroup.GroupTransparency = 0
+        WindowAnimating = false
+    end)
+end
+
+local function ShowWindow()
+    if WindowAnimating or WindowOpen then return end
+    WindowAnimating = true
+    WindowOpen = true
+
+    Main.Visible = true
+    Main.Size = UDim2.fromOffset(math.floor(CurrentWidth * 0.82), math.floor(CurrentHeight * 0.82))
+    WindowGroup.GroupTransparency = 1
+
+    local SizeTween = TweenService:Create(Main, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(CurrentWidth, CurrentHeight)
+    })
+    local FadeTween = TweenService:Create(WindowGroup, TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        GroupTransparency = 0
+    })
+
+    SizeTween:Play()
+    FadeTween:Play()
+
+    FadeTween.Completed:Connect(function()
+        WindowAnimating = false
+    end)
+end
+
+FloatButton.Activated:Connect(function()
+    if DraggingFloat then return end
+    if WindowOpen then HideWindow() else ShowWindow() end
+end)
+
+CloseButton.Activated:Connect(function()
+    if WindowAnimating then return end
+    ConfirmOverlay.Visible = true
+    ConfirmCard.Size = UDim2.fromOffset(250, 140)
+    TweenService:Create(ConfirmCard, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(285, 155)
+    }):Play()
+end)
+
+NoButton.Activated:Connect(function()
+    ConfirmOverlay.Visible = false
+end)
+
+YesButton.Activated:Connect(function()
+    ConfirmOverlay.Visible = false
+    WindowOpen = false
+    ClearFloatDragConnections()
+    if ScreenGui then ScreenGui:Destroy() end
+    if FloatGui then FloatGui:Destroy() end
+end)
+
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+    if not FloatButton.Parent then return end
+    local ClampedPosition = ClampFloatButton(FloatButton.AbsolutePosition)
+    FloatButton.Position = UDim2.fromOffset(math.floor(ClampedPosition.X + 0.5), math.floor(ClampedPosition.Y + 0.5))
+end)
