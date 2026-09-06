@@ -411,6 +411,13 @@ local Humanoid = nil
 local Raiz = nil
 local PartesCorpo = {}
 
+-- ================================================
+-- 👻 VARIÁVEIS DO BOTÃO FLUTUANTE INVISÍVEL
+-- ================================================
+local InvisivelAtivo = false
+local InvisivelButtonGui = nil
+local isDraggingInvis = false
+local CoreGui = game:GetService("CoreGui")
 
         -- ============================
         -- VARIÁVEIS DA ABA SPEED
@@ -568,7 +575,181 @@ InvisivelToggle.Activated:Connect(function()
 end)
 
 -- ================================================
+-- 👻 CARD TOGGLE — ESTILO ANTI-FLING
+-- ================================================
+local InvisivelCard = Instance.new("Frame")
+InvisivelCard.Name = "InvisivelCard"
+InvisivelCard.Size = UDim2.new(1, -6, 0, 50)
+InvisivelCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+InvisivelCard.BorderSizePixel = 0
+InvisivelCard.Parent = PageFrame
 
+local InvisivelCorner = Instance.new("UICorner")
+InvisivelCorner.CornerRadius = UDim.new(0, 10)
+InvisivelCorner.Parent = InvisivelCard
+
+local InvisivelStroke = Instance.new("UIStroke")
+InvisivelStroke.Color = Color3.fromRGB(39, 40, 48)
+InvisivelStroke.Thickness = 1
+InvisivelStroke.Parent = InvisivelCard
+
+local InvisivelTitle = Instance.new("TextLabel")
+InvisivelTitle.Name = "Title"
+InvisivelTitle.Size = UDim2.new(1, -60, 1, 0)
+InvisivelTitle.Position = UDim2.fromOffset(12, 0)
+InvisivelTitle.BackgroundTransparency = 1
+InvisivelTitle.Text = "👻 Botão Invisível"
+InvisivelTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+InvisivelTitle.TextSize = 12
+InvisivelTitle.Font = Enum.Font.GothamSemibold
+InvisivelTitle.TextXAlignment = Enum.TextXAlignment.Left
+InvisivelTitle.Parent = InvisivelCard
+
+local InvisivelToggle = Instance.new("TextButton")
+InvisivelToggle.Name = "ToggleButton"
+InvisivelToggle.Size = UDim2.fromOffset(26, 26)
+InvisivelToggle.AnchorPoint = Vector2.new(1, 0.5)
+InvisivelToggle.Position = UDim2.new(1, -12, 0.5, 0)
+InvisivelToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+InvisivelToggle.BorderSizePixel = 0
+InvisivelToggle.Text = ""
+InvisivelToggle.AutoButtonColor = false
+InvisivelToggle.Parent = InvisivelCard
+
+local InvisivelBtnCorner = Instance.new("UICorner")
+InvisivelBtnCorner.CornerRadius = UDim.new(0, 6)
+InvisivelBtnCorner.Parent = InvisivelToggle
+
+local InvisivelBtnStroke = Instance.new("UIStroke")
+InvisivelBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+InvisivelBtnStroke.Thickness = 1
+InvisivelBtnStroke.Parent = InvisivelToggle
+
+local InvisivelCheck = Instance.new("TextLabel")
+InvisivelCheck.Name = "CheckMark"
+InvisivelCheck.Size = UDim2.fromScale(1, 1)
+InvisivelCheck.BackgroundTransparency = 1
+InvisivelCheck.Text = "✓"
+InvisivelCheck.TextColor3 = Color3.new(1, 1, 1)
+InvisivelCheck.TextSize = 14
+InvisivelCheck.Font = Enum.Font.GothamBold
+InvisivelCheck.TextTransparency = 1
+InvisivelCheck.Parent = InvisivelToggle
+
+InvisivelToggle.Activated:Connect(function()
+    if not InvisivelButtonGui then
+        CreateInvisivelButton()
+    else
+        RemoveInvisivelButton()
+    end
+
+    local Ligado = InvisivelButtonGui ~= nil
+    local targetBg = Ligado and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = Ligado and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = Ligado and 0 or 1
+
+    TweenService:Create(InvisivelToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(InvisivelBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(InvisivelCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
+
+-- ================================================
+-- 👻 SISTEMA DO BOTÃO FLUTUANTE INVISÍVEL
+-- ================================================
+local function CreateInvisivelButton()
+    if InvisivelButtonGui then return end
+
+    local ParentGui = CoreGui
+    pcall(function()
+        if not CoreGui then ParentGui = Player:WaitForChild("PlayerGui") end
+    end)
+
+    local GuiBtn = Instance.new("ScreenGui")
+    GuiBtn.Name = "AstralX_InvisivelButton"
+    GuiBtn.ResetOnSpawn = false
+    GuiBtn.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    GuiBtn.Parent = ParentGui
+
+    local Btn = Instance.new("ImageButton")
+    Btn.Size = UDim2.new(0, 110, 0, 42)
+    Btn.Position = UDim2.new(0.5, -55, 0.3, -21)
+    
+    Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.BackgroundTransparency = 0.3
+    Btn.Parent = GuiBtn
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 12)
+    Corner.Parent = Btn
+
+    local Borda = Instance.new("UIStroke")
+    Borda.Color = Color3.fromRGB(200, 200, 200)
+    Borda.Thickness = 2
+    Borda.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    Borda.Parent = Btn
+
+    local Texto = Instance.new("TextLabel")
+    Texto.Size = UDim2.new(1, 0, 1, 0)
+    Texto.BackgroundTransparency = 1
+    Texto.Text = "Invisible"
+    Texto.TextColor3 = Color3.fromRGB(0, 0, 0)
+    Texto.TextSize = 14
+    Texto.Font = Enum.Font.GothamBold
+    Texto.Parent = Btn
+
+    local dragThreshold = 10
+    local dragStartMousePos, buttonStartPosScreen
+
+    Btn.InputBegan:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDraggingInvis = false
+            dragStartMousePos = Input.Position
+            buttonStartPosScreen = Btn.Position
+        end
+    end)
+
+    Btn.InputChanged:Connect(function(Input)
+        if (Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseMovement) and dragStartMousePos then
+            local delta = Input.Position - dragStartMousePos
+            if delta.Magnitude > dragThreshold then
+                isDraggingInvis = true
+                Btn.Position = buttonStartPosScreen + UDim2.fromOffset(delta.X, delta.Y)
+            end
+        end
+    end)
+
+    Btn.InputEnded:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if not isDraggingInvis then
+                InvisivelAtivo = not InvisivelAtivo
+
+                if InvisivelAtivo then
+                    Btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+                    Btn.BackgroundTransparency = 0.3
+                    Borda.Color = Color3.fromRGB(255, 20, 147)
+                    Texto.TextColor3 = Color3.fromRGB(255, 255, 255)
+                else
+                    Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                    Btn.BackgroundTransparency = 0.3
+                    Borda.Color = Color3.fromRGB(200, 200, 200)
+                    Texto.TextColor3 = Color3.fromRGB(0, 0, 0)
+                end
+            end
+            dragStartMousePos = nil
+            isDraggingInvis = false
+        end
+    end)
+
+    InvisivelButtonGui = GuiBtn
+end
+
+local function RemoveInvisivelButton()
+    if InvisivelButtonGui then 
+        InvisivelButtonGui:Destroy() 
+        InvisivelButtonGui = nil 
+    end
+    InvisivelAtivo = false
+end
 
 -- ================================================
 -- INVISÍVEL - SISTEMA
