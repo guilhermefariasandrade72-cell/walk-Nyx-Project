@@ -414,6 +414,23 @@ for Index, TabData in ipairs(TabsData) do
         local JampSliding = false
         local JampActiveInput = nil
 
+-- ============================
+-- VARIÁVEIS DA ABA FLY
+-- ============================
+local FlyAtivo = false
+local FlyVelocidade = 50
+local FlyMinVal = 16
+local FlyMaxVal = 150
+local FlySliding = false
+local FlyActiveInput = nil
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local bv, bg, con
+local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+
         -- ============================
         -- BOTAO SPEED
         -- ============================
@@ -640,6 +657,119 @@ for Index, TabData in ipairs(TabsData) do
         JampSliderButton.AutoButtonColor = false
         JampSliderButton.Parent = JampSliderTrack
 
+-- ============================
+-- BOTÃO FLY
+-- ============================
+local FlyCard = Instance.new("Frame")
+FlyCard.Name = "FlyCard"
+FlyCard.Size = UDim2.new(1, -6, 0, 85)
+FlyCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+FlyCard.BorderSizePixel = 0
+FlyCard.Parent = PageFrame
+
+local FlyCardCorner = Instance.new("UICorner")
+FlyCardCorner.CornerRadius = UDim.new(0, 10)
+FlyCardCorner.Parent = FlyCard
+
+local FlyCardStroke = Instance.new("UIStroke")
+FlyCardStroke.Color = Color3.fromRGB(39, 40, 48)
+FlyCardStroke.Thickness = 1
+FlyCardStroke.Parent = FlyCard
+
+local FlyTitle = Instance.new("TextLabel")
+FlyTitle.Name = "Title"
+FlyTitle.Size = UDim2.new(1, -60, 0, 36)
+FlyTitle.Position = UDim2.fromOffset(12, 0)
+FlyTitle.BackgroundTransparency = 1
+FlyTitle.Text = "Fly (Voo)"
+FlyTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+FlyTitle.TextSize = 12
+FlyTitle.Font = Enum.Font.GothamSemibold
+FlyTitle.TextXAlignment = Enum.TextXAlignment.Left
+FlyTitle.Parent = FlyCard
+
+local FlyToggleButton = Instance.new("TextButton")
+FlyToggleButton.Name = "ToggleButton"
+FlyToggleButton.Size = UDim2.fromOffset(26, 26)
+FlyToggleButton.AnchorPoint = Vector2.new(1, 0)
+FlyToggleButton.Position = UDim2.new(1, -12, 0, 5)
+FlyToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+FlyToggleButton.BorderSizePixel = 0
+FlyToggleButton.Text = ""
+FlyToggleButton.AutoButtonColor = false
+FlyToggleButton.Parent = FlyCard
+
+local FlyToggleCorner = Instance.new("UICorner")
+FlyToggleCorner.CornerRadius = UDim.new(0, 6)
+FlyToggleCorner.Parent = FlyToggleButton
+
+local FlyToggleStroke = Instance.new("UIStroke")
+FlyToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+FlyToggleStroke.Thickness = 1
+FlyToggleStroke.Parent = FlyToggleButton
+
+local FlyCheckMark = Instance.new("TextLabel")
+FlyCheckMark.Name = "CheckMark"
+FlyCheckMark.Size = UDim2.fromScale(1, 1)
+FlyCheckMark.BackgroundTransparency = 1
+FlyCheckMark.Text = "✔"
+FlyCheckMark.TextColor3 = Color3.new(1, 1, 1)
+FlyCheckMark.TextSize = 14
+FlyCheckMark.Font = Enum.Font.GothamBold
+FlyCheckMark.TextTransparency = 1
+FlyCheckMark.Parent = FlyToggleButton
+
+local FlySliderContainer = Instance.new("Frame")
+FlySliderContainer.Name = "SliderContainer"
+FlySliderContainer.Size = UDim2.new(1, -24, 0, 30)
+FlySliderContainer.Position = UDim2.fromOffset(12, 44)
+FlySliderContainer.BackgroundTransparency = 1
+FlySliderContainer.Parent = FlyCard
+
+local FlySliderLabel = Instance.new("TextLabel")
+FlySliderLabel.Name = "SliderLabel"
+FlySliderLabel.Size = UDim2.new(1, 0, 0, 14)
+FlySliderLabel.BackgroundTransparency = 1
+FlySliderLabel.Text = "Velocidade Voo: 50"
+FlySliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+FlySliderLabel.TextSize = 10
+FlySliderLabel.Font = Enum.Font.GothamMedium
+FlySliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+FlySliderLabel.Parent = FlySliderContainer
+
+local FlySliderTrack = Instance.new("Frame")
+FlySliderTrack.Name = "SliderTrack"
+FlySliderTrack.Size = UDim2.new(1, 0, 0, 6)
+FlySliderTrack.Position = UDim2.fromOffset(0, 18)
+FlySliderTrack.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+FlySliderTrack.BorderSizePixel = 0
+FlySliderTrack.Parent = FlySliderContainer
+
+local FlySliderTrackCorner = Instance.new("UICorner")
+FlySliderTrackCorner.CornerRadius = UDim.new(1, 0)
+FlySliderTrackCorner.Parent = FlySliderTrack
+
+local FlySliderFill = Instance.new("Frame")
+FlySliderFill.Name = "SliderFill"
+FlySliderFill.Size = UDim2.new(0, 0, 1, 0)
+FlySliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+FlySliderFill.BorderSizePixel = 0
+FlySliderFill.Parent = FlySliderTrack
+
+local FlySliderFillCorner = Instance.new("UICorner")
+FlySliderFillCorner.CornerRadius = UDim.new(1, 0)
+FlySliderFillCorner.Parent = FlySliderFill
+
+local FlySliderButton = Instance.new("TextButton")
+FlySliderButton.Name = "SliderButton"
+FlySliderButton.Size = UDim2.new(1, 10, 1, 10)
+FlySliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+FlySliderButton.Position = UDim2.new(0, 0, 0.5, 0)
+FlySliderButton.BackgroundTransparency = 1
+FlySliderButton.Text = ""
+FlySliderButton.AutoButtonColor = false
+FlySliderButton.Parent = FlySliderTrack
+
         -- ============================
         -- LÓGICA DO SLIDER DE SPEED
         -- ============================
@@ -760,6 +890,50 @@ for Index, TabData in ipairs(TabsData) do
                 Player.Character.Humanoid.JumpPower = 50
             end
         end)
+
+-- ============================
+-- SLIDER (LÓGICA)
+-- ============================
+local function UpdateFlySlider(InputPosition)
+    local TrackPos = FlySliderTrack.AbsolutePosition.X
+    local TrackSize = FlySliderTrack.AbsoluteSize.X
+    local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
+    local Percentage = ClampedX / TrackSize
+
+    FlyVelocidade = math.floor(FlyMinVal + (FlyMaxVal - FlyMinVal) * Percentage + 0.5)
+    FlySliderLabel.Text = "Velocidade Voo: " .. tostring(FlyVelocidade)
+
+    TweenService:Create(FlySliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
+    TweenService:Create(FlySliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, 0)}):Play()
+end
+
+FlySliderButton.InputBegan:Connect(function(Input)
+    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not FlyActiveInput then
+        FlyActiveInput = Input
+        FlySliding = true
+    end
+end)
+
+FlySliderTrack.InputBegan:Connect(function(Input)
+    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not FlyActiveInput then
+        FlyActiveInput = Input
+        FlySliding = true
+        UpdateFlySlider(Input.Position.X)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input == FlyActiveInput then
+        FlySliding = false
+        FlyActiveInput = nil
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(Input)
+    if FlySliding and Input == FlyActiveInput and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+        UpdateFlySlider(Input.Position.X)
+    end
+end)
 
         -- ============================
         -- LOOP PRINCIPAL UNIFICADO
