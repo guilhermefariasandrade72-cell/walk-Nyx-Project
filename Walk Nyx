@@ -468,7 +468,14 @@ _G.AntiFling = false
 -- =============================
 -- WALK FLING (Variáveis)
 -- =============================
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 
+local player = Players.LocalPlayer
+
+local WalkFlingAtivo = false
+local FlingPower = 50000
+local FlingConnection = nil
 
         -- ============================
         -- BOTAO SPEED
@@ -961,7 +968,78 @@ FlySliderButton.Parent = FlySliderTrack
 -- =============================
 -- WALK FLING (Botão)
 -- =============================
+local WalkFlingCard = Instance.new("Frame")
+WalkFlingCard.Name = "WalkFlingCard"
+WalkFlingCard.Size = UDim2.new(1, -6, 0, 50)
+WalkFlingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+WalkFlingCard.BorderSizePixel = 0
+WalkFlingCard.Parent = PageFrame
 
+local WalkFlingCorner = Instance.new("UICorner")
+WalkFlingCorner.CornerRadius = UDim.new(0, 10)
+WalkFlingCorner.Parent = WalkFlingCard
+
+local WalkFlingStroke = Instance.new("UIStroke")
+WalkFlingStroke.Color = Color3.fromRGB(39, 40, 48)
+WalkFlingStroke.Thickness = 1
+WalkFlingStroke.Parent = WalkFlingCard
+
+local WalkFlingTitle = Instance.new("TextLabel")
+WalkFlingTitle.Name = "Title"
+WalkFlingTitle.Size = UDim2.new(1, -60, 1, 0)
+WalkFlingTitle.Position = UDim2.fromOffset(12, 0)
+WalkFlingTitle.BackgroundTransparency = 1
+WalkFlingTitle.Text = "Walk Fling"
+WalkFlingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+WalkFlingTitle.TextSize = 12
+WalkFlingTitle.Font = Enum.Font.GothamSemibold
+WalkFlingTitle.TextXAlignment = Enum.TextXAlignment.Left
+WalkFlingTitle.Parent = WalkFlingCard
+
+local WalkFlingToggle = Instance.new("TextButton")
+WalkFlingToggle.Name = "ToggleButton"
+WalkFlingToggle.Size = UDim2.fromOffset(26, 26)
+WalkFlingToggle.AnchorPoint = Vector2.new(1, 0.5)
+WalkFlingToggle.Position = UDim2.new(1, -12, 0.5, 0)
+WalkFlingToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+WalkFlingToggle.BorderSizePixel = 0
+WalkFlingToggle.Text = ""
+WalkFlingToggle.AutoButtonColor = false
+WalkFlingToggle.Parent = WalkFlingCard
+
+local WalkFlingBtnCorner = Instance.new("UICorner")
+WalkFlingBtnCorner.CornerRadius = UDim.new(0, 6)
+WalkFlingBtnCorner.Parent = WalkFlingToggle
+
+local WalkFlingBtnStroke = Instance.new("UIStroke")
+WalkFlingBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+WalkFlingBtnStroke.Thickness = 1
+WalkFlingBtnStroke.Parent = WalkFlingToggle
+
+local WalkFlingCheck = Instance.new("TextLabel")
+WalkFlingCheck.Name = "CheckMark"
+WalkFlingCheck.Size = UDim2.fromScale(1, 1)
+WalkFlingCheck.BackgroundTransparency = 1
+WalkFlingCheck.Text = "✔"
+WalkFlingCheck.TextColor3 = Color3.new(1, 1, 1)
+WalkFlingCheck.TextSize = 14
+WalkFlingCheck.Font = Enum.Font.GothamBold
+WalkFlingCheck.TextTransparency = 1
+WalkFlingCheck.Parent = WalkFlingToggle
+
+WalkFlingToggle.Activated:Connect(function()
+    local newState = not WalkFlingAtivo
+    ToggleWalkFling(newState)
+
+    local targetBg = newState and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = newState and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = newState and 0 or 1
+
+    local TweenService = game:GetService("TweenService")
+    TweenService:Create(WalkFlingToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(WalkFlingBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(WalkFlingCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
 
 -- =============================
 -- ANTI-FLING (Botão)
@@ -1370,7 +1448,57 @@ end)
 -- =============================
 -- WALK FLING (Sistema)
 -- =============================
+local function ToggleWalkFling(state)
+    WalkFlingAtivo = state
 
+    if not WalkFlingAtivo then
+        if FlingConnection then
+            FlingConnection:Disconnect()
+            FlingConnection = nil
+        end
+        return
+    end
+
+    FlingConnection = RunService.Heartbeat:Connect(function()
+        if not WalkFlingAtivo then return end
+
+        local char = player.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+
+        if hrp and humanoid then
+            for _, part in ipairs(char:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+
+            local oldCFrame = hrp.CFrame
+            local vel = hrp.AssemblyLinearVelocity
+
+            -- Aplica a velocidade fixa extrema
+            hrp.CFrame = oldCFrame * CFrame.Angles(0, math.rad(math.random(1, 360)), 0)
+            hrp.AssemblyAngularVelocity = Vector3.new(0, FlingPower, 0)
+
+            RunService.RenderStepped:Wait()
+            if hrp then
+                hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                if humanoid.MoveDirection.Magnitude > 0 then
+                    hrp.AssemblyLinearVelocity = vel
+                else
+                    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                end
+            end
+        end
+    end)
+end
+
+player.CharacterAdded:Connect(function()
+    if WalkFlingAtivo then
+        task.wait(1.5)
+        ToggleWalkFling(true)
+    end
+end)
 
 -- ================================================
 -- ABA SETTINGS
