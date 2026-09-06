@@ -399,6 +399,15 @@ for Index, TabData in ipairs(TabsData) do
 
     elseif TabData.Name == "Player" then
 
+-- ================================================
+-- INVISÍVEL - VARIÁVEIS
+-- ================================================
+local InvisivelAtivo = false
+local Personagem = nil
+local Humanoid = nil
+local Raiz = nil
+local PartesCorpo = {}
+
         -- ============================
         -- VARIÁVEIS DA ABA SPEED
         -- ============================
@@ -464,6 +473,165 @@ local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("Play
 -- ANTI-FLING (Variáveis)
 -- =============================
 _G.AntiFling = false
+
+-- ===============================
+-- TITULO MOVIMENTO
+-- ===============================
+local SectionLabel = Instance.new("TextLabel")
+SectionLabel.Name = "MovementLabel"
+SectionLabel.Size = UDim2.new(1, -6, 0, 30)
+SectionLabel.BackgroundTransparency = 1
+SectionLabel.Text = "EXTRAS"
+SectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
+SectionLabel.TextSize = 20
+SectionLabel.Font = Enum.Font.GothamBold
+SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel.TextTransparency = 0
+SectionLabel.Parent = PageFrame
+
+-- ================================================
+-- INVISÍVEL - BOTÃO
+-- ================================================
+local InvisivelCard = Instance.new("Frame")
+InvisivelCard.Name = "InvisivelCard"
+InvisivelCard.Size = UDim2.new(1, -6, 0, 50)
+InvisivelCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+InvisivelCard.BorderSizePixel = 0
+InvisivelCard.Parent = PageFrame
+
+local InvisivelCorner = Instance.new("UICorner")
+InvisivelCorner.CornerRadius = UDim.new(0, 10)
+InvisivelCorner.Parent = InvisivelCard
+
+local InvisivelStroke = Instance.new("UIStroke")
+InvisivelStroke.Color = Color3.fromRGB(39, 40, 48)
+InvisivelStroke.Thickness = 1
+InvisivelStroke.Parent = InvisivelCard
+
+local InvisivelTitle = Instance.new("TextLabel")
+InvisivelTitle.Name = "Title"
+InvisivelTitle.Size = UDim2.new(1, -60, 1, 0)
+InvisivelTitle.Position = UDim2.fromOffset(12, 0)
+InvisivelTitle.BackgroundTransparency = 1
+InvisivelTitle.Text = "Invisível"
+InvisivelTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+InvisivelTitle.TextSize = 12
+InvisivelTitle.Font = Enum.Font.GothamSemibold
+InvisivelTitle.TextXAlignment = Enum.TextXAlignment.Left
+InvisivelTitle.Parent = InvisivelCard
+
+local InvisivelToggle = Instance.new("TextButton")
+InvisivelToggle.Name = "ToggleButton"
+InvisivelToggle.Size = UDim2.fromOffset(26, 26)
+InvisivelToggle.AnchorPoint = Vector2.new(1, 0.5)
+InvisivelToggle.Position = UDim2.new(1, -12, 0.5, 0)
+InvisivelToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+InvisivelToggle.BorderSizePixel = 0
+InvisivelToggle.Text = ""
+InvisivelToggle.AutoButtonColor = false
+InvisivelToggle.Parent = InvisivelCard
+
+local InvisivelBtnCorner = Instance.new("UICorner")
+InvisivelBtnCorner.CornerRadius = UDim.new(0, 6)
+InvisivelBtnCorner.Parent = InvisivelToggle
+
+InvisivelBtnStroke = Instance.new("UIStroke")
+InvisivelBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+InvisivelBtnStroke.Thickness = 1
+InvisivelBtnStroke.Parent = InvisivelToggle
+
+local InvisivelCheck = Instance.new("TextLabel")
+InvisivelCheck.Name = "CheckMark"
+InvisivelCheck.Size = UDim2.fromScale(1, 1)
+InvisivelCheck.BackgroundTransparency = 1
+InvisivelCheck.Text = "✔"
+InvisivelCheck.TextColor3 = Color3.new(1, 1, 1)
+InvisivelCheck.TextSize = 14
+InvisivelCheck.Font = Enum.Font.GothamBold
+InvisivelCheck.TextTransparency = 1
+InvisivelCheck.Parent = InvisivelToggle
+
+InvisivelToggle.Activated:Connect(function()
+    InvisivelAtivo = not InvisivelAtivo
+
+    local targetBg = InvisivelAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = InvisivelAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = InvisivelAtivo and 0 or 1
+
+    TweenService:Create(InvisivelToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(InvisivelBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(InvisivelCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
+
+-- ================================================
+-- INVISÍVEL - SISTEMA
+-- ================================================
+local function ConfigurarPersonagem()
+    Personagem = player.Character or player.CharacterAdded:Wait()
+    Humanoid = Personagem:WaitForChild("Humanoid")
+    Raiz = Personagem:WaitForChild("HumanoidRootPart")
+    
+    PartesCorpo = {}
+    for _, obj in ipairs(Personagem:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            table.insert(PartesCorpo, obj)
+        end
+    end
+end
+
+player.CharacterAdded:Connect(function(novoChar)
+    task.wait(0.5)
+    ConfigurarPersonagem()
+end)
+
+RunService.Heartbeat:Connect(function()
+    if not InvisivelAtivo then return end
+    
+    if not Personagem or not Personagem.Parent or not Raiz or not Humanoid or Humanoid.Health <= 0 then
+        ConfigurarPersonagem()
+        return
+    end
+
+    for _, parte in ipairs(PartesCorpo) do
+        if parte and parte.Parent then
+            if parte.Name == "HumanoidRootPart" then
+                parte.Transparency = 1
+            else
+                parte.Transparency = 0.5
+            end
+        end
+    end
+
+    local PosOriginal = Raiz.CFrame
+    local CamOffset = Humanoid.CameraOffset
+    
+    Raiz.CFrame = PosOriginal * CFrame.new(0, -200000, 0)
+    Humanoid.CameraOffset = Raiz.CFrame:ToObjectSpace(CFrame.new(PosOriginal.Position)).Position
+    
+    RunService.RenderStepped:Wait()
+    
+    if Raiz and Raiz.Parent then
+        Raiz.CFrame = PosOriginal
+        Humanoid.CameraOffset = CamOffset
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if not InvisivelAtivo and Personagem and Humanoid and Humanoid.Health > 0 then
+            for _, parte in ipairs(PartesCorpo) do
+                if parte and parte.Parent and parte.Name ~= "HumanoidRootPart" then
+                    parte.Transparency = 0
+                end
+            end
+        end
+    end
+end)
+
+if player.Character then
+    ConfigurarPersonagem()
+end
 
 -- ===============================
 -- TITULO MOVIMENTO
