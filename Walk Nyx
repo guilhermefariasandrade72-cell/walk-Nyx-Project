@@ -394,35 +394,29 @@ for Index, TabData in ipairs(TabsData) do
     PageFrame.Parent = ContentContainer
 
     --==============================================================--
-    -- ÁREA DE VARIÁVEIS, BOTÕES E SISTEMA DA ABA:[span_0](start_span)[span_0](end_span)
-    -- TabData.Name ("Main", "Auto Farm", "ESP", "Player", "Settings")
+    -- TÍTULOS / INSERÇÃO DE VARIÁVEIS, BOTÕES E SISTEMAS DE CADA ABA
     --==============================================================--
     if TabData.Name == "Main" then
-        -- [Coloque as variáveis, botões e sistemas da aba Main aqui]
-
-
+        -- [1] ABA: MAIN
+        -- Crie aqui as variáveis, toggles, botões e sistemas da aba Main
 
     elseif TabData.Name == "Auto Farm" then
-        -- [Coloque as variáveis, botões e sistemas da aba Auto Farm aqui]
-
-
+        -- [2] ABA: AUTO FARM
+        -- Crie aqui as variáveis, toggles, botões e sistemas de Auto Farm
 
     elseif TabData.Name == "ESP" then
-        -- [Coloque as variáveis, botões e sistemas da aba ESP aqui]
-
-
+        -- [3] ABA: ESP
+        -- Crie aqui as variáveis, toggles, botões e sistemas de ESP
 
     elseif TabData.Name == "Player" then
-        -- [Coloque as variáveis, botões e sistemas da aba Player aqui]
-
-
+        -- [4] ABA: PLAYER
+        -- Crie aqui as variáveis, sliders, botões e sistemas de Player
 
     elseif TabData.Name == "Settings" then
-        -- [Coloque as variáveis, botões e sistemas da aba Settings aqui]
+        -- [5] ABA: SETTINGS
+        -- Crie aqui as variáveis, botões de configuração e sistemas gerais
+
     end
-
-
-    --==============================================================--
 
     local ListLayout = Instance.new("UIListLayout")
     ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
