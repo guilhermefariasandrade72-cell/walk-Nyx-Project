@@ -875,32 +875,35 @@ ESPMoedasToggleButton.Activated:Connect(function()
     TweenService:Create(ESPMoedasCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
 end)
 
--- ==================================
--- 💰 SISTEMA DO ESP MOEDAS (CONFIRMADO)
--- ==================================
+-- ==========================================================
+-- 💰 SISTEMA DO ESP MOEDAS (CORRIGIDO PARA O MM2 / PARES / MODELOS)
+-- ==========================================================
 task.spawn(function()
     while true do
         task.wait(0.4)
 
-        if ESPMoedasAtivo then
-            -- Limpa moedas que sumiram
+        -- Verificando com _G. caso seu toggle use variável global
+        local ativo = _G.ESPMoedasAtivo or ESPMoedasAtivo
+
+        if ativo then
+            -- Limpa moedas que sumiram ou foram coletadas
             for Moeda, H in pairs(MoedasHighlight) do
                 if not Moeda or not Moeda:IsDescendantOf(workspace) then
-                    H:Destroy()
+                    if H then H:Destroy() end
                     MoedasHighlight[Moeda] = nil
                 end
             end
 
-            -- Pega o container
+            -- Procura o container de moedas no jogo
             local CoinContainer = workspace:FindFirstChild("CoinContainer", true)
             if not CoinContainer then
                 task.wait(1)
                 continue
             end
 
-            -- ✅ SIMPLES: PEGA TODAS AS Coin_Server!
+            -- Varre os filhos do container (aceitando Model, BasePart ou MeshPart)
             for _, moeda in ipairs(CoinContainer:GetChildren()) do
-                if moeda:IsA("Part") and moeda.Name == "Coin_Server" then
+                if moeda.Name == "Coin_Server" then
                     if not MoedasHighlight[moeda] then
                         local H = Instance.new("Highlight")
                         H.Adornee = moeda
@@ -917,7 +920,7 @@ task.spawn(function()
                 end
             end
         else
-            -- Desliga tudo
+            -- Desliga e limpa tudo quando o ESP for desativado
             for Moeda, H in pairs(MoedasHighlight) do
                 if H then H:Destroy() end
             end
