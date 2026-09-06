@@ -675,37 +675,76 @@ local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("Play
 -- ========================
 -- BOTAO DO PULO INFINITO 
 -- ========================
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "InfJumpGui"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = player:WaitForChild("PlayerGui")
+-- (Insira este card dentro da sua ScrollingFrame/Page da aba Player)
+local InfJumpCard = Instance.new("Frame")
+InfJumpCard.Name = "InfJumpCard"
+InfJumpCard.Size = UDim2.new(1, -6, 0, 50)
+InfJumpCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+InfJumpCard.BorderSizePixel = 0
+InfJumpCard.Parent = PageFrame -- Altere para o nome da sua página/container da aba Player se precisar
 
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "ToggleInfJump"
-ToggleButton.Size = UDim2.fromOffset(120, 50)
-ToggleButton.Position = UDim2.new(0, 50, 0, 200)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.TextSize = 14
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.Text = "Pulo Infinito: OFF"
-ToggleButton.Active = true
-ToggleButton.Draggable = true
-ToggleButton.Parent = ScreenGui
+local InfJumpCardCorner = Instance.new("UICorner")
+InfJumpCardCorner.CornerRadius = UDim.new(0, 10)
+InfJumpCardCorner.Parent = InfJumpCard
 
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 8)
-Corner.Parent = ToggleButton
+local InfJumpCardStroke = Instance.new("UIStroke")
+InfJumpCardStroke.Color = Color3.fromRGB(39, 40, 48)
+InfJumpCardStroke.Thickness = 1
+InfJumpCardStroke.Parent = InfJumpCard
 
-ToggleButton.MouseButton1Click:Connect(function()
+local InfJumpTitle = Instance.new("TextLabel")
+InfJumpTitle.Name = "Title"
+InfJumpTitle.Size = UDim2.new(1, -60, 1, 0)
+InfJumpTitle.Position = UDim2.fromOffset(12, 0)
+InfJumpTitle.BackgroundTransparency = 1
+InfJumpTitle.Text = "Pulo Infinito (Inf Jump)"
+InfJumpTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+InfJumpTitle.TextSize = 12
+InfJumpTitle.Font = Enum.Font.GothamSemibold
+InfJumpTitle.TextXAlignment = Enum.TextXAlignment.Left
+InfJumpTitle.Parent = InfJumpCard
+
+local InfJumpToggleButton = Instance.new("TextButton")
+InfJumpToggleButton.Name = "ToggleButton"
+InfJumpToggleButton.Size = UDim2.fromOffset(26, 26)
+InfJumpToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+InfJumpToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+InfJumpToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+InfJumpToggleButton.BorderSizePixel = 0
+InfJumpToggleButton.Text = ""
+InfJumpToggleButton.AutoButtonColor = false
+InfJumpToggleButton.Parent = InfJumpCard
+
+local InfJumpToggleCorner = Instance.new("UICorner")
+InfJumpToggleCorner.CornerRadius = UDim.new(0, 6)
+InfJumpToggleCorner.Parent = InfJumpToggleButton
+
+local InfJumpToggleStroke = Instance.new("UIStroke")
+InfJumpToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+InfJumpToggleStroke.Thickness = 1
+InfJumpToggleStroke.Parent = InfJumpToggleButton
+
+local InfJumpCheckMark = Instance.new("TextLabel")
+InfJumpCheckMark.Name = "CheckMark"
+InfJumpCheckMark.Size = UDim2.fromScale(1, 1)
+InfJumpCheckMark.BackgroundTransparency = 1
+InfJumpCheckMark.Text = "✔"
+InfJumpCheckMark.TextColor3 = Color3.new(1, 1, 1)
+InfJumpCheckMark.TextSize = 14
+InfJumpCheckMark.Font = Enum.Font.GothamBold
+InfJumpCheckMark.TextTransparency = 1
+InfJumpCheckMark.Parent = InfJumpToggleButton
+
+InfJumpToggleButton.Activated:Connect(function()
     _G.PuloInfinito = not _G.PuloInfinito
-    if _G.PuloInfinito then
-        ToggleButton.Text = "Pulo Infinito: ON"
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
-    else
-        ToggleButton.Text = "Pulo Infinito: OFF"
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    end
+    
+    local targetBgColor = _G.PuloInfinito and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = _G.PuloInfinito and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = _G.PuloInfinito and 0 or 1
+
+    TweenService:Create(InfJumpToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(InfJumpToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(InfJumpCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
 end)
 
 -- ============================
