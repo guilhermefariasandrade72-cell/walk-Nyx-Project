@@ -876,47 +876,43 @@ ESPMoedasToggleButton.Activated:Connect(function()
 end)
 
 -- ==================================
--- 💰 SISTEMA DO ESP MOEDAS (CORRIGIDO)
+-- 💰 SISTEMA DO ESP MOEDAS (NOME CERTO: CoinArea)
 -- ==================================
 task.spawn(function()
     while true do
         task.wait(0.4)
 
         if ESPMoedasAtivo then
-            -- Limpa os que já não existem
+            -- Limpa moedas que já não existem
             for Moeda, H in pairs(MoedasHighlight) do
-                if not Moeda or not Moeda:IsDescendantOf(Workspace) then
+                if not Moeda or not Moeda:IsDescendantOf(workspace) then
                     H:Destroy()
                     MoedasHighlight[Moeda] = nil
                 end
             end
 
-            -- Procura TODAS as moedas (nome contém "Coin" ou "moeda")
-            for _, Descendente in ipairs(Workspace:GetDescendants()) do
-                if Descendente:IsA("BasePart") then
-                    local Nome = Descendente.Name:lower()
-                    -- Pega qualquer coisa que tenha "coin" no nome
-                    if Nome:find("coin") or Nome:find("money") or Nome:find("gold") then
-                        if not MoedasHighlight[Descendente] then
-                            local H = Instance.new("Highlight")
-                            H.Name = "ESP_Moeda"
-                            H.Adornee = Descendente
-                            H.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                            H.FillColor = Color3.fromRGB(255, 215, 0) -- Dourado
-                            H.OutlineColor = Color3.fromRGB(255, 255, 0)
-                            H.FillTransparency = 0.3
-                            H.OutlineTransparency = 0
-                            H.OutlineThickness = 2
-                            H.Parent = Descendente
-                            MoedasHighlight[Descendente] = H
-                        else
-                            MoedasHighlight[Descendente].Enabled = true
-                        end
+            -- Procura TODAS as CoinArea
+            for _, Descendente in ipairs(workspace:GetDescendants()) do
+                if Descendente:IsA("BasePart") and Descendente.Name == "CoinArea" then
+                    if not MoedasHighlight[Descendente] then
+                        local H = Instance.new("Highlight")
+                        H.Name = "ESP_Moeda"
+                        H.Adornee = Descendente
+                        H.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                        H.FillColor = Color3.fromRGB(255, 215, 0) -- Dourado
+                        H.OutlineColor = Color3.fromRGB(255, 255, 0)
+                        H.FillTransparency = 0.3
+                        H.OutlineTransparency = 0
+                        H.OutlineThickness = 2
+                        H.Parent = Descendente
+                        MoedasHighlight[Descendente] = H
+                    else
+                        MoedasHighlight[Descendente].Enabled = true
                     end
                 end
             end
         else
-            -- Desliga e limpa TUDO
+            -- Desliga tudo
             for Moeda, H in pairs(MoedasHighlight) do
                 if H then H:Destroy() end
             end
