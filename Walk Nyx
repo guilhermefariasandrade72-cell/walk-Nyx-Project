@@ -415,7 +415,6 @@ local CONFIG_FARM = {
 -- 🚜 BOTÃO AUTO FARM + SLIDER
 -- ==================================
 
--- 🟢 BOTÃO LIGAR/DESLIGAR AUTO FARM
 local AutoFarmCard = Instance.new("Frame")
 AutoFarmCard.Name = "AutoFarmCard"
 AutoFarmCard.Size = UDim2.new(1, -6, 0, 50)
@@ -477,15 +476,61 @@ AutoFarmCheckMark.Parent = AutoFarmToggleButton
 
 AutoFarmToggleButton.Activated:Connect(function()
     AutoFarmAtivo = not AutoFarmAtivo
-    local targetBgColor = AutoFarmAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-    local targetStrokeColor = AutoFarmAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+
+    local targetBgColor =
+        AutoFarmAtivo
+        and Color3.fromRGB(225, 40, 56)
+        or Color3.fromRGB(11, 12, 16)
+
+    local targetStrokeColor =
+        AutoFarmAtivo
+        and Color3.fromRGB(255, 65, 80)
+        or Color3.fromRGB(39, 40, 48)
+
     local targetTextTrans = AutoFarmAtivo and 0 or 1
-    TweenService:Create(AutoFarmToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
-    TweenService:Create(AutoFarmToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
-    TweenService:Create(AutoFarmCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+
+    TweenService:Create(
+        AutoFarmToggleButton,
+        TweenInfo.new(
+            0.2,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.Out
+        ),
+        {
+            BackgroundColor3 = targetBgColor
+        }
+    ):Play()
+
+    TweenService:Create(
+        AutoFarmToggleStroke,
+        TweenInfo.new(
+            0.2,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.Out
+        ),
+        {
+            Color = targetStrokeColor
+        }
+    ):Play()
+
+    TweenService:Create(
+        AutoFarmCheckMark,
+        TweenInfo.new(
+            0.2,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.Out
+        ),
+        {
+            TextTransparency = targetTextTrans
+        }
+    ):Play()
 end)
 
--- 🟢 SLIDER DE VELOCIDADE
+
+-- ==================================
+-- ⚡ SLIDER DE VELOCIDADE
+-- ==================================
+
 local FarmSpeedCard = Instance.new("Frame")
 FarmSpeedCard.Name = "FarmSpeedCard"
 FarmSpeedCard.Size = UDim2.new(1, -6, 0, 60)
@@ -526,23 +571,35 @@ FarmSpeedValue.Font = Enum.Font.GothamBold
 FarmSpeedValue.TextXAlignment = Enum.TextXAlignment.Right
 FarmSpeedValue.Parent = FarmSpeedCard
 
+
+-- TRACK
 local FarmSpeedSliderBg = Instance.new("Frame")
 FarmSpeedSliderBg.Name = "SliderBg"
 FarmSpeedSliderBg.Size = UDim2.new(1, -24, 0, 6)
 FarmSpeedSliderBg.Position = UDim2.fromOffset(12, 38)
 FarmSpeedSliderBg.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+FarmSpeedSliderBg.BorderSizePixel = 0
 FarmSpeedSliderBg.Parent = FarmSpeedCard
 
 local FarmSpeedSliderCorner = Instance.new("UICorner")
 FarmSpeedSliderCorner.CornerRadius = UDim.new(0, 3)
 FarmSpeedSliderCorner.Parent = FarmSpeedSliderBg
 
+
+-- PREENCHIMENTO
 local FarmSpeedSliderFill = Instance.new("Frame")
 FarmSpeedSliderFill.Name = "SliderFill"
 FarmSpeedSliderFill.Size = UDim2.new(0.5, 0, 1, 0)
 FarmSpeedSliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+FarmSpeedSliderFill.BorderSizePixel = 0
 FarmSpeedSliderFill.Parent = FarmSpeedSliderBg
 
+local FarmSpeedFillCorner = Instance.new("UICorner")
+FarmSpeedFillCorner.CornerRadius = UDim.new(0, 3)
+FarmSpeedFillCorner.Parent = FarmSpeedSliderFill
+
+
+-- BOTÃO DO SLIDER
 local FarmSpeedSliderButton = Instance.new("TextButton")
 FarmSpeedSliderButton.Name = "SliderButton"
 FarmSpeedSliderButton.Size = UDim2.fromOffset(16, 16)
@@ -555,46 +612,133 @@ FarmSpeedSliderButton.AutoButtonColor = false
 FarmSpeedSliderButton.Parent = FarmSpeedSliderBg
 
 local FarmSpeedButtonCorner = Instance.new("UICorner")
-FarmSpeedButtonCorner.CornerRadius = UDim.new(0, 8)
+FarmSpeedButtonCorner.CornerRadius = UDim.new(1, 0)
 FarmSpeedButtonCorner.Parent = FarmSpeedSliderButton
 
-local dragStart, atualPos
-local minVal, maxVal, defVal = 16, 25, 20
 
-local function UpdateSliderFromValue(val)
-    val = math.clamp(val, minVal, maxVal)
-    local percent = (val - minVal) / (maxVal - minVal)
-    FarmSpeedSliderFill.Size = UDim2.new(percent, 0, 1, 0)
-    FarmSpeedSliderButton.Position = UDim2.new(percent, 0, 0.5, 0)
-    FarmSpeedValue.Text = tostring(math.floor(val))
-    AtualizarVelocidadeFarm(val)
+-- ==================================
+-- SISTEMA DO SLIDER
+-- ==================================
+
+local minVal = 16
+local maxVal = 25
+local defVal = 20
+
+local FarmSliderDragging = false
+local FarmSliderActiveInput = nil
+
+local function AtualizarVelocidadeFarm(vel)
+    CONFIG_FARM.velocidade = vel
 end
 
-FarmSpeedSliderButton.MouseButton1Down:Connect(function(x)
-    dragStart = x
-    atualPos = FarmSpeedSliderButton.Position
+local function UpdateFarmSlider(val)
+    val = math.clamp(val, minVal, maxVal)
+
+    local percent = (val - minVal) / (maxVal - minVal)
+
+    FarmSpeedSliderFill.Size =
+        UDim2.new(percent, 0, 1, 0)
+
+    FarmSpeedSliderButton.Position =
+        UDim2.new(percent, 0, 0.5, 0)
+
+    local valorFinal = math.floor(val + 0.5)
+
+    FarmSpeedValue.Text = tostring(valorFinal)
+
+    AtualizarVelocidadeFarm(valorFinal)
+end
+
+
+-- VALOR INICIAL
+UpdateFarmSlider(defVal)
+
+
+-- ==================================
+-- ARRASTAR NO BOTÃO
+-- ==================================
+
+local function AtualizarFarmPeloInput(input)
+    local X = input.Position.X
+
+    local inicio = FarmSpeedSliderBg.AbsolutePosition.X
+    local largura = FarmSpeedSliderBg.AbsoluteSize.X
+
+    if largura <= 0 then
+        return
+    end
+
+    local percentual =
+        math.clamp(
+            (X - inicio) / largura,
+            0,
+            1
+        )
+
+    local valor =
+        minVal + ((maxVal - minVal) * percentual)
+
+    UpdateFarmSlider(valor)
+end
+
+
+FarmSpeedSliderButton.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+
+        FarmSliderDragging = true
+        FarmSliderActiveInput = input
+
+        AtualizarFarmPeloInput(input)
+    end
 end)
+
+
+FarmSpeedSliderBg.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+
+        FarmSliderDragging = true
+        FarmSliderActiveInput = input
+
+        AtualizarFarmPeloInput(input)
+    end
+end)
+
 
 UserInputService.InputChanged:Connect(function(input)
-    if dragStart and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        local totalW = FarmSpeedSliderBg.AbsoluteSize.X
-        local newX = math.clamp(atualPos.X.Scale + delta.X / totalW, 0, 1)
-        local newVal = minVal + (maxVal - minVal) * newX
-        UpdateSliderFromValue(newVal)
+
+    if not FarmSliderDragging then
+        return
+    end
+
+    if FarmSliderActiveInput
+    and FarmSliderActiveInput.UserInputType == Enum.UserInputType.Touch then
+
+        if input.UserInputType == Enum.UserInputType.Touch then
+            AtualizarFarmPeloInput(input)
+        end
+
+    elseif input.UserInputType == Enum.UserInputType.MouseMovement then
+        AtualizarFarmPeloInput(input)
     end
 end)
+
 
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1Down then
-        dragStart = nil
-    end
-end)
 
-FarmSpeedSliderBg.MouseButton1Down:Connect(function(x)
-    local posX = (x - FarmSpeedSliderBg.AbsolutePosition.X) / FarmSpeedSliderBg.AbsoluteSize.X
-    local newVal = minVal + (maxVal - minVal) * math.clamp(posX, 0, 1)
-    UpdateSliderFromValue(newVal)
+    if FarmSliderActiveInput == input then
+        FarmSliderDragging = false
+        FarmSliderActiveInput = nil
+        return
+    end
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        FarmSliderDragging = false
+        FarmSliderActiveInput = nil
+    end
 end)
 
 -- ==================================
