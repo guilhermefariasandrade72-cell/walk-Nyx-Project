@@ -408,6 +408,14 @@ local Humanoid = nil
 local Raiz = nil
 local PartesCorpo = {}
 
+-- ================================================
+-- BOTÃO FLUTUANTE INVISÍVEL - VARIÁVEIS
+-- ================================================
+local FloatingInvisAtivo = false
+local FloatSize = 120 -- Tamanho inicial padrão do botão flutuante quadrado
+local DraggingFloatInvis = false
+local FloatInvisDragInput, FloatInvisDragStart, FloatInvisStartPos
+
         -- ============================
         -- VARIÁVEIS DA ABA SPEED
         -- ============================
@@ -490,6 +498,239 @@ SectionLabel.TextTransparency = 0
 SectionLabel.Parent = PageFrame
 
 -- ================================================
+-- BOTÃO FLUTUANTE INVISÍVEL - CARD NA UI (Toggle + Slider)
+-- ================================================
+local FloatSettingCard = Instance.new("Frame")
+FloatSettingCard.Name = "FloatSettingCard"
+FloatSettingCard.Size = UDim2.new(1, -6, 0, 90)
+FloatSettingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+FloatSettingCard.BorderSizePixel = 0
+FloatSettingCard.Parent = PageFrame
+
+local FloatSettingCorner = Instance.new("UICorner")
+FloatSettingCorner.CornerRadius = UDim.new(0, 10)
+FloatSettingCorner.Parent = FloatSettingCard
+
+local FloatSettingStroke = Instance.new("UIStroke")
+FloatSettingStroke.Color = Color3.fromRGB(39, 40, 48)
+FloatSettingStroke.Thickness = 1
+FloatSettingStroke.Parent = FloatSettingCard
+
+local FloatSettingTitle = Instance.new("TextLabel")
+FloatSettingTitle.Name = "Title"
+FloatSettingTitle.Size = UDim2.new(1, -60, 0, 40)
+FloatSettingTitle.Position = UDim2.fromOffset(12, 0)
+FloatSettingTitle.BackgroundTransparency = 1
+FloatSettingTitle.Text = "Floating Invisible Button"
+FloatSettingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+FloatSettingTitle.TextSize = 12
+FloatSettingTitle.Font = Enum.Font.GothamSemibold
+FloatSettingTitle.TextXAlignment = Enum.TextXAlignment.Left
+FloatSettingTitle.Parent = FloatSettingCard
+
+local FloatSettingToggle = Instance.new("TextButton")
+FloatSettingToggle.Name = "ToggleButton"
+FloatSettingToggle.Size = UDim2.fromOffset(26, 26)
+FloatSettingToggle.AnchorPoint = Vector2.new(1, 0)
+FloatSettingToggle.Position = UDim2.new(1, -12, 0, 7)
+FloatSettingToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+FloatSettingToggle.BorderSizePixel = 0
+FloatSettingToggle.Text = ""
+FloatSettingToggle.AutoButtonColor = false
+FloatSettingToggle.Parent = FloatSettingCard
+
+local FloatSettingBtnCorner = Instance.new("UICorner")
+FloatSettingBtnCorner.CornerRadius = UDim.new(0, 6)
+FloatSettingBtnCorner.Parent = FloatSettingToggle
+
+local FloatSettingBtnStroke = Instance.new("UIStroke")
+FloatSettingBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+FloatSettingBtnStroke.Thickness = 1
+FloatSettingBtnStroke.Parent = FloatSettingToggle
+
+local FloatSettingCheck = Instance.new("TextLabel")
+FloatSettingCheck.Name = "CheckMark"
+FloatSettingCheck.Size = UDim2.fromScale(1, 1)
+FloatSettingCheck.BackgroundTransparency = 1
+FloatSettingCheck.Text = "✔"
+FloatSettingCheck.TextColor3 = Color3.new(1, 1, 1)
+FloatSettingCheck.TextSize = 14
+FloatSettingCheck.Font = Enum.Font.GothamBold
+FloatSettingCheck.TextTransparency = 1
+FloatSettingCheck.Parent = FloatSettingToggle
+
+-- Slider de Tamanho do Botão Flutuante
+local SliderContainer = Instance.new("Frame")
+SliderContainer.Name = "SliderContainer"
+SliderContainer.Size = UDim2.new(1, -24, 0, 30)
+SliderContainer.Position = UDim2.fromOffset(12, 50)
+SliderContainer.BackgroundTransparency = 1
+SliderContainer.Parent = FloatSettingCard
+
+local SliderLabel = Instance.new("TextLabel")
+SliderLabel.Name = "SliderLabel"
+SliderLabel.Size = UDim2.new(0, 150, 1, 0)
+SliderLabel.BackgroundTransparency = 1
+SliderLabel.Text = "Float Size"
+SliderLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
+SliderLabel.TextSize = 11
+SliderLabel.Font = Enum.Font.GothamMedium
+SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+SliderLabel.Parent = SliderContainer
+
+local SliderBg = Instance.new("TextButton")
+SliderBg.Name = "SliderBg"
+SliderBg.Size = UDim2.new(0, 120, 0, 6)
+SliderBg.AnchorPoint = Vector2.new(1, 0.5)
+SliderBg.Position = UDim2.new(1, 0, 0.5, 0)
+SliderBg.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+SliderBg.BorderSizePixel = 0
+SliderBg.Text = ""
+SliderBg.AutoButtonColor = false
+SliderBg.Parent = SliderContainer
+
+local SliderBgCorner = Instance.new("UICorner")
+SliderBgCorner.CornerRadius = UDim.new(1, 0)
+SliderBgCorner.Parent = SliderBg
+
+local SliderFill = Instance.new("Frame")
+SliderFill.Name = "Fill"
+SliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+SliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+SliderFill.BorderSizePixel = 0
+SliderFill.Parent = SliderBg
+
+local SliderFillCorner = Instance.new("UICorner")
+SliderFillCorner.CornerRadius = UDim.new(1, 0)
+SliderFillCorner.Parent = SliderFill
+
+-- Criação da ScreenGui do Botão Flutuante na Tela
+local FloatScreenGui = Instance.new("ScreenGui")
+FloatScreenGui.Name = "FloatInvisGui"
+FloatScreenGui.Enabled = false
+FloatScreenGui.ResetOnSpawn = false
+FloatScreenGui.Parent = game:GetService("CoreGui")
+
+local FloatingButton = Instance.new("TextButton")
+FloatingButton.Name = "FloatingButton"
+FloatingButton.Size = UDim2.fromOffset(FloatSize, FloatSize)
+FloatingButton.Position = UDim2.new(0.5, -60, 0.2, 0)
+FloatingButton.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+FloatingButton.BorderSizePixel = 0
+FloatingButton.Text = "Invisible"
+FloatingButton.TextColor3 = Color3.fromRGB(245, 245, 248)
+FloatingButton.TextSize = 13
+FloatingButton.Font = Enum.Font.GothamBold
+FloatingButton.AutoButtonColor = false
+FloatingButton.Parent = FloatScreenGui
+
+local FloatCorner = Instance.new("UICorner")
+FloatCorner.CornerRadius = UDim.new(0, 8)
+FloatCorner.Parent = FloatingButton
+
+local FloatStroke = Instance.new("UIStroke")
+FloatStroke.Color = Color3.fromRGB(39, 40, 48)
+FloatStroke.Thickness = 1
+FloatStroke.Parent = FloatingButton
+
+-- Linha vermelha/verde na parte esquerda do botão flutuante
+local StatusLine = Instance.new("Frame")
+StatusLine.Name = "StatusLine"
+StatusLine.Size = UDim2.new(0, 4, 1, -12)
+StatusLine.Position = UDim2.new(0, 6, 0, 6)
+StatusLine.BackgroundColor3 = Color3.fromRGB(225, 40, 56) -- Vermelho quando desligado
+StatusLine.BorderSizePixel = 0
+StatusLine.Parent = FloatingButton
+
+local StatusLineCorner = Instance.new("UICorner")
+StatusLineCorner.CornerRadius = UDim.new(1, 0)
+StatusLineCorner.Parent = StatusLine
+
+-- Lógica para ligar/desligar o menu flutuante pelo card principal
+local FloatMenuAtivo = false
+FloatSettingToggle.Activated:Connect(function()
+    FloatMenuAtivo = not FloatMenuAtivo
+    FloatScreenGui.Enabled = FloatMenuAtivo
+
+    local targetBg = FloatMenuAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = FloatMenuAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = FloatMenuAtivo and 0 or 1
+
+    TweenService:Create(FloatSettingToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(FloatSettingBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(FloatSettingCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
+
+-- Clique no Botão Flutuante (Alterna a Invisibilidade e muda a cor da linha)
+FloatingButton.Activated:Connect(function()
+    if DraggingFloatInvis then return end
+    
+    local novoEstado = not FloatingInvisAtivo
+    AtualizarEstadoFloatingInvis(novoEstado)
+
+    -- Se ligado = Verde, Se desligado = Vermelho
+    local corLinha = novoEstado and Color3.fromRGB(40, 225, 100) or Color3.fromRGB(225, 40, 56)
+    TweenService:Create(StatusLine, TweenInfo.new(0.2), {BackgroundColor3 = corLinha}):Play()
+end)
+
+-- Sistema de Arraste do Botão Flutuante pela Tela
+FloatingButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DraggingFloatInvis = true
+        FloatInvisDragStart = input.Position
+        FloatInvisStartPos = FloatingButton.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                DraggingFloatInvis = false
+            end
+        end)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if DraggingFloatInvis and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - FloatInvisDragStart
+        FloatingButton.Position = UDim2.new(
+            FloatInvisStartPos.X.Scale, 
+            FloatInvisStartPos.X.Offset + delta.X, 
+            FloatInvisStartPos.Y.Scale, 
+            FloatInvisStartPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- Lógica do Slider para alterar o tamanho dinamicamente
+local function AtualizarSlider(input)
+    local posRelativa = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
+    SliderFill.Size = UDim2.new(posRelativa, 0, 1, 0)
+    
+    -- Tamanho mínimo de 80 e máximo de 200 pixels
+    FloatSize = math.floor(80 + (posRelativa * 120))
+    FloatingButton.Size = UDim2.fromOffset(FloatSize, FloatSize)
+end
+
+local SliderDragging = false
+SliderBg.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        SliderDragging = true
+        AtualizarSlider(input)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        SliderDragging = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if SliderDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        AtualizarSlider(input)
+    end
+end)
+
+-- ================================================
 -- INVISÍVEL - BOTÃO
 -- ================================================
 local InvisivelCard = Instance.new("Frame")
@@ -562,6 +803,18 @@ InvisivelToggle.Activated:Connect(function()
     TweenService:Create(InvisivelBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
     TweenService:Create(InvisivelCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
 end)
+
+-- ================================================
+-- BOTÃO FLUTUANTE INVISÍVEL - SISTEMA
+-- ================================================
+-- (Assume que as funções e variáveis de invisibilidade globais já foram definidas no script anterior)
+local function AtualizarEstadoFloatingInvis(estado)
+    FloatingInvisAtivo = estado
+    -- Sincroniza com a função de invisibilidade principal existente
+    if type(InvisivelAtivo) ~= "nil" then
+        InvisivelAtivo = estado
+    end
+end
 
 -- ================================================
 -- INVISÍVEL - SISTEMA
