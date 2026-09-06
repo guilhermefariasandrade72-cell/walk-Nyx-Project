@@ -876,7 +876,7 @@ ESPMoedasToggleButton.Activated:Connect(function()
 end)
 
 -- ==================================
--- 💰 SISTEMA DO ESP MOEDAS (NOME CERTO: CoinArea)
+-- 💰 SISTEMA DO ESP MOEDAS (SEM ERRO!)
 -- ==================================
 task.spawn(function()
     while true do
@@ -903,7 +903,7 @@ task.spawn(function()
                         H.OutlineColor = Color3.fromRGB(255, 255, 0)
                         H.FillTransparency = 0.3
                         H.OutlineTransparency = 0
-                        H.OutlineThickness = 2
+                        -- ❌ REMOVIDO: OutlineThickness (não existe!)
                         H.Parent = Descendente
                         MoedasHighlight[Descendente] = H
                     else
