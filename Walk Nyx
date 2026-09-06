@@ -600,21 +600,33 @@ local function CreateInvisivelButton()
     GuiBtn.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     GuiBtn.Parent = ParentGui
 
-    -- Botão flutuante maior (140x65)
+    -- Botão quadrado maior (140x65) e SEM UICorner (quadrado perfeito)
     local Btn = Instance.new("ImageButton")
     Btn.Size = UDim2.new(0, 140, 0, 65)
     Btn.Position = UDim2.new(0.5, -70, 0.3, -32)
-    Btn.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-    Btn.BackgroundTransparency = 0.1
+    Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.BorderSizePixel = 0
     Btn.Parent = GuiBtn
 
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 14)
-    Corner.Parent = Btn
+    -- Gradiente direto no fundo do botão para garantir o efeito vermelho/verde para preto nas laterais
+    local GradienteFundo = Instance.new("UIGradient")
+    GradienteFundo.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- Vermelho na esquerda (Desligado)
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))   -- Preto na direita
+    })
+    GradienteFundo.Rotation = 0 -- Esquerda para Direita
+    GradienteFundo.Parent = Btn
 
-    -- Linha em volta com gradiente (Esquerda Vermelho/Verde e Direita Preto)
+    -- Frame interno para criar o efeito de borda/card escuro por dentro e deixar o degradê aparecendo só na bordinha (ou fundo completo)
+    -- Se quiser que o fundo todo seja o degradê, pode usar direto. Aqui vamos deixar um fundo escuro interno e o degradê na borda usando 2 frames se necessário, ou aplicar o degradê direto no fundo como você pediu.
+    -- Vamos ajustar para o fundo escuro com uma bordinha de degradê perfeita:
+    
+    Btn.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    GradienteFundo:Destroy() -- Removemos do fundo base para aplicar na borda com um truque de Frame
+
+    -- Borda com Gradiente real usando UIStroke + UIGradient
     local Borda = Instance.new("UIStroke")
-    Borda.Thickness = 3
+    Borda.Thickness = 4
     Borda.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     Borda.Parent = Btn
 
@@ -623,13 +635,13 @@ local function CreateInvisivelButton()
         ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- Vermelho na esquerda
         ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))   -- Preto na direita
     })
-    GradienteBorda.Rotation = 0 -- Horizontal: Esquerda para Direita
+    GradienteBorda.Rotation = 0
     GradienteBorda.Parent = Borda
 
     -- Texto "Invisible" no topo
     local Texto = Instance.new("TextLabel")
     Texto.Size = UDim2.new(1, 0, 0, 25)
-    Texto.Position = UDim2.new(0, 0, 0, 8)
+    Texto.Position = UDim2.new(0, 0, 0, 10)
     Texto.BackgroundTransparency = 1
     Texto.Text = "Invisible"
     Texto.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -641,11 +653,11 @@ local function CreateInvisivelButton()
     local StatusTexto = Instance.new("TextLabel")
     StatusTexto.Name = "StatusText"
     StatusTexto.Size = UDim2.new(1, 0, 0, 20)
-    StatusTexto.Position = UDim2.new(0, 0, 0, 32)
+    StatusTexto.Position = UDim2.new(0, 0, 0, 35)
     StatusTexto.BackgroundTransparency = 1
     StatusTexto.Text = "Off"
     StatusTexto.TextColor3 = Color3.fromRGB(255, 65, 80)
-    StatusTexto.TextSize = 11
+    StatusTexto.TextSize = 12
     StatusTexto.Font = Enum.Font.GothamSemibold
     StatusTexto.Parent = Btn
 
@@ -701,7 +713,7 @@ end
 
 
 -- ================================================
--- 👻 CRIAÇÃO DO CARD E DO TOGGLE NA ABA (ESTILO SOLICITADO)
+-- 👻 CRIAÇÃO DO CARD E DO TOGGLE NA ABA
 -- ================================================
 local InvisivelCard = Instance.new("Frame")
 InvisivelCard.Name = "InvisivelCard"
