@@ -442,14 +442,63 @@ for Index, TabData in ipairs(TabsData) do
         -- VARIÁVEIS DA ABA PLAYER
         -- ============================
 --             SPEED
-        
+local SpeedEnabled = false
+local CurrentSpeed = 16
+local MinSpeed = 16
+local MaxSpeed = 30
+local SpeedSliding = false
+local SpeedActiveInput = nil
+
 --        VARIÁVEIS DA ABA JAMP
         
         -- ============================
         -- BOTOES DA ABA PLAYER
         -- ============================
 --            SPEED
-        
+SpeedToggleButton.Activated:Connect(function()
+    SpeedEnabled = not SpeedEnabled
+    
+    local targetBg = SpeedEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = SpeedEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetCheck = SpeedEnabled and 0 or 1
+    
+    TweenService:Create(SpeedToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(SpeedToggleStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(SpeedCheckMark, TweenInfo.new(0.2), {TextTransparency = targetCheck}):Play()
+    
+    if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+        Player.Character.Humanoid.WalkSpeed = SpeedEnabled and CurrentSpeed or 16
+    end
+end)
+
+SpeedSliderButton.InputBegan:Connect(function(Input)
+    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not SpeedActiveInput then
+        SpeedActiveInput = Input
+        SpeedSliding = true
+    end
+end)
+
+SpeedSliderTrack.InputBegan:Connect(function(Input)
+    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not SpeedActiveInput then
+        SpeedActiveInput = Input
+        SpeedSliding = true
+        UpdateSpeedSlider(Input.Position.X)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input == SpeedActiveInput then
+        SpeedSliding = false
+        SpeedActiveInput = nil
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(Input)
+    if SpeedSliding and Input == SpeedActiveInput and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+        UpdateSpeedSlider(Input.Position.X)
+    end
+end)
+
         -- ============================
         -- BOTOES DA ABA JAMP
         -- ============================
@@ -458,7 +507,40 @@ for Index, TabData in ipairs(TabsData) do
         -- SISTEMA DA ABA PLAYER
         -- ============================
 --                 SPEED
-        
+task.spawn(function()
+    while true do
+        local c = Player.Character
+        if c then
+            local Humanoid = c:FindFirstChild("Humanoid")
+            if Humanoid then
+                if SpeedEnabled then
+                    Humanoid.WalkSpeed = CurrentSpeed
+                else
+                    Humanoid.WalkSpeed = 16
+                end
+            end
+        end
+        task.wait(0.1)
+    end
+end)
+
+local function UpdateSpeedSlider(InputPosition)
+    local TrackPos = SpeedSliderTrack.AbsolutePosition.X
+    local TrackSize = SpeedSliderTrack.AbsoluteSize.X
+    local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
+    local Percentage = ClampedX / TrackSize
+
+    CurrentSpeed = math.floor(MinSpeed + (MaxSpeed - MinSpeed) * Percentage + 0.5)
+    SpeedSliderLabel.Text = "Speed: " .. tostring(CurrentSpeed)
+
+    TweenService:Create(SpeedSliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
+    TweenService:Create(SpeedSliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, -12)}):Play()
+    
+    if SpeedEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+        Player.Character.Humanoid.WalkSpeed = CurrentSpeed
+    end
+end)
+
 
         -- ============================
         -- 🦘 SISTEMA DE PULO CORRIGIDO
