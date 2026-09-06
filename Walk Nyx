@@ -420,6 +420,13 @@ local Workspace = game:GetService("Workspace")
 local player = Players.LocalPlayer
 
 -- ==================================
+-- 🧱 VARIÁVEIS DO X-RAY
+-- ==================================
+local XRayAtivo = false
+local ValoresOriginais = {}
+
+
+-- ==================================
 -- ✨ 1. HIGHLIGHT ESP
 -- ==================================
 local ESPHighlightCard = Instance.new("Frame")
@@ -713,6 +720,127 @@ ESPLineToggleButton.Activated:Connect(function()
     TweenService:Create(ESPLineToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
     TweenService:Create(ESPLineToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
     TweenService:Create(ESPLineCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
+
+-- ==================================
+-- 🧱 BOTÃO X-RAY
+-- ==================================
+local XRayCard = Instance.new("Frame")
+XRayCard.Name = "XRayCard"
+XRayCard.Size = UDim2.new(1, -6, 0, 50)
+XRayCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+XRayCard.BorderSizePixel = 0
+XRayCard.Parent = PageFrame
+
+local XRayCardCorner = Instance.new("UICorner")
+XRayCardCorner.CornerRadius = UDim.new(0, 10)
+XRayCardCorner.Parent = XRayCard
+
+local XRayCardStroke = Instance.new("UIStroke")
+XRayCardStroke.Color = Color3.fromRGB(39, 40, 48)
+XRayCardStroke.Thickness = 1
+XRayCardStroke.Parent = XRayCard
+
+local XRayTitle = Instance.new("TextLabel")
+XRayTitle.Name = "Title"
+XRayTitle.Size = UDim2.new(1, -60, 1, 0)
+XRayTitle.Position = UDim2.fromOffset(12, 0)
+XRayTitle.BackgroundTransparency = 1
+XRayTitle.Text = "🧱 X-Ray (Paredes Transparentes)"
+XRayTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+XRayTitle.TextSize = 12
+XRayTitle.Font = Enum.Font.GothamSemibold
+XRayTitle.TextXAlignment = Enum.TextXAlignment.Left
+XRayTitle.Parent = XRayCard
+
+local XRayToggleButton = Instance.new("TextButton")
+XRayToggleButton.Name = "ToggleButton"
+XRayToggleButton.Size = UDim2.fromOffset(26, 26)
+XRayToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+XRayToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+XRayToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+XRayToggleButton.BorderSizePixel = 0
+XRayToggleButton.Text = ""
+XRayToggleButton.AutoButtonColor = false
+XRayToggleButton.Parent = XRayCard
+
+local XRayToggleCorner = Instance.new("UICorner")
+XRayToggleCorner.CornerRadius = UDim.new(0, 6)
+XRayToggleCorner.Parent = XRayToggleButton
+
+local XRayToggleStroke = Instance.new("UIStroke")
+XRayToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+XRayToggleStroke.Thickness = 1
+XRayToggleStroke.Parent = XRayToggleButton
+
+local XRayCheckMark = Instance.new("TextLabel")
+XRayCheckMark.Name = "CheckMark"
+XRayCheckMark.Size = UDim2.fromScale(1, 1)
+XRayCheckMark.BackgroundTransparency = 1
+XRayCheckMark.Text = "✔"
+XRayCheckMark.TextColor3 = Color3.new(1, 1, 1)
+XRayCheckMark.TextSize = 14
+XRayCheckMark.Font = Enum.Font.GothamBold
+XRayCheckMark.TextTransparency = 1
+XRayCheckMark.Parent = XRayToggleButton
+
+XRayToggleButton.Activated:Connect(function()
+    XRayAtivo = not XRayAtivo
+    
+    local targetBgColor = XRayAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = XRayAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = XRayAtivo and 0 or 1
+
+    TweenService:Create(XRayToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(XRayToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(XRayCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
+
+-- ==================================
+-- 🧱 SISTEMA DO X-RAY
+-- ==================================
+local function AplicarXRay()
+    for _, Descendente in ipairs(workspace:GetDescendants()) do
+        if Descendente:IsA("BasePart") and not Descendente:IsA("Terrain") then
+            
+            -- ✅ IGNORA PERSONAGENS DE JOGADORES
+            local EhJogador = false
+            for _, Jogador in ipairs(Players:GetPlayers()) do
+                if Jogador.Character and Descendente:IsDescendantOf(Jogador.Character) then
+                    EhJogador = true
+                    break
+                end
+            end
+            
+            if not EhJogador then
+                if not ValoresOriginais[Descendente] then
+                    ValoresOriginais[Descendente] = {Transparency = Descendente.Transparency, LocalTransparencyModifier = Descendente.LocalTransparencyModifier}
+                end
+                Descendente.LocalTransparencyModifier = 0.65 -- Semi-transparente
+            end
+        end
+    end
+end
+
+local function RemoverXRay()
+    for Parte, Valores in pairs(ValoresOriginais) do
+        if Parte and Parte:IsDescendantOf(workspace) then
+            Parte.LocalTransparencyModifier = Valores.LocalTransparencyModifier
+        end
+    end
+    table.clear(ValoresOriginais)
+end
+
+task.spawn(function()
+    while task.wait(0.5) do
+        if XRayAtivo then
+            AplicarXRay()
+        else
+            if next(ValoresOriginais) then
+                RemoverXRay()
+            end
+        end
+    end
 end)
 
 -- ==================================
