@@ -600,64 +600,42 @@ local function CreateInvisivelButton()
     GuiBtn.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     GuiBtn.Parent = ParentGui
 
-    -- Botão quadrado maior (140x65) e SEM UICorner (quadrado perfeito)
+    -- Botão quadrado perfeito 70x70 e SEM UICorner (totalmente quadrado)
     local Btn = Instance.new("ImageButton")
-    Btn.Size = UDim2.new(0, 140, 0, 65)
-    Btn.Position = UDim2.new(0.5, -70, 0.3, -32)
-    Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.Size = UDim2.new(0, 70, 0, 70)
+    Btn.Position = UDim2.new(0.5, -35, 0.3, -35)
+    Btn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    Btn.BackgroundTransparency = 0.3 -- Semi preto translúcido no centro
     Btn.BorderSizePixel = 0
     Btn.Parent = GuiBtn
 
-    -- Gradiente direto no fundo do botão para garantir o efeito vermelho/verde para preto nas laterais
-    local GradienteFundo = Instance.new("UIGradient")
-    GradienteFundo.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- Vermelho na esquerda (Desligado)
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))   -- Preto na direita
-    })
-    GradienteFundo.Rotation = 0 -- Esquerda para Direita
-    GradienteFundo.Parent = Btn
-
-    -- Frame interno para criar o efeito de borda/card escuro por dentro e deixar o degradê aparecendo só na bordinha (ou fundo completo)
-    -- Se quiser que o fundo todo seja o degradê, pode usar direto. Aqui vamos deixar um fundo escuro interno e o degradê na borda usando 2 frames se necessário, ou aplicar o degradê direto no fundo como você pediu.
-    -- Vamos ajustar para o fundo escuro com uma bordinha de degradê perfeita:
-    
-    Btn.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-    GradienteFundo:Destroy() -- Removemos do fundo base para aplicar na borda com um truque de Frame
-
-    -- Borda com Gradiente real usando UIStroke + UIGradient
+    -- Linha vermelha contornando o quadrado em volta
     local Borda = Instance.new("UIStroke")
-    Borda.Thickness = 4
+    Borda.Color = Color3.fromRGB(255, 0, 0) -- Vermelho desligado
+    Borda.Thickness = 3
     Borda.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     Borda.Parent = Btn
 
-    local GradienteBorda = Instance.new("UIGradient")
-    GradienteBorda.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- Vermelho na esquerda
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))   -- Preto na direita
-    })
-    GradienteBorda.Rotation = 0
-    GradienteBorda.Parent = Borda
-
-    -- Texto "Invisible" no topo
+    -- Texto "Invisible" no centro-superior
     local Texto = Instance.new("TextLabel")
-    Texto.Size = UDim2.new(1, 0, 0, 25)
-    Texto.Position = UDim2.new(0, 0, 0, 10)
+    Texto.Size = UDim2.new(1, 0, 0, 20)
+    Texto.Position = UDim2.new(0, 0, 0, 15)
     Texto.BackgroundTransparency = 1
     Texto.Text = "Invisible"
     Texto.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Texto.TextSize = 13
+    Texto.TextSize = 12
     Texto.Font = Enum.Font.GothamBold
     Texto.Parent = Btn
 
-    -- Texto "Off" / "On" abaixo do "Invisible"
+    -- Texto "Off" / "On" logo abaixo do "Invisible"
     local StatusTexto = Instance.new("TextLabel")
     StatusTexto.Name = "StatusText"
-    StatusTexto.Size = UDim2.new(1, 0, 0, 20)
+    StatusTexto.Size = UDim2.new(1, 0, 0, 15)
     StatusTexto.Position = UDim2.new(0, 0, 0, 35)
     StatusTexto.BackgroundTransparency = 1
     StatusTexto.Text = "Off"
-    StatusTexto.TextColor3 = Color3.fromRGB(255, 65, 80)
-    StatusTexto.TextSize = 12
+    StatusTexto.TextColor3 = Color3.fromRGB(255, 50, 50)
+    StatusTexto.TextSize = 11
     StatusTexto.Font = Enum.Font.GothamSemibold
     StatusTexto.Parent = Btn
 
@@ -688,19 +666,13 @@ local function CreateInvisivelButton()
                 InvisivelAtivo = not InvisivelAtivo
 
                 if InvisivelAtivo then
-                    GradienteBorda.Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)), -- Verde na esquerda
-                        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))   -- Preto na direita
-                    })
+                    Borda.Color = Color3.fromRGB(0, 255, 0) -- Verde quando ligado
                     StatusTexto.Text = "On"
                     StatusTexto.TextColor3 = Color3.fromRGB(0, 255, 0)
                 else
-                    GradienteBorda.Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- Vermelho na esquerda
-                        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))   -- Preto na direita
-                    })
+                    Borda.Color = Color3.fromRGB(255, 0, 0) -- Vermelho quando desligado
                     StatusTexto.Text = "Off"
-                    StatusTexto.TextColor3 = Color3.fromRGB(255, 65, 80)
+                    StatusTexto.TextColor3 = Color3.fromRGB(255, 50, 50)
                 end
             end
             dragStartMousePos = nil
