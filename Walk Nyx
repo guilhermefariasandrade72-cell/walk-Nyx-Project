@@ -1,7 +1,6 @@
 --==============================================================--
 --                      WALK NYX PROJECT                        --
 --              PREMIUM UI / MOBILE / LUCIDE                  --
---                   INTERFACE ONLY - FIXED                     --
 --==============================================================--
 
 local Players = game:GetService("Players")
@@ -52,7 +51,6 @@ local DEFAULT_WIDTH  = 445
 local DEFAULT_HEIGHT = 320
 
 local MIN_WIDTH  = 360
--- Altura mínima calculada exatamente para que a janela pare logo abaixo da aba Settings
 local MIN_HEIGHT = 60 + (5 * 48) + 16
 
 local MAX_WIDTH  = 700
@@ -103,10 +101,6 @@ local function CreateLucideIcon(Parent, IconName, IconColor, IconSize)
     return Image
 end
 
---==============================================================--
--- ÍCONE DE CIFRÃO ($) COM TEXTO PURO (BEM MAIOR)
---==============================================================--
-
 local function CreateDollarIcon(Parent, IconColor, IconSize)
     IconSize = IconSize or 32
 
@@ -124,10 +118,6 @@ local function CreateDollarIcon(Parent, IconColor, IconSize)
 
     return TextLabel
 end
-
---==============================================================--
--- ÍCONE PLAYER
---==============================================================--
 
 local function CreateDirectPlayerIcon(Parent, IconColor)
     local Container = Instance.new("Frame")
@@ -369,7 +359,7 @@ SidebarLine.BorderSizePixel = 0
 SidebarLine.Parent = Sidebar
 
 --==============================================================--
--- CONTENT (SEM SCROLL, CRESCIMENTO AUTOMÁTICO)
+-- CONTENT
 --==============================================================--
 
 local ContentContainer = Instance.new("Frame")
@@ -393,232 +383,270 @@ for Index, TabData in ipairs(TabsData) do
     PageFrame.Visible = (Index == 1)
     PageFrame.Parent = ContentContainer
 
-    --==============================================================--
-    -- TÍTULOS / INSERÇÃO DE VARIÁVEIS, BOTÕES E SISTEMAS DE CADA ABA
-    --==============================================================--
     if TabData.Name == "Main" then
-        -- [1] ABA: MAIN
-        -- Crie aqui as variáveis, toggles, botões e sistemas da aba Main
+        -- ============================
+        -- VARIÁVEIS DA ABA MAIN
+        -- ============================
+        -- (Coloque suas variáveis da aba Main aqui se precisar)
+
+        -- ============================
+        -- BOTOES DA ABA MAIN
+        -- ============================
+        -- (Coloque seus botões/cards da aba Main aqui)
+
+        -- ============================
+        -- SISTEMA DA ABA MAIN
+        -- ============================
+        -- (Coloque a lógica/loops da aba Main aqui)
+
 
     elseif TabData.Name == "Auto Farm" then
-        -- [2] ABA: AUTO FARM
-        -- Crie aqui as variáveis, toggles, botões e sistemas de Auto Farm
+        -- ============================
+        -- VARIÁVEIS DA ABA AUTO FARM
+        -- ============================
+        -- (Coloque suas variáveis da aba Auto Farm aqui)
+
+        -- ============================
+        -- BOTOES DA ABA AUTO FARM
+        -- ============================
+        -- (Coloque seus botões/cards da aba Auto Farm aqui)
+
+        -- ============================
+        -- SISTEMA DA ABA AUTO FARM
+        -- ============================
+        -- (Coloque a lógica/loops da aba Auto Farm aqui)
+
 
     elseif TabData.Name == "ESP" then
-        -- [3] ABA: ESP
-        -- Crie aqui as variáveis, toggles, botões e sistemas de ESP
+        -- ============================
+        -- VARIÁVEIS DA ABA ESP
+        -- ============================
+        -- (Coloque suas variáveis da aba ESP aqui)
 
--- =============================================================
---                  ABA PLAYER
--- =============================================================--
+        -- ============================
+        -- BOTOES DA ABA ESP
+        -- ============================
+        -- (Coloque seus botões/cards da aba ESP aqui)
+
+        -- ============================
+        -- SISTEMA DA ABA ESP
+        -- ============================
+        -- (Coloque a lógica/loops da aba ESP aqui)
+
 
     elseif TabData.Name == "Player" then
+        -- ============================
+        -- VARIÁVEIS DA ABA PLAYER
+        -- ============================
+        local SpeedEnabled = false
+        local CurrentSpeed = 16
+        local MinVal = 16
+        local MaxVal = 30
+        local Sliding = false
+        local ActiveInput = nil
 
---==============================================================--
--- VARIÁVEIS (ABA PLAYER)
---==============================================================--
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+        -- ============================
+        -- BOTOES DA ABA PLAYER
+        -- ============================
+        local SpeedCard = Instance.new("Frame")
+        SpeedCard.Name = "SpeedCard"
+        SpeedCard.Size = UDim2.new(1, -6, 0, 85)
+        SpeedCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+        SpeedCard.BorderSizePixel = 0
+        SpeedCard.Parent = PageFrame
 
-local Player = Players.LocalPlayer
+        local SpeedCardCorner = Instance.new("UICorner")
+        SpeedCardCorner.CornerRadius = UDim.new(0, 10)
+        SpeedCardCorner.Parent = SpeedCard
 
-local SpeedEnabled = false
-local CurrentSpeed = 16
-local MinVal = 16
-local MaxVal = 30
-local Sliding = false
+        local SpeedCardStroke = Instance.new("UIStroke")
+        SpeedCardStroke.Color = Color3.fromRGB(39, 40, 48)
+        SpeedCardStroke.Thickness = 1
+        SpeedCardStroke.Parent = SpeedCard
 
---==============================================================--
--- BOTÃO (INTERFACE DO TOGGLE E SLIDER PARA INSERIR NA ABA PLAYER)
---==============================================================--
-local SpeedCard = Instance.new("Frame")
-SpeedCard.Name = "SpeedCard"
-SpeedCard.Size = UDim2.new(1, -6, 0, 85)
-SpeedCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-SpeedCard.BorderSizePixel = 0
--- Defina o 'Parent' como a sua PageFrame da aba Player (ex: PageFrame.Parent = PlayerPage)
+        local SpeedTitle = Instance.new("TextLabel")
+        SpeedTitle.Name = "Title"
+        SpeedTitle.Size = UDim2.new(1, -60, 0, 36)
+        SpeedTitle.Position = UDim2.fromOffset(12, 0)
+        SpeedTitle.BackgroundTransparency = 1
+        SpeedTitle.Text = "Speed Hack (Walk)"
+        SpeedTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+        SpeedTitle.TextSize = 12
+        SpeedTitle.Font = Enum.Font.GothamSemibold
+        SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+        SpeedTitle.Parent = SpeedCard
 
-local SpeedCardCorner = Instance.new("UICorner")
-SpeedCardCorner.CornerRadius = UDim.new(0, 10)
-SpeedCardCorner.Parent = SpeedCard
+        local ToggleButton = Instance.new("TextButton")
+        ToggleButton.Name = "ToggleButton"
+        ToggleButton.Size = UDim2.fromOffset(26, 26)
+        ToggleButton.AnchorPoint = Vector2.new(1, 0)
+        ToggleButton.Position = UDim2.new(1, -12, 0, 5)
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        ToggleButton.BorderSizePixel = 0
+        ToggleButton.Text = ""
+        ToggleButton.AutoButtonColor = false
+        ToggleButton.Parent = SpeedCard
 
-local SpeedCardStroke = Instance.new("UIStroke")
-SpeedCardStroke.Color = Color3.fromRGB(39, 40, 48)
-SpeedCardStroke.Thickness = 1
-SpeedCardStroke.Parent = SpeedCard
+        local ToggleCorner = Instance.new("UICorner")
+        ToggleCorner.CornerRadius = UDim.new(0, 6)
+        ToggleCorner.Parent = ToggleButton
 
-local SpeedTitle = Instance.new("TextLabel")
-SpeedTitle.Name = "Title"
-SpeedTitle.Size = UDim2.new(1, -60, 0, 36)
-SpeedTitle.Position = UDim2.fromOffset(12, 0)
-SpeedTitle.BackgroundTransparency = 1
-SpeedTitle.Text = "Speed Hack (Walk)"
-SpeedTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
-SpeedTitle.TextSize = 12
-SpeedTitle.Font = Enum.Font.GothamSemibold
-SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
-SpeedTitle.Parent = SpeedCard
+        local ToggleStroke = Instance.new("UIStroke")
+        ToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+        ToggleStroke.Thickness = 1
+        ToggleStroke.Parent = ToggleButton
 
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "ToggleButton"
-ToggleButton.Size = UDim2.fromOffset(26, 26)
-ToggleButton.AnchorPoint = Vector2.new(1, 0)
-ToggleButton.Position = UDim2.new(1, -12, 0, 5)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-ToggleButton.BorderSizePixel = 0
-ToggleButton.Text = ""
-ToggleButton.AutoButtonColor = false
-ToggleButton.Parent = SpeedCard
+        local CheckMark = Instance.new("TextLabel")
+        CheckMark.Name = "CheckMark"
+        CheckMark.Size = UDim2.fromScale(1, 1)
+        CheckMark.BackgroundTransparency = 1
+        CheckMark.Text = "✔"
+        CheckMark.TextColor3 = Color3.new(1, 1, 1)
+        CheckMark.TextSize = 14
+        CheckMark.Font = Enum.Font.GothamBold
+        CheckMark.TextTransparency = 1
+        CheckMark.Parent = ToggleButton
 
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 6)
-ToggleCorner.Parent = ToggleButton
+        local SliderContainer = Instance.new("Frame")
+        SliderContainer.Name = "SliderContainer"
+        SliderContainer.Size = UDim2.new(1, -24, 0, 30)
+        SliderContainer.Position = UDim2.fromOffset(12, 44)
+        SliderContainer.BackgroundTransparency = 1
+        SliderContainer.Parent = SpeedCard
 
-local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(39, 40, 48)
-ToggleStroke.Thickness = 1
-ToggleStroke.Parent = ToggleButton
+        local SliderLabel = Instance.new("TextLabel")
+        SliderLabel.Name = "SliderLabel"
+        SliderLabel.Size = UDim2.new(1, 0, 0, 14)
+        SliderLabel.BackgroundTransparency = 1
+        SliderLabel.Text = "Velocidade: 16"
+        SliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+        SliderLabel.TextSize = 10
+        SliderLabel.Font = Enum.Font.GothamMedium
+        SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+        SliderLabel.Parent = SliderContainer
 
-local CheckMark = Instance.new("TextLabel")
-CheckMark.Name = "CheckMark"
-CheckMark.Size = UDim2.fromScale(1, 1)
-CheckMark.BackgroundTransparency = 1
-CheckMark.Text = "✔"
-CheckMark.TextColor3 = Color3.new(1, 1, 1)
-CheckMark.TextSize = 14
-CheckMark.Font = Enum.Font.GothamBold
-CheckMark.TextTransparency = 1
-CheckMark.Parent = ToggleButton
+        local SliderTrack = Instance.new("Frame")
+        SliderTrack.Name = "SliderTrack"
+        SliderTrack.Size = UDim2.new(1, 0, 0, 6)
+        SliderTrack.Position = UDim2.fromOffset(0, 18)
+        SliderTrack.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        SliderTrack.BorderSizePixel = 0
+        SliderTrack.Parent = SliderContainer
 
-local SliderContainer = Instance.new("Frame")
-SliderContainer.Name = "SliderContainer"
-SliderContainer.Size = UDim2.new(1, -24, 0, 30)
-SliderContainer.Position = UDim2.fromOffset(12, 44)
-SliderContainer.BackgroundTransparency = 1
-SliderContainer.Parent = SpeedCard
+        local SliderTrackCorner = Instance.new("UICorner")
+        SliderTrackCorner.CornerRadius = UDim.new(1, 0)
+        SliderTrackCorner.Parent = SliderTrack
 
-local SliderLabel = Instance.new("TextLabel")
-SliderLabel.Name = "SliderLabel"
-SliderLabel.Size = UDim2.new(1, 0, 0, 14)
-SliderLabel.BackgroundTransparency = 1
-SliderLabel.Text = "Velocidade: 16"
-SliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
-SliderLabel.TextSize = 10
-SliderLabel.Font = Enum.Font.GothamMedium
-SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
-SliderLabel.Parent = SliderContainer
+        local SliderFill = Instance.new("Frame")
+        SliderFill.Name = "SliderFill"
+        SliderFill.Size = UDim2.new(0, 0, 1, 0)
+        SliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+        SliderFill.BorderSizePixel = 0
+        SliderFill.Parent = SliderTrack
 
-local SliderTrack = Instance.new("Frame")
-SliderTrack.Name = "SliderTrack"
-SliderTrack.Size = UDim2.new(1, 0, 0, 6)
-SliderTrack.Position = UDim2.fromOffset(0, 18)
-SliderTrack.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-SliderTrack.BorderSizePixel = 0
-SliderTrack.Parent = SliderContainer
+        local SliderFillCorner = Instance.new("UICorner")
+        SliderFillCorner.CornerRadius = UDim.new(1, 0)
+        SliderFillCorner.Parent = SliderFill
 
-local SliderTrackCorner = Instance.new("UICorner")
-SliderTrackCorner.CornerRadius = UDim.new(1, 0)
-SliderTrackCorner.Parent = SliderTrack
+        local SliderButton = Instance.new("TextButton")
+        SliderButton.Name = "SliderButton"
+        SliderButton.Size = UDim2.new(1, 10, 1, 10)
+        SliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        SliderButton.Position = UDim2.new(0, 0, 0.5, 0)
+        SliderButton.BackgroundTransparency = 1
+        SliderButton.Text = ""
+        SliderButton.AutoButtonColor = false
+        SliderButton.Parent = SliderTrack
 
-local SliderFill = Instance.new("Frame")
-SliderFill.Name = "SliderFill"
-SliderFill.Size = UDim2.new(0, 0, 1, 0)
-SliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
-SliderFill.BorderSizePixel = 0
-SliderFill.Parent = SliderTrack
+        -- ============================
+        -- SISTEMA DA ABA PLAYER
+        -- ============================
+        local function UpdateSlider(InputPosition)
+            local TrackPos = SliderTrack.AbsolutePosition.X
+            local TrackSize = SliderTrack.AbsoluteSize.X
+            local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
+            local Percentage = ClampedX / TrackSize
 
-local SliderFillCorner = Instance.new("UICorner")
-SliderFillCorner.CornerRadius = UDim.new(1, 0)
-SliderFillCorner.Parent = SliderFill
+            CurrentSpeed = math.floor(MinVal + (MaxVal - MinVal) * Percentage + 0.5)
+            SliderLabel.Text = "Velocidade: " .. tostring(CurrentSpeed)
 
-local SliderButton = Instance.new("TextButton")
-SliderButton.Name = "SliderButton"
-SliderButton.Size = UDim2.new(1, 10, 1, 10)
-SliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
-SliderButton.Position = UDim2.new(0, 0, 0.5, 0)
-SliderButton.BackgroundTransparency = 1
-SliderButton.Text = ""
-SliderButton.AutoButtonColor = false
-SliderButton.Parent = SliderTrack
+            TweenService:Create(SliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
+            TweenService:Create(SliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, 0)}):Play()
+        end
 
---==============================================================--
--- SISTEMA SEPARADO (LÓGICA DE VELOCIDADE 16 FIXA QUANDO DESLIGADO)
---==============================================================--
+        SliderButton.InputBegan:Connect(function(Input)
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not ActiveInput then
+                ActiveInput = Input
+                Sliding = true
+            end
+        end)
 
-local function UpdateSlider(InputPosition)
-    local TrackPos = SliderTrack.AbsolutePosition.X
-    local TrackSize = SliderTrack.AbsoluteSize.X
-    local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
-    local Percentage = ClampedX / TrackSize
+        SliderTrack.InputBegan:Connect(function(Input)
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not ActiveInput then
+                ActiveInput = Input
+                Sliding = true
+                UpdateSlider(Input.Position.X)
+            end
+        end)
 
-    CurrentSpeed = math.floor(MinVal + (MaxVal - MinVal) * Percentage + 0.5)
-    SliderLabel.Text = "Velocidade: " .. tostring(CurrentSpeed)
+        UserInputService.InputEnded:Connect(function(Input)
+            if Input == ActiveInput then
+                Sliding = false
+                ActiveInput = nil
+            end
+        end)
 
-    TweenService:Create(SliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
-    TweenService:Create(SliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, 0)}):Play()
-end
+        UserInputService.InputChanged:Connect(function(Input)
+            if Sliding and Input == ActiveInput and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+                UpdateSlider(Input.Position.X)
+            end
+        end)
 
-SliderButton.InputBegan:Connect(function(Input)
-    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-        Sliding = true
-    end
-end)
+        ToggleButton.Activated:Connect(function()
+            SpeedEnabled = not SpeedEnabled
 
-UserInputService.InputEnded:Connect(function(Input)
-    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-        Sliding = false
-    end
-end)
+            local targetBgColor = SpeedEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+            local targetStrokeColor = SpeedEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+            local targetTextTrans = SpeedEnabled and 0 or 1
 
-UserInputService.InputChanged:Connect(function(Input)
-    if Sliding and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
-        UpdateSlider(Input.Position.X)
-    end
-end)
-
-SliderTrack.InputBegan:Connect(function(Input)
-    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-        Sliding = true
-        UpdateSlider(Input.Position.X)
-    end
-end)
-
-ToggleButton.Activated:Connect(function()
-    SpeedEnabled = not SpeedEnabled
-
-    local targetBgColor = SpeedEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-    local targetStrokeColor = SpeedEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-    local targetTextTrans = SpeedEnabled and 0 or 1
-
-    TweenService:Create(ToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
-    TweenService:Create(ToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
-    TweenService:Create(CheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
-    
-    if not SpeedEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
-        Player.Character.Humanoid.WalkSpeed = 16
-    end
-end)
-
-task.spawn(function()
-    while true do
-        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-            if SpeedEnabled then
-                Player.Character.Humanoid.WalkSpeed = CurrentSpeed
-            else
+            TweenService:Create(ToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+            TweenService:Create(ToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+            TweenService:Create(CheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+            
+            if not SpeedEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
                 Player.Character.Humanoid.WalkSpeed = 16
             end
-        end
-        task.wait(0.1)
-    end
-end)
+        end)
 
--- ====================================================
---                ABA SETTINGS
--- ====================================================
+        task.spawn(function()
+            while true do
+                if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                    if SpeedEnabled then
+                        Player.Character.Humanoid.WalkSpeed = CurrentSpeed
+                    else
+                        Player.Character.Humanoid.WalkSpeed = 16
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+
+
     elseif TabData.Name == "Settings" then
-        -- [5] ABA: SETTINGS
-        -- Crie aqui as variáveis, botões de configuração e sistemas gerais
+        -- ============================
+        -- VARIÁVEIS DA ABA SETTINGS
+        -- ============================
+        -- (Coloque suas variáveis da aba Settings aqui)
+
+        -- ============================
+        -- BOTOES DA ABA SETTINGS
+        -- ============================
+        -- (Coloque seus botões/cards da aba Settings aqui)
+
+        -- ============================
+        -- SISTEMA DA ABA SETTINGS
+        -- ============================
+        -- (Coloque a lógica/loops da aba Settings aqui)
 
     end
 
@@ -642,10 +670,7 @@ end)
     local Button = Instance.new("TextButton")
     Button.Name = TabData.Name
     Button.Size = UDim2.new(1, -12, 0, 42)
-    Button.Position = UDim2.fromOffset(
-        6,
-        10 + ((Index - 1) * 48)
-    )
+    Button.Position = UDim2.fromOffset(6, 10 + ((Index - 1) * 48))
     Button.BackgroundColor3 = Theme.Card
     Button.BackgroundTransparency = (Index == 1) and 0 or 1
     Button.BorderSizePixel = 0
@@ -677,22 +702,14 @@ end)
     IconHolder.BackgroundTransparency = 1
     IconHolder.Parent = Button
 
-    local InitialColor =
-        (Index == 1)
-        and Theme.AccentBright
-        or Theme.TextSecondary
+    local InitialColor = (Index == 1) and Theme.AccentBright or Theme.TextSecondary
 
     if TabData.IsCustom then
         CreateDirectPlayerIcon(IconHolder, InitialColor)
     elseif TabData.IsTextIcon then
         CreateDollarIcon(IconHolder, InitialColor, TabData.CustomSize or 32)
     else
-        CreateLucideIcon(
-            IconHolder,
-            TabData.Icon,
-            InitialColor,
-            20
-        )
+        CreateLucideIcon(IconHolder, TabData.Icon, InitialColor, 20)
     end
 
     local NameLabel = Instance.new("TextLabel")
@@ -701,10 +718,7 @@ end)
     NameLabel.Position = UDim2.fromOffset(46, 0)
     NameLabel.BackgroundTransparency = 1
     NameLabel.Text = TabData.Name
-    NameLabel.TextColor3 =
-        (Index == 1)
-        and Theme.Text
-        or Theme.TextSecondary
+    NameLabel.TextColor3 = (Index == 1) and Theme.Text or Theme.TextSecondary
     NameLabel.TextSize = 11
     NameLabel.Font = Enum.Font.GothamSemibold
     NameLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -714,49 +728,28 @@ end)
     TabButtons[Index] = Button
 
     Button.Activated:Connect(function()
-
-        if CurrentTabIndex == Index then
-            return
-        end
-
+        if CurrentTabIndex == Index then return end
         CurrentTabIndex = Index
 
         for Number, OtherButton in ipairs(TabButtons) do
-
             local Selected = (Number == Index)
 
-            OtherButton.BackgroundTransparency =
-                Selected and 0 or 1
+            OtherButton.BackgroundTransparency = Selected and 0 or 1
 
             local OtherName = OtherButton:FindFirstChild("Name")
-
             if OtherName then
-                OtherName.TextColor3 =
-                    Selected
-                    and Theme.Text
-                    or Theme.TextSecondary
+                OtherName.TextColor3 = Selected and Theme.Text or Theme.TextSecondary
             end
 
-            local OtherIndicator =
-                OtherButton:FindFirstChild("Indicator")
-
+            local OtherIndicator = OtherButton:FindFirstChild("Indicator")
             if OtherIndicator then
                 OtherIndicator.Visible = Selected
             end
 
-            local OtherIconHolder =
-                OtherButton:FindFirstChild("IconHolder")
-
+            local OtherIconHolder = OtherButton:FindFirstChild("IconHolder")
             if OtherIconHolder then
-
-                local TargetColor =
-                    Selected
-                    and Theme.AccentBright
-                    or Theme.TextSecondary
-
-                local ImageIcon =
-                    OtherIconHolder:FindFirstChild("Icon")
-
+                local TargetColor = Selected and Theme.AccentBright or Theme.TextSecondary
+                local ImageIcon = OtherIconHolder:FindFirstChild("Icon")
                 if ImageIcon then
                     if ImageIcon:IsA("ImageLabel") then
                         ImageIcon.ImageColor3 = TargetColor
@@ -765,37 +758,20 @@ end)
                     end
                 end
 
-                local DirectIcon =
-                    OtherIconHolder:FindFirstChild("DirectPlayerIcon")
-
+                local DirectIcon = OtherIconHolder:FindFirstChild("DirectPlayerIcon")
                 if DirectIcon then
-
-                    local Head =
-                        DirectIcon:FindFirstChild("Head")
-
-                    local BodyPart =
-                        DirectIcon:FindFirstChild("BodyPart")
-
-                    if Head then
-                        Head.BackgroundColor3 = TargetColor
-                    end
-
-                    if BodyPart then
-                        BodyPart.BackgroundColor3 = TargetColor
-                    end
-
+                    local Head = DirectIcon:FindFirstChild("Head")
+                    local BodyPart = DirectIcon:FindFirstChild("BodyPart")
+                    if Head then Head.BackgroundColor3 = TargetColor end
+                    if BodyPart then BodyPart.BackgroundColor3 = TargetColor end
                 end
-
             end
 
             if TabFrames[Number] then
                 TabFrames[Number].Visible = Selected
             end
-
         end
-
     end)
-
 end
 
 --==============================================================--
@@ -803,85 +779,29 @@ end
 --==============================================================--
 
 local function SetSidebarExpanded(State)
-
     SidebarExpanded = State
 
-    local Width =
-        State
-        and 155
-        or 66
+    local Width = State and 155 or 66
+    local ContentX = State and 161 or 72
+    local ContentWidth = State and -169 or -80
 
-    local ContentX =
-        State
-        and 161
-        or 72
+    TweenService:Create(Sidebar, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, Width, 1, 0)
+    }):Play()
 
-    local ContentWidth =
-        State
-        and -169
-        or -80
-
-    TweenService:Create(
-        Sidebar,
-        TweenInfo.new(
-            0.25,
-            Enum.EasingStyle.Quint,
-            Enum.EasingDirection.Out
-        ),
-        {
-            Size = UDim2.new(
-                0,
-                Width,
-                1,
-                0
-            )
-        }
-    ):Play()
-
-    TweenService:Create(
-        ContentContainer,
-        TweenInfo.new(
-            0.25,
-            Enum.EasingStyle.Quint,
-            Enum.EasingDirection.Out
-        ),
-        {
-            Position = UDim2.fromOffset(
-                ContentX,
-                0
-            ),
-
-            Size = UDim2.new(
-                1,
-                ContentWidth,
-                1,
-                -10
-            )
-        }
-    ):Play()
+    TweenService:Create(ContentContainer, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        Position = UDim2.fromOffset(ContentX, 0),
+        Size = UDim2.new(1, ContentWidth, 1, -10)
+    }):Play()
 
     for _, Button in ipairs(TabButtons) do
-
-        local NameLabel =
-            Button:FindFirstChild("Name")
-
+        local NameLabel = Button:FindFirstChild("Name")
         if NameLabel then
-
-            TweenService:Create(
-                NameLabel,
-                TweenInfo.new(0.18),
-                {
-                    TextTransparency =
-                        State
-                        and 0
-                        or 1
-                }
-            ):Play()
-
+            TweenService:Create(NameLabel, TweenInfo.new(0.18), {
+                TextTransparency = State and 0 or 1
+            }):Play()
         end
-
     end
-
 end
 
 MM2Button.Activated:Connect(function()
@@ -893,144 +813,52 @@ end)
 --==============================================================--
 
 Header.InputBegan:Connect(function(Input)
-
-    if Input.UserInputType ~= Enum.UserInputType.MouseButton1
-        and Input.UserInputType ~= Enum.UserInputType.Touch then
-        return
-    end
-
+    if Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch then return end
     DraggingWindow = true
 
     local StartPosition = Input.Position
     local StartWindowPosition = Main.Position
 
-    TweenService:Create(
-        Main,
-        TweenInfo.new(
-            0.18,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.Out
-        ),
-        {
-            Size = UDim2.fromOffset(
-                math.floor(CurrentWidth * 1.03),
-                math.floor(CurrentHeight * 1.03)
-            )
-        }
-    ):Play()
+    TweenService:Create(Main, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(math.floor(CurrentWidth * 1.03), math.floor(CurrentHeight * 1.03))
+    }):Play()
 
-    local Changed
-    local Ended
-
+    local Changed, Ended
     Changed = UserInputService.InputChanged:Connect(function(Change)
+        if not DraggingWindow then return end
+        if Change.UserInputType == Enum.UserInputType.MouseMovement or Change.UserInputType == Enum.UserInputType.Touch then
+            local Delta = Change.Position - StartPosition
+            local ViewportSize = workspace.CurrentCamera.ViewportSize
 
-        if not DraggingWindow then
-            return
+            local RawX = StartWindowPosition.X.Offset + Delta.X
+            local RawY = StartWindowPosition.Y.Offset + Delta.Y
+
+            local HalfW = (CurrentWidth * 1.03) / 2
+            local HalfH = (CurrentHeight * 1.03) / 2
+
+            local MinX = HalfW - (ViewportSize.X * 0.5)
+            local MaxX = (ViewportSize.X * 0.5) - HalfW
+            local MinY = HalfH - (ViewportSize.Y * 0.5)
+            local MaxY = (ViewportSize.Y * 0.5) - HalfH
+
+            Main.Position = UDim2.new(0.5, math.clamp(RawX, MinX, MaxX), 0.5, math.clamp(RawY, MinY, MaxY))
         end
-
-        if Change.UserInputType == Enum.UserInputType.MouseMovement
-            or Change.UserInputType == Enum.UserInputType.Touch then
-
-            local Delta =
-                Change.Position - StartPosition
-
-            local ViewportSize =
-                workspace.CurrentCamera.ViewportSize
-
-            local RawX =
-                StartWindowPosition.X.Offset
-                + Delta.X
-
-            local RawY =
-                StartWindowPosition.Y.Offset
-                + Delta.Y
-
-            local HalfW =
-                (CurrentWidth * 1.03) / 2
-
-            local HalfH =
-                (CurrentHeight * 1.03) / 2
-
-            local MinX =
-                HalfW
-                - (ViewportSize.X * 0.5)
-
-            local MaxX =
-                (ViewportSize.X * 0.5)
-                - HalfW
-
-            local MinY =
-                HalfH
-                - (ViewportSize.Y * 0.5)
-
-            local MaxY =
-                (ViewportSize.Y * 0.5)
-                - HalfH
-
-            local ClampedX =
-                math.clamp(
-                    RawX,
-                    MinX,
-                    MaxX
-                )
-
-            local ClampedY =
-                math.clamp(
-                    RawY,
-                    MinY,
-                    MaxY
-                )
-
-            Main.Position =
-                UDim2.new(
-                    0.5,
-                    ClampedX,
-                    0.5,
-                    ClampedY
-                )
-
-        end
-
     end)
 
     Ended = UserInputService.InputEnded:Connect(function(EndedInput)
-
-        if EndedInput.UserInputType == Enum.UserInputType.MouseButton1
-            or EndedInput.UserInputType == Enum.UserInputType.Touch then
-
+        if EndedInput.UserInputType == Enum.UserInputType.MouseButton1 or EndedInput.UserInputType == Enum.UserInputType.Touch then
             DraggingWindow = false
-
-            TweenService:Create(
-                Main,
-                TweenInfo.new(
-                    0.2,
-                    Enum.EasingStyle.Back,
-                    Enum.EasingDirection.Out
-                ),
-                {
-                    Size = UDim2.fromOffset(
-                        CurrentWidth,
-                        CurrentHeight
-                    )
-                }
-            ):Play()
-
-            if Changed then
-                Changed:Disconnect()
-            end
-
-            if Ended then
-                Ended:Disconnect()
-            end
-
+            TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = UDim2.fromOffset(CurrentWidth, CurrentHeight)
+            }):Play()
+            if Changed then Changed:Disconnect() end
+            if Ended then Ended:Disconnect() end
         end
-
     end)
-
 end)
 
 --==============================================================--
--- RESIZE (TRAVADO PARA NÃO SUBIR ACIMA DA ABA SETTINGS)
+-- RESIZE
 --==============================================================--
 
 local ResizeButton = Instance.new("TextButton")
@@ -1045,97 +873,46 @@ ResizeButton.ZIndex = 40
 ResizeButton.Parent = Main
 
 for i = 1, 3 do
-
     local Line = Instance.new("Frame")
     Line.Size = UDim2.fromOffset(2, 7)
-    Line.Position = UDim2.fromOffset(
-        17 + ((i - 1) * 4),
-        17 - ((i - 1) * 4)
-    )
+    Line.Position = UDim2.fromOffset(17 + ((i - 1) * 4), 17 - ((i - 1) * 4))
     Line.Rotation = -45
     Line.BackgroundColor3 = Theme.Accent
     Line.BorderSizePixel = 0
     Line.ZIndex = 41
     Line.Parent = ResizeButton
-
 end
 
 ResizeButton.InputBegan:Connect(function(Input)
-
-    if Input.UserInputType ~= Enum.UserInputType.MouseButton1
-        and Input.UserInputType ~= Enum.UserInputType.Touch then
-        return
-    end
-
+    if Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch then return end
     Resizing = true
 
     local StartPosition = Input.Position
     local StartWidth = Main.AbsoluteSize.X
     local StartHeight = Main.AbsoluteSize.Y
-
-    local Changed
-    local Ended
+    local Changed, Ended
 
     Changed = UserInputService.InputChanged:Connect(function(Change)
-
-        if not Resizing then
-            return
+        if not Resizing then return end
+        if Change.UserInputType == Enum.UserInputType.MouseMovement or Change.UserInputType == Enum.UserInputType.Touch then
+            local Delta = Change.Position - StartPosition
+            CurrentWidth = math.clamp(StartWidth + Delta.X, MIN_WIDTH, MAX_WIDTH)
+            CurrentHeight = math.clamp(StartHeight + Delta.Y, MIN_HEIGHT, MAX_HEIGHT)
+            Main.Size = UDim2.fromOffset(CurrentWidth, CurrentHeight)
         end
-
-        if Change.UserInputType == Enum.UserInputType.MouseMovement
-            or Change.UserInputType == Enum.UserInputType.Touch then
-
-            local Delta =
-                Change.Position - StartPosition
-
-            CurrentWidth =
-                math.clamp(
-                    StartWidth + Delta.X,
-                    MIN_WIDTH,
-                    MAX_WIDTH
-                )
-
-            -- Respeita o limite estrito para não encolher além da última aba (Settings)
-            CurrentHeight =
-                math.clamp(
-                    StartHeight + Delta.Y,
-                    MIN_HEIGHT,
-                    MAX_HEIGHT
-                )
-
-            Main.Size =
-                UDim2.fromOffset(
-                    CurrentWidth,
-                    CurrentHeight
-                )
-
-        end
-
     end)
 
     Ended = UserInputService.InputEnded:Connect(function(EndedInput)
-
-        if EndedInput.UserInputType == Enum.UserInputType.MouseButton1
-            or EndedInput.UserInputType == Enum.UserInputType.Touch then
-
+        if EndedInput.UserInputType == Enum.UserInputType.MouseButton1 or EndedInput.UserInputType == Enum.UserInputType.Touch then
             Resizing = false
-
-            if Changed then
-                Changed:Disconnect()
-            end
-
-            if Ended then
-                Ended:Disconnect()
-            end
-
+            if Changed then Changed:Disconnect() end
+            if Ended then Ended:Disconnect() end
         end
-
     end)
-
 end)
 
 --==============================================================--
--- CONFIRMAÇÃO
+-- CONFIRMAÇÃO / FECHAMENTO
 --==============================================================--
 
 local ConfirmOverlay = Instance.new("Frame")
@@ -1254,7 +1031,6 @@ NoCorner.Parent = NoButton
 
 local DraggingFloat = false
 local FloatDragThreshold = 6
-
 local FloatDragInput = nil
 local FloatDragStart = nil
 local FloatStartPosition = nil
@@ -1264,19 +1040,8 @@ local FloatMouseChangedConnection = nil
 local FloatTouchMovedConnection = nil
 local FloatInputEndedConnection = nil
 
---==============================================================--
--- REMOVE FLOAT ANTIGO
---==============================================================--
-
 local OldFloatGui = PlayerGui:FindFirstChild("WN_FloatGui")
-
-if OldFloatGui then
-    OldFloatGui:Destroy()
-end
-
---==============================================================--
--- GUI FLUTUANTE
---==============================================================--
+if OldFloatGui then OldFloatGui:Destroy() end
 
 local FloatGui = Instance.new("ScreenGui")
 FloatGui.Name = "WN_FloatGui"
@@ -1286,29 +1051,21 @@ FloatGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 FloatGui.DisplayOrder = 2147483646
 FloatGui.Parent = PlayerGui
 
---==============================================================--
--- BOTÃO
---==============================================================--
-
 local FloatButton = Instance.new("TextButton")
 FloatButton.Name = "WNFloat"
 FloatButton.Size = UDim2.fromOffset(54, 54)
 FloatButton.AnchorPoint = Vector2.new(0, 0)
 FloatButton.Position = UDim2.new(1, -75, 1, -90)
-
 FloatButton.BackgroundColor3 = Theme.Window
 FloatButton.BackgroundTransparency = 0
 FloatButton.BorderSizePixel = 0
-
 FloatButton.Text = "WN"
 FloatButton.TextColor3 = Theme.AccentBright
 FloatButton.TextSize = 14
 FloatButton.Font = Enum.Font.GothamBold
-
 FloatButton.AutoButtonColor = false
 FloatButton.Active = true
 FloatButton.Selectable = true
-
 FloatButton.ZIndex = 100
 FloatButton.Parent = FloatGui
 
@@ -1322,355 +1079,122 @@ FloatStroke.Thickness = 1.5
 FloatStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 FloatStroke.Parent = FloatButton
 
---==============================================================--
--- LIMITAR BOTÃO NA TELA
---==============================================================--
-
 local function ClampFloatButton(Position)
-
     local Camera = workspace.CurrentCamera
-
-    if not Camera then
-        return Position
-    end
+    if not Camera then return Position end
 
     local ViewportSize = Camera.ViewportSize
     local ButtonSize = FloatButton.AbsoluteSize
 
-    local MaxX =
-        math.max(
-            0,
-            ViewportSize.X - ButtonSize.X
-        )
+    local MaxX = math.max(0, ViewportSize.X - ButtonSize.X)
+    local MaxY = math.max(0, ViewportSize.Y - ButtonSize.Y)
 
-    local MaxY =
-        math.max(
-            0,
-            ViewportSize.Y - ButtonSize.Y
-        )
-
-    local X =
-        math.clamp(
-            Position.X,
-            0,
-            MaxX
-        )
-
-    local Y =
-        math.clamp(
-            Position.Y,
-            0,
-            MaxY
-        )
-
-    return Vector2.new(X, Y)
+    return Vector2.new(math.clamp(Position.X, 0, MaxX), math.clamp(Position.Y, 0, MaxY))
 end
-
---==============================================================--
--- LIMPAR CONEXÕES
---==============================================================--
 
 local function ClearFloatDragConnections()
-
-    if FloatMouseChangedConnection then
-        FloatMouseChangedConnection:Disconnect()
-        FloatMouseChangedConnection = nil
-    end
-
-    if FloatTouchMovedConnection then
-        FloatTouchMovedConnection:Disconnect()
-        FloatTouchMovedConnection = nil
-    end
-
-    if FloatInputEndedConnection then
-        FloatInputEndedConnection:Disconnect()
-        FloatInputEndedConnection = nil
-    end
-
+    if FloatMouseChangedConnection then FloatMouseChangedConnection:Disconnect(); FloatMouseChangedConnection = nil end
+    if FloatTouchMovedConnection then FloatTouchMovedConnection:Disconnect(); FloatTouchMovedConnection = nil end
+    if FloatInputEndedConnection then FloatInputEndedConnection:Disconnect(); FloatInputEndedConnection = nil end
 end
 
---==============================================================--
--- FINALIZAR DRAG
---==============================================================--
-
 local function StopFloatDrag()
-
     ClearFloatDragConnections()
-
     FloatDragInput = nil
     FloatDragStart = nil
     FloatStartPosition = nil
     FloatGrabOffset = nil
-
-    task.defer(function()
-        DraggingFloat = false
-    end)
-
+    task.defer(function() DraggingFloat = false end)
 end
-
---==============================================================--
--- ATUALIZAR POSIÇÃO
---==============================================================--
 
 local function UpdateFloatPosition(CurrentPosition)
-
-    if not FloatDragStart
-        or not FloatStartPosition then
-        return
-    end
-
-    local Delta =
-        CurrentPosition - FloatDragStart
+    if not FloatDragStart or not FloatStartPosition then return end
+    local Delta = CurrentPosition - FloatDragStart
 
     if not DraggingFloat then
-
-        if Delta.Magnitude < FloatDragThreshold then
-            return
-        end
-
+        if Delta.Magnitude < FloatDragThreshold then return end
         DraggingFloat = true
-
     end
 
-    local NewPosition =
-        CurrentPosition - FloatGrabOffset
+    local NewPosition = CurrentPosition - FloatGrabOffset
+    local ClampedPosition = ClampFloatButton(NewPosition)
 
-    local ClampedPosition =
-        ClampFloatButton(NewPosition)
-
-    FloatButton.Position =
-        UDim2.fromOffset(
-            math.floor(ClampedPosition.X + 0.5),
-            math.floor(ClampedPosition.Y + 0.5)
-        )
-
+    FloatButton.Position = UDim2.fromOffset(math.floor(ClampedPosition.X + 0.5), math.floor(ClampedPosition.Y + 0.5))
 end
 
---==============================================================--
--- COMEÇA DRAG
---==============================================================--
-
 FloatButton.InputBegan:Connect(function(Input)
-
-    local InputType =
-        Input.UserInputType
-
-    if InputType ~= Enum.UserInputType.MouseButton1
-        and InputType ~= Enum.UserInputType.Touch then
-        return
-    end
+    local InputType = Input.UserInputType
+    if InputType ~= Enum.UserInputType.MouseButton1 and InputType ~= Enum.UserInputType.Touch then return end
 
     ClearFloatDragConnections()
-
     DraggingFloat = false
-
     FloatDragInput = Input
+    FloatDragStart = Vector2.new(Input.Position.X, Input.Position.Y)
 
-    FloatDragStart =
-        Vector2.new(
-            Input.Position.X,
-            Input.Position.Y
-        )
-
-    local AbsolutePosition =
-        FloatButton.AbsolutePosition
-
-    FloatStartPosition =
-        Vector2.new(
-            AbsolutePosition.X,
-            AbsolutePosition.Y
-        )
-
-    FloatGrabOffset =
-        FloatDragStart - FloatStartPosition
+    local AbsolutePosition = FloatButton.AbsolutePosition
+    FloatStartPosition = Vector2.new(AbsolutePosition.X, AbsolutePosition.Y)
+    FloatGrabOffset = FloatDragStart - FloatStartPosition
 
     if InputType == Enum.UserInputType.MouseButton1 then
-
-        FloatMouseChangedConnection =
-            UserInputService.InputChanged:Connect(function(Change)
-
-                if FloatDragInput ~= Input then
-                    return
-                end
-
-                if Change.UserInputType
-                    ~= Enum.UserInputType.MouseMovement then
-                    return
-                end
-
-                UpdateFloatPosition(
-                    Vector2.new(
-                        Change.Position.X,
-                        Change.Position.Y
-                    )
-                )
-
-            end)
-
+        FloatMouseChangedConnection = UserInputService.InputChanged:Connect(function(Change)
+            if FloatDragInput ~= Input or Change.UserInputType ~= Enum.UserInputType.MouseMovement then return end
+            UpdateFloatPosition(Vector2.new(Change.Position.X, Change.Position.Y))
+        end)
     elseif InputType == Enum.UserInputType.Touch then
-
-        FloatTouchMovedConnection =
-            UserInputService.TouchMoved:Connect(function(Touch)
-
-                if FloatDragInput ~= Touch then
-                    return
-                end
-
-                UpdateFloatPosition(
-                    Vector2.new(
-                        Touch.Position.X,
-                        Touch.Position.Y
-                    )
-                )
-
-            end)
-
+        FloatTouchMovedConnection = UserInputService.TouchMoved:Connect(function(Touch)
+            if FloatDragInput ~= Touch then return end
+            UpdateFloatPosition(Vector2.new(Touch.Position.X, Touch.Position.Y))
+        end)
     end
 
-    FloatInputEndedConnection =
-        UserInputService.InputEnded:Connect(function(EndedInput)
-
-            if EndedInput ~= FloatDragInput then
-                return
-            end
-
-            StopFloatDrag()
-
-        end)
-
+    FloatInputEndedConnection = UserInputService.InputEnded:Connect(function(EndedInput)
+        if EndedInput ~= FloatDragInput then return end
+        StopFloatDrag()
+    end)
 end)
 
---==============================================================--
--- ESCONDER JANELA
---==============================================================--
-
 local function HideWindow()
-
-    if WindowAnimating
-        or not WindowOpen then
-        return
-    end
-
+    if WindowAnimating or not WindowOpen then return end
     WindowAnimating = true
     WindowOpen = false
 
-    local HiddenWidth =
-        math.floor(
-            CurrentWidth * 0.82
-        )
+    local HiddenWidth = math.floor(CurrentWidth * 0.82)
+    local HiddenHeight = math.floor(CurrentHeight * 0.82)
 
-    local HiddenHeight =
-        math.floor(
-            CurrentHeight * 0.82
-        )
-
-    local SizeTween =
-        TweenService:Create(
-            Main,
-            TweenInfo.new(
-                0.28,
-                Enum.EasingStyle.Quint,
-                Enum.EasingDirection.In
-            ),
-            {
-                Size =
-                    UDim2.fromOffset(
-                        HiddenWidth,
-                        HiddenHeight
-                    )
-            }
-        )
-
-    local FadeTween =
-        TweenService:Create(
-            WindowGroup,
-            TweenInfo.new(
-                0.24,
-                Enum.EasingStyle.Quint,
-                Enum.EasingDirection.In
-            ),
-            {
-                GroupTransparency = 1
-            }
-        )
+    local SizeTween = TweenService:Create(Main, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+        Size = UDim2.fromOffset(HiddenWidth, HiddenHeight)
+    })
+    local FadeTween = TweenService:Create(WindowGroup, TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+        GroupTransparency = 1
+    })
 
     SizeTween:Play()
     FadeTween:Play()
 
     FadeTween.Completed:Connect(function()
-
-        if not ScreenGui.Parent then
-            return
-        end
-
+        if not ScreenGui.Parent then return end
         Main.Visible = false
-
-        Main.Size =
-            UDim2.fromOffset(
-                CurrentWidth,
-                CurrentHeight
-            )
-
+        Main.Size = UDim2.fromOffset(CurrentWidth, CurrentHeight)
         WindowGroup.GroupTransparency = 0
         WindowAnimating = false
-
     end)
-
 end
 
---==============================================================--
--- MOSTRAR JANELA
---==============================================================--
-
 local function ShowWindow()
-
-    if WindowAnimating
-        or WindowOpen then
-        return
-    end
-
+    if WindowAnimating or WindowOpen then return end
     WindowAnimating = true
     WindowOpen = true
 
     Main.Visible = true
-
-    Main.Size =
-        UDim2.fromOffset(
-            math.floor(CurrentWidth * 0.82),
-            math.floor(CurrentHeight * 0.82)
-        )
-
+    Main.Size = UDim2.fromOffset(math.floor(CurrentWidth * 0.82), math.floor(CurrentHeight * 0.82))
     WindowGroup.GroupTransparency = 1
 
-    local SizeTween =
-        TweenService:Create(
-            Main,
-            TweenInfo.new(
-                0.32,
-                Enum.EasingStyle.Back,
-                Enum.EasingDirection.Out
-            ),
-            {
-                Size =
-                    UDim2.fromOffset(
-                        CurrentWidth,
-                        CurrentHeight
-                    )
-            }
-        )
-
-    local FadeTween =
-        TweenService:Create(
-            WindowGroup,
-            TweenInfo.new(
-                0.26,
-                Enum.EasingStyle.Quint,
-                Enum.EasingDirection.Out
-            ),
-            {
-                GroupTransparency = 0
-            }
-        )
+    local SizeTween = TweenService:Create(Main, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(CurrentWidth, CurrentHeight)
+    })
+    local FadeTween = TweenService:Create(WindowGroup, TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        GroupTransparency = 0
+    })
 
     SizeTween:Play()
     FadeTween:Play()
@@ -1678,118 +1202,36 @@ local function ShowWindow()
     FadeTween.Completed:Connect(function()
         WindowAnimating = false
     end)
-
 end
 
---==============================================================--
--- CLIQUE NO WN
---==============================================================--
-
 FloatButton.Activated:Connect(function()
-
-    if DraggingFloat then
-        return
-    end
-
-    if WindowOpen then
-        HideWindow()
-    else
-        ShowWindow()
-    end
-
+    if DraggingFloat then return end
+    if WindowOpen then HideWindow() else ShowWindow() end
 end)
-
---==============================================================--
--- BOTÃO X
---==============================================================--
 
 CloseButton.Activated:Connect(function()
-
-    if WindowAnimating then
-        return
-    end
-
+    if WindowAnimating then return end
     ConfirmOverlay.Visible = true
-
-    ConfirmCard.Size =
-        UDim2.fromOffset(
-            250,
-            140
-        )
-
-    TweenService:Create(
-        ConfirmCard,
-        TweenInfo.new(
-            0.22,
-            Enum.EasingStyle.Back,
-            Enum.EasingDirection.Out
-        ),
-        {
-            Size =
-                UDim2.fromOffset(
-                    285,
-                    155
-                )
-        }
-    ):Play()
-
+    ConfirmCard.Size = UDim2.fromOffset(250, 140)
+    TweenService:Create(ConfirmCard, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(285, 155)
+    }):Play()
 end)
-
---==============================================================--
--- NÃO
---==============================================================--
 
 NoButton.Activated:Connect(function()
-
     ConfirmOverlay.Visible = false
-
 end)
-
---==============================================================--
--- SIM
---==============================================================--
 
 YesButton.Activated:Connect(function()
-
     ConfirmOverlay.Visible = false
     WindowOpen = false
-
     ClearFloatDragConnections()
-
-    if ScreenGui then
-        ScreenGui:Destroy()
-    end
-
-    if FloatGui then
-        FloatGui:Destroy()
-    end
-
+    if ScreenGui then ScreenGui:Destroy() end
+    if FloatGui then FloatGui:Destroy() end
 end)
 
---==============================================================--
--- AJUSTE QUANDO A TELA MUDA
---==============================================================--
-
-workspace.CurrentCamera:GetPropertyChangedSignal(
-    "ViewportSize"
-):Connect(function()
-
-    if not FloatButton.Parent then
-        return
-    end
-
-    local CurrentPosition =
-        FloatButton.AbsolutePosition
-
-    local ClampedPosition =
-        ClampFloatButton(
-            CurrentPosition
-        )
-
-    FloatButton.Position =
-        UDim2.fromOffset(
-            math.floor(ClampedPosition.X + 0.5),
-            math.floor(ClampedPosition.Y + 0.5)
-        )
-
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+    if not FloatButton.Parent then return end
+    local ClampedPosition = ClampFloatButton(FloatButton.AbsolutePosition)
+    FloatButton.Position = UDim2.fromOffset(math.floor(ClampedPosition.X + 0.5), math.floor(ClampedPosition.Y + 0.5))
 end)
