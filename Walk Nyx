@@ -419,7 +419,301 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local player = Players.LocalPlayer
 
+-- ==================================
+-- ✨ 1. HIGHLIGHT ESP
+-- ==================================
+local ESPHighlightCard = Instance.new("Frame")
+ESPHighlightCard.Name = "ESPHighlightCard"
+ESPHighlightCard.Size = UDim2.new(1, -6, 0, 50)
+ESPHighlightCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+ESPHighlightCard.BorderSizePixel = 0
+ESPHighlightCard.Parent = PageFrame
 
+local ESPHighlightCardCorner = Instance.new("UICorner")
+ESPHighlightCardCorner.CornerRadius = UDim.new(0, 10)
+ESPHighlightCardCorner.Parent = ESPHighlightCard
+
+local ESPHighlightCardStroke = Instance.new("UIStroke")
+ESPHighlightCardStroke.Color = Color3.fromRGB(39, 40, 48)
+ESPHighlightCardStroke.Thickness = 1
+ESPHighlightCardStroke.Parent = ESPHighlightCard
+
+local ESPHighlightTitle = Instance.new("TextLabel")
+ESPHighlightTitle.Name = "Title"
+ESPHighlightTitle.Size = UDim2.new(1, -60, 1, 0)
+ESPHighlightTitle.Position = UDim2.fromOffset(12, 0)
+ESPHighlightTitle.BackgroundTransparency = 1
+ESPHighlightTitle.Text = "Highlight ESP"
+ESPHighlightTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+ESPHighlightTitle.TextSize = 12
+ESPHighlightTitle.Font = Enum.Font.GothamSemibold
+ESPHighlightTitle.TextXAlignment = Enum.TextXAlignment.Left
+ESPHighlightTitle.Parent = ESPHighlightCard
+
+local ESPHighlightToggleButton = Instance.new("TextButton")
+ESPHighlightToggleButton.Name = "ToggleButton"
+ESPHighlightToggleButton.Size = UDim2.fromOffset(26, 26)
+ESPHighlightToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+ESPHighlightToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+ESPHighlightToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+ESPHighlightToggleButton.BorderSizePixel = 0
+ESPHighlightToggleButton.Text = ""
+ESPHighlightToggleButton.AutoButtonColor = false
+ESPHighlightToggleButton.Parent = ESPHighlightCard
+
+local ESPHighlightToggleCorner = Instance.new("UICorner")
+ESPHighlightToggleCorner.CornerRadius = UDim.new(0, 6)
+ESPHighlightToggleCorner.Parent = ESPHighlightToggleButton
+
+local ESPHighlightToggleStroke = Instance.new("UIStroke")
+ESPHighlightToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+ESPHighlightToggleStroke.Thickness = 1
+ESPHighlightToggleStroke.Parent = ESPHighlightToggleButton
+
+local ESPHighlightCheckMark = Instance.new("TextLabel")
+ESPHighlightCheckMark.Name = "CheckMark"
+ESPHighlightCheckMark.Size = UDim2.fromScale(1, 1)
+ESPHighlightCheckMark.BackgroundTransparency = 1
+ESPHighlightCheckMark.Text = "✔"
+ESPHighlightCheckMark.TextColor3 = Color3.new(1, 1, 1)
+ESPHighlightCheckMark.TextSize = 14
+ESPHighlightCheckMark.Font = Enum.Font.GothamBold
+ESPHighlightCheckMark.TextTransparency = 1
+ESPHighlightCheckMark.Parent = ESPHighlightToggleButton
+
+ESPHighlightToggleButton.Activated:Connect(function()
+    ESPHighlightAtivo = not ESPHighlightAtivo
+    
+    local targetBgColor = ESPHighlightAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = ESPHighlightAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = ESPHighlightAtivo and 0 or 1
+
+    TweenService:Create(ESPHighlightToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(ESPHighlightToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(ESPHighlightCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
+
+-- ==================================
+-- 🏷️ 2. NAME ESP
+-- ==================================
+local ESPNameCard = Instance.new("Frame")
+ESPNameCard.Name = "ESPNameCard"
+ESPNameCard.Size = UDim2.new(1, -6, 0, 50)
+ESPNameCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+ESPNameCard.BorderSizePixel = 0
+ESPNameCard.Parent = PageFrame
+
+local ESPNameCardCorner = Instance.new("UICorner")
+ESPNameCardCorner.CornerRadius = UDim.new(0, 10)
+ESPNameCardCorner.Parent = ESPNameCard
+
+local ESPNameCardStroke = Instance.new("UIStroke")
+ESPNameCardStroke.Color = Color3.fromRGB(39, 40, 48)
+ESPNameCardStroke.Thickness = 1
+ESPNameCardStroke.Parent = ESPNameCard
+
+local ESPNameTitle = Instance.new("TextLabel")
+ESPNameTitle.Name = "Title"
+ESPNameTitle.Size = UDim2.new(1, -60, 1, 0)
+ESPNameTitle.Position = UDim2.fromOffset(12, 0)
+ESPNameTitle.BackgroundTransparency = 1
+ESPNameTitle.Text = "Name ESP"
+ESPNameTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+ESPNameTitle.TextSize = 12
+ESPNameTitle.Font = Enum.Font.GothamSemibold
+ESPNameTitle.TextXAlignment = Enum.TextXAlignment.Left
+ESPNameTitle.Parent = ESPNameCard
+
+local ESPNameToggleButton = Instance.new("TextButton")
+ESPNameToggleButton.Name = "ToggleButton"
+ESPNameToggleButton.Size = UDim2.fromOffset(26, 26)
+ESPNameToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+ESPNameToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+ESPNameToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+ESPNameToggleButton.BorderSizePixel = 0
+ESPNameToggleButton.Text = ""
+ESPNameToggleButton.AutoButtonColor = false
+ESPNameToggleButton.Parent = ESPNameCard
+
+local ESPNameToggleCorner = Instance.new("UICorner")
+ESPNameToggleCorner.CornerRadius = UDim.new(0, 6)
+ESPNameToggleCorner.Parent = ESPNameToggleButton
+
+local ESPNameToggleStroke = Instance.new("UIStroke")
+ESPNameToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+ESPNameToggleStroke.Thickness = 1
+ESPNameToggleStroke.Parent = ESPNameToggleButton
+
+local ESPNameCheckMark = Instance.new("TextLabel")
+ESPNameCheckMark.Name = "CheckMark"
+ESPNameCheckMark.Size = UDim2.fromScale(1, 1)
+ESPNameCheckMark.BackgroundTransparency = 1
+ESPNameCheckMark.Text = "✔"
+ESPNameCheckMark.TextColor3 = Color3.new(1, 1, 1)
+ESPNameCheckMark.TextSize = 14
+ESPNameCheckMark.Font = Enum.Font.GothamBold
+ESPNameCheckMark.TextTransparency = 1
+ESPNameCheckMark.Parent = ESPNameToggleButton
+
+ESPNameToggleButton.Activated:Connect(function()
+    ESPNomeAtivo = not ESPNomeAtivo
+    
+    local targetBgColor = ESPNomeAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = ESPNomeAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = ESPNomeAtivo and 0 or 1
+
+    TweenService:Create(ESPNameToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(ESPNameToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(ESPNameCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
+
+-- ==================================
+-- 📏 3. DISTANCE ESP
+-- ==================================
+local ESPDistanceCard = Instance.new("Frame")
+ESPDistanceCard.Name = "ESPDistanceCard"
+ESPDistanceCard.Size = UDim2.new(1, -6, 0, 50)
+ESPDistanceCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+ESPDistanceCard.BorderSizePixel = 0
+ESPDistanceCard.Parent = PageFrame
+
+local ESPDistanceCardCorner = Instance.new("UICorner")
+ESPDistanceCardCorner.CornerRadius = UDim.new(0, 10)
+ESPDistanceCardCorner.Parent = ESPDistanceCard
+
+local ESPDistanceCardStroke = Instance.new("UIStroke")
+ESPDistanceCardStroke.Color = Color3.fromRGB(39, 40, 48)
+ESPDistanceCardStroke.Thickness = 1
+ESPDistanceCardStroke.Parent = ESPDistanceCard
+
+local ESPDistanceTitle = Instance.new("TextLabel")
+ESPDistanceTitle.Name = "Title"
+ESPDistanceTitle.Size = UDim2.new(1, -60, 1, 0)
+ESPDistanceTitle.Position = UDim2.fromOffset(12, 0)
+ESPDistanceTitle.BackgroundTransparency = 1
+ESPDistanceTitle.Text = "Distance ESP"
+ESPDistanceTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+ESPDistanceTitle.TextSize = 12
+ESPDistanceTitle.Font = Enum.Font.GothamSemibold
+ESPDistanceTitle.TextXAlignment = Enum.TextXAlignment.Left
+ESPDistanceTitle.Parent = ESPDistanceCard
+
+local ESPDistanceToggleButton = Instance.new("TextButton")
+ESPDistanceToggleButton.Name = "ToggleButton"
+ESPDistanceToggleButton.Size = UDim2.fromOffset(26, 26)
+ESPDistanceToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+ESPDistanceToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+ESPDistanceToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+ESPDistanceToggleButton.BorderSizePixel = 0
+ESPDistanceToggleButton.Text = ""
+ESPDistanceToggleButton.AutoButtonColor = false
+ESPDistanceToggleButton.Parent = ESPDistanceCard
+
+local ESPDistanceToggleCorner = Instance.new("UICorner")
+ESPDistanceToggleCorner.CornerRadius = UDim.new(0, 6)
+ESPDistanceToggleCorner.Parent = ESPDistanceToggleButton
+
+local ESPDistanceToggleStroke = Instance.new("UIStroke")
+ESPDistanceToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+ESPDistanceToggleStroke.Thickness = 1
+ESPDistanceToggleStroke.Parent = ESPDistanceToggleButton
+
+local ESPDistanceCheckMark = Instance.new("TextLabel")
+ESPDistanceCheckMark.Name = "CheckMark"
+ESPDistanceCheckMark.Size = UDim2.fromScale(1, 1)
+ESPDistanceCheckMark.BackgroundTransparency = 1
+ESPDistanceCheckMark.Text = "✔"
+ESPDistanceCheckMark.TextColor3 = Color3.new(1, 1, 1)
+ESPDistanceCheckMark.TextSize = 14
+ESPDistanceCheckMark.Font = Enum.Font.GothamBold
+ESPDistanceCheckMark.TextTransparency = 1
+ESPDistanceCheckMark.Parent = ESPDistanceToggleButton
+
+ESPDistanceToggleButton.Activated:Connect(function()
+    ESPDistanciaAtiva = not ESPDistanciaAtiva
+    
+    local targetBgColor = ESPDistanciaAtiva and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = ESPDistanciaAtiva and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = ESPDistanciaAtiva and 0 or 1
+
+    TweenService:Create(ESPDistanceToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(ESPDistanceToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(ESPDistanceCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
+
+-- ==================================
+-- 📐 4. LINE ESP
+-- ==================================
+local ESPLineCard = Instance.new("Frame")
+ESPLineCard.Name = "ESPLineCard"
+ESPLineCard.Size = UDim2.new(1, -6, 0, 50)
+ESPLineCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+ESPLineCard.BorderSizePixel = 0
+ESPLineCard.Parent = PageFrame
+
+local ESPLineCardCorner = Instance.new("UICorner")
+ESPLineCardCorner.CornerRadius = UDim.new(0, 10)
+ESPLineCardCorner.Parent = ESPLineCard
+
+local ESPLineCardStroke = Instance.new("UIStroke")
+ESPLineCardStroke.Color = Color3.fromRGB(39, 40, 48)
+ESPLineCardStroke.Thickness = 1
+ESPLineCardStroke.Parent = ESPLineCard
+
+local ESPLineTitle = Instance.new("TextLabel")
+ESPLineTitle.Name = "Title"
+ESPLineTitle.Size = UDim2.new(1, -60, 1, 0)
+ESPLineTitle.Position = UDim2.fromOffset(12, 0)
+ESPLineTitle.BackgroundTransparency = 1
+ESPLineTitle.Text = "Line ESP"
+ESPLineTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+ESPLineTitle.TextSize = 12
+ESPLineTitle.Font = Enum.Font.GothamSemibold
+ESPLineTitle.TextXAlignment = Enum.TextXAlignment.Left
+ESPLineTitle.Parent = ESPLineCard
+
+local ESPLineToggleButton = Instance.new("TextButton")
+ESPLineToggleButton.Name = "ToggleButton"
+ESPLineToggleButton.Size = UDim2.fromOffset(26, 26)
+ESPLineToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+ESPLineToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+ESPLineToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+ESPLineToggleButton.BorderSizePixel = 0
+ESPLineToggleButton.Text = ""
+ESPLineToggleButton.AutoButtonColor = false
+ESPLineToggleButton.Parent = ESPLineCard
+
+local ESPLineToggleCorner = Instance.new("UICorner")
+ESPLineToggleCorner.CornerRadius = UDim.new(0, 6)
+ESPLineToggleCorner.Parent = ESPLineToggleButton
+
+local ESPLineToggleStroke = Instance.new("UIStroke")
+ESPLineToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+ESPLineToggleStroke.Thickness = 1
+ESPLineToggleStroke.Parent = ESPLineToggleButton
+
+local ESPLineCheckMark = Instance.new("TextLabel")
+ESPLineCheckMark.Name = "CheckMark"
+ESPLineCheckMark.Size = UDim2.fromScale(1, 1)
+ESPLineCheckMark.BackgroundTransparency = 1
+ESPLineCheckMark.Text = "✔"
+ESPLineCheckMark.TextColor3 = Color3.new(1, 1, 1)
+ESPLineCheckMark.TextSize = 14
+ESPLineCheckMark.Font = Enum.Font.GothamBold
+ESPLineCheckMark.TextTransparency = 1
+ESPLineCheckMark.Parent = ESPLineToggleButton
+
+ESPLineToggleButton.Activated:Connect(function()
+    ESPTracerAtivo = not ESPTracerAtivo
+    
+    local targetBgColor = ESPTracerAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = ESPTracerAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = ESPTracerAtivo and 0 or 1
+
+    TweenService:Create(ESPLineToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(ESPLineToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(ESPLineCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
 
 -- ==================================
 -- SISTEMAS DA ABA ESP (OPTIMIZADO PARA MOBILE)
@@ -976,7 +1270,7 @@ InvisivelTitle.Name = "Title"
 InvisivelTitle.Size = UDim2.new(1, -60, 1, 0)
 InvisivelTitle.Position = UDim2.fromOffset(12, 0)
 InvisivelTitle.BackgroundTransparency = 1
-InvisivelTitle.Text = "👻 Botão Invisível"
+InvisivelTitle.Text = "Botão Invisível"
 InvisivelTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
 InvisivelTitle.TextSize = 12
 InvisivelTitle.Font = Enum.Font.GothamSemibold
