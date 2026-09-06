@@ -49,10 +49,11 @@ local Theme = {
 --==============================================================--
 
 local DEFAULT_WIDTH  = 445
-local DEFAULT_HEIGHT = 280
+local DEFAULT_HEIGHT = 320
 
 local MIN_WIDTH  = 360
-local MIN_HEIGHT = 270
+-- Altura mínima calculada exatamente para que a janela pare logo abaixo da aba Settings
+local MIN_HEIGHT = 60 + (5 * 48) + 16
 
 local MAX_WIDTH  = 700
 local MAX_HEIGHT = 520
@@ -103,6 +104,28 @@ local function CreateLucideIcon(Parent, IconName, IconColor, IconSize)
 end
 
 --==============================================================--
+-- ÍCONE DE CIFRÃO ($) COM TEXTO PURO (BEM MAIOR)
+--==============================================================--
+
+local function CreateDollarIcon(Parent, IconColor, IconSize)
+    IconSize = IconSize or 32
+
+    local TextLabel = Instance.new("TextLabel")
+    TextLabel.Name = "Icon"
+    TextLabel.Size = UDim2.fromOffset(34, 34)
+    TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+    TextLabel.Position = UDim2.fromScale(0.5, 0.5)
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.Text = "$"
+    TextLabel.TextColor3 = IconColor
+    TextLabel.TextSize = IconSize
+    TextLabel.Font = Enum.Font.GothamBold
+    TextLabel.Parent = Parent
+
+    return TextLabel
+end
+
+--==============================================================--
 -- ÍCONE PLAYER
 --==============================================================--
 
@@ -147,10 +170,11 @@ end
 --==============================================================--
 
 local TabsData = {
-    { Name = "Main",     Icon = "house",    IsCustom = false },
-    { Name = "ESP",      Icon = "eye",      IsCustom = false },
-    { Name = "Player",   Icon = "user",     IsCustom = true  },
-    { Name = "Settings", Icon = "settings", IsCustom = false },
+    { Name = "Main",      Icon = "house",              IsCustom = false },
+    { Name = "Auto Farm", Icon = "circle-dollar-sign", IsCustom = false, IsTextIcon = true, CustomSize = 32 },
+    { Name = "ESP",       Icon = "eye",                IsCustom = false },
+    { Name = "Player",    Icon = "user",               IsCustom = true  },
+    { Name = "Settings",  Icon = "settings",           IsCustom = false },
 }
 
 --==============================================================--
@@ -345,7 +369,7 @@ SidebarLine.BorderSizePixel = 0
 SidebarLine.Parent = Sidebar
 
 --==============================================================--
--- CONTENT
+-- CONTENT (SEM SCROLL, CRESCIMENTO AUTOMÁTICO)
 --==============================================================--
 
 local ContentContainer = Instance.new("Frame")
@@ -353,7 +377,7 @@ ContentContainer.Name = "ContentContainer"
 ContentContainer.Size = UDim2.new(1, -80, 1, -10)
 ContentContainer.Position = UDim2.fromOffset(72, 0)
 ContentContainer.BackgroundTransparency = 1
-ContentContainer.ClipsDescendants = true
+ContentContainer.ClipsDescendants = false
 ContentContainer.Parent = Body
 
 local TabFrames = {}
@@ -361,35 +385,30 @@ local TabButtons = {}
 
 for Index, TabData in ipairs(TabsData) do
 
-    local PageScroll = Instance.new("ScrollingFrame")
-    PageScroll.Name = TabData.Name .. "Page"
-    PageScroll.Size = UDim2.fromScale(1, 1)
-    PageScroll.BackgroundTransparency = 1
-    PageScroll.BorderSizePixel = 0
-    PageScroll.ScrollBarThickness = 3
-    PageScroll.ScrollBarImageColor3 = Theme.Accent
-    PageScroll.Visible = (Index == 1)
-    PageScroll.Parent = ContentContainer
+    local PageFrame = Instance.new("Frame")
+    PageFrame.Name = TabData.Name .. "Page"
+    PageFrame.Size = UDim2.new(1, 0, 0, 0)
+    PageFrame.BackgroundTransparency = 1
+    PageFrame.BorderSizePixel = 0
+    PageFrame.Visible = (Index == 1)
+    PageFrame.Parent = ContentContainer
 
     local ListLayout = Instance.new("UIListLayout")
     ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
     ListLayout.Padding = UDim.new(0, 8)
-    ListLayout.Parent = PageScroll
+    ListLayout.Parent = PageFrame
 
     local PagePadding = Instance.new("UIPadding")
     PagePadding.PaddingTop = UDim.new(0, 4)
     PagePadding.PaddingBottom = UDim.new(0, 8)
     PagePadding.PaddingRight = UDim.new(0, 6)
-    PagePadding.Parent = PageScroll
+    PagePadding.Parent = PageFrame
 
     ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        PageScroll.CanvasSize = UDim2.fromOffset(
-            0,
-            ListLayout.AbsoluteContentSize.Y + 12
-        )
+        PageFrame.Size = UDim2.new(1, 0, 0, ListLayout.AbsoluteContentSize.Y + 16)
     end)
 
-    TabFrames[Index] = PageScroll
+    TabFrames[Index] = PageFrame
 
     local Button = Instance.new("TextButton")
     Button.Name = TabData.Name
@@ -436,6 +455,8 @@ for Index, TabData in ipairs(TabsData) do
 
     if TabData.IsCustom then
         CreateDirectPlayerIcon(IconHolder, InitialColor)
+    elseif TabData.IsTextIcon then
+        CreateDollarIcon(IconHolder, InitialColor, TabData.CustomSize or 32)
     else
         CreateLucideIcon(
             IconHolder,
@@ -507,8 +528,12 @@ for Index, TabData in ipairs(TabsData) do
                 local ImageIcon =
                     OtherIconHolder:FindFirstChild("Icon")
 
-                if ImageIcon and ImageIcon:IsA("ImageLabel") then
-                    ImageIcon.ImageColor3 = TargetColor
+                if ImageIcon then
+                    if ImageIcon:IsA("ImageLabel") then
+                        ImageIcon.ImageColor3 = TargetColor
+                    elseif ImageIcon:IsA("TextLabel") then
+                        ImageIcon.TextColor3 = TargetColor
+                    end
                 end
 
                 local DirectIcon =
@@ -776,7 +801,7 @@ Header.InputBegan:Connect(function(Input)
 end)
 
 --==============================================================--
--- RESIZE
+-- RESIZE (TRAVADO PARA NÃO SUBIR ACIMA DA ABA SETTINGS)
 --==============================================================--
 
 local ResizeButton = Instance.new("TextButton")
@@ -841,6 +866,7 @@ ResizeButton.InputBegan:Connect(function(Input)
                     MAX_WIDTH
                 )
 
+            -- Respeita o limite estrito para não encolher além da última aba (Settings)
             CurrentHeight =
                 math.clamp(
                     StartHeight + Delta.Y,
@@ -1177,8 +1203,6 @@ local function UpdateFloatPosition(CurrentPosition)
 
     end
 
-    -- Mantém exatamente o ponto tocado
-    -- preso ao dedo/mouse.
     local NewPosition =
         CurrentPosition - FloatGrabOffset
 
@@ -1219,8 +1243,6 @@ FloatButton.InputBegan:Connect(function(Input)
             Input.Position.Y
         )
 
-    -- Usa AbsolutePosition para não misturar
-    -- Scale com Offset.
     local AbsolutePosition =
         FloatButton.AbsolutePosition
 
@@ -1230,13 +1252,8 @@ FloatButton.InputBegan:Connect(function(Input)
             AbsolutePosition.Y
         )
 
-    -- Guarda o ponto exato onde o dedo encostou.
     FloatGrabOffset =
         FloatDragStart - FloatStartPosition
-
-    --==========================================================--
-    -- MOUSE
-    --==========================================================--
 
     if InputType == Enum.UserInputType.MouseButton1 then
 
@@ -1261,16 +1278,11 @@ FloatButton.InputBegan:Connect(function(Input)
 
             end)
 
-    --==========================================================--
-    -- TOUCH / CELULAR
-    --==========================================================--
-
     elseif InputType == Enum.UserInputType.Touch then
 
         FloatTouchMovedConnection =
             UserInputService.TouchMoved:Connect(function(Touch)
 
-                -- Acompanha exatamente o mesmo dedo.
                 if FloatDragInput ~= Touch then
                     return
                 end
@@ -1285,10 +1297,6 @@ FloatButton.InputBegan:Connect(function(Input)
             end)
 
     end
-
-    --==========================================================--
-    -- SOLTOU
-    --==========================================================--
 
     FloatInputEndedConnection =
         UserInputService.InputEnded:Connect(function(EndedInput)
@@ -1450,8 +1458,6 @@ end
 
 FloatButton.Activated:Connect(function()
 
-    -- Se realmente arrastou,
-    -- não considera como clique.
     if DraggingFloat then
         return
     end
