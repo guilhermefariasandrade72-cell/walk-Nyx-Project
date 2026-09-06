@@ -411,6 +411,22 @@ local PartesCorpo = {}
 -- ================================================
 -- BOTÃO FLUTUANTE INVISÍVEL - VARIÁVEIS
 -- ================================================
+local InvisiBtnAtivo = false
+local TamanhoBotao = 54
+local TamanhoMin = 40
+local TamanhoMax = 90
+local ArrasteOffset = Vector2.new(0, 0)
+local ArrastandoBotao = false
+local SliderArrastando = false
+local SliderAtivo = nil
+local BotaoFlutuante = nil
+local FloatGui = nil
+
+-- ⚡ VARIÁVEIS DA INVISIBILIDADE
+local CharInvisi = nil
+local HumanoidInvisi = nil
+local RootInvisi = nil
+local PartesInvisi = {}
 
         -- ============================
         -- VARIÁVEIS DA ABA SPEED
@@ -497,6 +513,131 @@ SectionLabel.Parent = PageFrame
 -- BOTÃO FLUTUANTE INVISÍVEL - CARD NA UI (Toggle + Slider)
 -- ================================================
 
+-- BOTÃO PRINCIPAL
+local BtnInvisibilidade = Instance.new("TextButton")
+BtnInvisibilidade.Name = "BtnInvisibilidade"
+BtnInvisibilidade.Size = UDim2.new(1, 0, 0, 44)
+BtnInvisibilidade.BackgroundColor3 = Theme.Card
+BtnInvisibilidade.Text = "👻 Invisibilidade"
+BtnInvisibilidade.TextColor3 = Theme.Text
+BtnInvisibilidade.TextSize = 13
+BtnInvisibilidade.Font = Enum.Font.GothamBold
+BtnInvisibilidade.AutoButtonColor = false
+BtnInvisibilidade.Parent = PageFrame
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(0, 10)
+BtnCorner.Parent = BtnInvisibilidade
+
+BtnInvisibilidade.Activated:Connect(function()
+    if not BotaoFlutuante then
+        CriarBotaoFlutuante()
+        ConfigurarInvisi()
+    end
+end)
+
+-- SLIDER DE TAMANHO
+local ContainerSlider = Instance.new("Frame")
+ContainerSlider.Name = "ContainerTamanhoInvisi"
+ContainerSlider.Size = UDim2.new(1, 0, 0, 50)
+ContainerSlider.Position = UDim2.new(0, 0, 0, 54)
+ContainerSlider.BackgroundTransparency = 1
+ContainerSlider.Parent = PageFrame
+
+local LabelTamanho = Instance.new("TextLabel")
+LabelTamanho.Name = "LabelTamanho"
+LabelTamanho.Size = UDim2.new(0, 100, 0, 20)
+LabelTamanho.Position = UDim2.new(0, 0, 0, 0)
+LabelTamanho.BackgroundTransparency = 1
+LabelTamanho.Text = "Tamanho: 54"
+LabelTamanho.TextColor3 = Theme.TextSecondary
+LabelTamanho.TextSize = 11
+LabelTamanho.Font = Enum.Font.GothamMedium
+LabelTamanho.TextXAlignment = Enum.TextXAlignment.Left
+LabelTamanho.Parent = ContainerSlider
+
+local SliderTrackTamanho = Instance.new("Frame")
+SliderTrackTamanho.Name = "SliderTrack"
+SliderTrackTamanho.Size = UDim2.new(1, -45, 0, 20)
+SliderTrackTamanho.Position = UDim2.new(0, 0, 0.5, -10)
+SliderTrackTamanho.BackgroundColor3 = Theme.Card
+SliderTrackTamanho.Parent = ContainerSlider
+local TrackCorner = Instance.new("UICorner")
+TrackCorner.CornerRadius = UDim.new(0, 8)
+TrackCorner.Parent = SliderTrackTamanho
+
+local SliderFillTamanho = Instance.new("Frame")
+SliderFillTamanho.Name = "SliderFill"
+SliderFillTamanho.Size = UDim2.new(0, 0, 1, 0)
+SliderFillTamanho.BackgroundColor3 = Theme.Accent
+SliderFillTamanho.Parent = SliderTrackTamanho
+local FillCorner = Instance.new("UICorner")
+FillCorner.CornerRadius = UDim.new(0, 8)
+FillCorner.Parent = SliderFillTamanho
+
+local SliderBtnTamanho = Instance.new("TextButton")
+SliderBtnTamanho.Name = "SliderButton"
+SliderBtnTamanho.Size = UDim2.fromOffset(24, 24)
+SliderBtnTamanho.Position = UDim2.new(0, -12, 0.5, -12)
+SliderBtnTamanho.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SliderBtnTamanho.Text = ""
+SliderBtnTamanho.AutoButtonColor = false
+SliderBtnTamanho.Parent = SliderTrackTamanho
+local BtnCorner2 = Instance.new("UICorner")
+BtnCorner2.CornerRadius = UDim.new(1, 0)
+BtnCorner2.Parent = SliderBtnTamanho
+
+-- FUNÇÃO DO SLIDER
+local function AtualizarSliderTamanho(PosicaoX)
+    local TrackPos = SliderTrackTamanho.AbsolutePosition.X
+    local TrackTam = SliderTrackTamanho.AbsoluteSize.X
+    local X = math.clamp(PosicaoX - TrackPos, 0, TrackTam)
+    local Porcento = X / TrackTam
+
+    TamanhoBotao = math.floor(TamanhoMin + (TamanhoMax - TamanhoMin) * Porcento + 0.5)
+    LabelTamanho.Text = "Tamanho: " .. tostring(TamanhoBotao)
+
+    TweenService:Create(SliderFillTamanho, TweenInfo.new(0.08), {Size = UDim2.new(Porcento, 0, 1, 0)}):Play()
+    TweenService:Create(SliderBtnTamanho, TweenInfo.new(0.08), {Position = UDim2.new(Porcento, 0, 0.5, -12)}):Play()
+
+    if BotaoFlutuante then
+        BotaoFlutuante.Size = UDim2.fromOffset(TamanhoBotao, TamanhoBotao)
+        local Linha = BotaoFlutuante:FindFirstChild("LinhaStatus")
+        if Linha then Linha.Size = UDim2.fromOffset(4, TamanhoBotao) end
+        local Icone = BotaoFlutuante:FindFirstChild("Icone")
+        if Icone then Icone.TextSize = TamanhoBotao * 0.35 end
+    end
+end
+
+-- CONEXÕES DO SLIDER
+SliderBtnTamanho.InputBegan:Connect(function(Input)
+    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not SliderArrastando then
+        SliderArrastando = true
+        SliderAtivo = Input
+    end
+end)
+
+SliderTrackTamanho.InputBegan:Connect(function(Input)
+    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not SliderArrastando then
+        SliderArrastando = true
+        SliderAtivo = Input
+        AtualizarSliderTamanho(Input.Position.X)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input == SliderAtivo then
+        SliderArrastando = false
+        SliderAtivo = nil
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(Input)
+    if SliderArrastando and Input == SliderAtivo and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+        AtualizarSliderTamanho(Input.Position.X)
+    end
+end)
+
+
 -- ================================================
 -- INVISÍVEL - BOTÃO
 -- ================================================
@@ -574,6 +715,174 @@ end)
 -- ================================================
 -- BOTÃO FLUTUANTE INVISÍVEL - SISTEMA
 -- ================================================
+
+-- CRIA GUI PARA O BOTÃO FLUTUANTE
+local function CriarFloatGui()
+    if FloatGui then return end
+    FloatGui = Instance.new("ScreenGui")
+    FloatGui.Name = "InvisiFloatGui"
+    FloatGui.ResetOnSpawn = false
+    FloatGui.IgnoreGuiInset = true
+    FloatGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    FloatGui.DisplayOrder = 2147483646
+    FloatGui.Parent = PlayerGui
+end
+
+-- CONFIGURA PERSONAGEM
+local function ConfigurarInvisi()
+    CharInvisi = Player.Character or Player.CharacterAdded:Wait()
+    HumanoidInvisi = CharInvisi:WaitForChild("Humanoid")
+    RootInvisi = CharInvisi:WaitForChild("HumanoidRootPart")
+    
+    PartesInvisi = {}
+    for _, obj in ipairs(CharInvisi:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            table.insert(PartesInvisi, obj)
+        end
+    end
+end
+
+-- QUANDO RENASCE
+Player.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    if InvisiBtnAtivo then
+        ConfigurarInvisi()
+    end
+end)
+
+-- SISTEMA DE INVISIBILIDADE
+RunService.Heartbeat:Connect(function()
+    if not InvisiBtnAtivo then return end
+    
+    if not CharInvisi or not CharInvisi.Parent or not RootInvisi or not HumanoidInvisi or HumanoidInvisi.Health <= 0 then
+        ConfigurarInvisi()
+        return
+    end
+
+    for _, parte in ipairs(PartesInvisi) do
+        if parte and parte.Parent then
+            if parte.Name == "HumanoidRootPart" then
+                parte.Transparency = 1
+            else
+                parte.Transparency = 0.5
+            end
+        end
+    end
+
+    local PosOriginal = RootInvisi.CFrame
+    local CamOffset = HumanoidInvisi.CameraOffset
+    
+    RootInvisi.CFrame = PosOriginal * CFrame.new(0, -200000, 0)
+    HumanoidInvisi.CameraOffset = RootInvisi.CFrame:ToObjectSpace(CFrame.new(PosOriginal.Position)).Position
+    
+    RunService.RenderStepped:Wait()
+    
+    if RootInvisi and RootInvisi.Parent then
+        RootInvisi.CFrame = PosOriginal
+        HumanoidInvisi.CameraOffset = CamOffset
+    end
+end)
+
+-- RESETA AO DESLIGAR
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if not InvisiBtnAtivo and CharInvisi and HumanoidInvisi and HumanoidInvisi.Health > 0 then
+            for _, parte in ipairs(PartesInvisi) do
+                if parte and parte.Parent and parte.Name ~= "HumanoidRootPart" then
+                    parte.Transparency = 0
+                end
+            end
+        end
+    end
+end)
+
+-- CRIA BOTÃO FLUTUANTE
+local function CriarBotaoFlutuante()
+    CriarFloatGui()
+    if BotaoFlutuante then BotaoFlutuante:Destroy() end
+
+    BotaoFlutuante = Instance.new("TextButton")
+    BotaoFlutuante.Name = "BotaoInvisibilidade"
+    BotaoFlutuante.Size = UDim2.fromOffset(TamanhoBotao, TamanhoBotao)
+    BotaoFlutuante.Position = UDim2.new(1, -80, 1, -90)
+    BotaoFlutuante.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    BotaoFlutuante.AutoButtonColor = false
+    BotaoFlutuante.Text = ""
+    BotaoFlutuante.ZIndex = 50
+    BotaoFlutuante.Parent = FloatGui
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 12)
+    BtnCorner.Parent = BotaoFlutuante
+
+    -- LINHA LATERAL 🔴
+    local LinhaStatus = Instance.new("Frame")
+    LinhaStatus.Name = "LinhaStatus"
+    LinhaStatus.Size = UDim2.fromOffset(4, TamanhoBotao)
+    LinhaStatus.Position = UDim2.new(0, 0, 0, 0)
+    LinhaStatus.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+    LinhaStatus.ZIndex = 51
+    LinhaStatus.Parent = BotaoFlutuante
+    local LinhaCorner = Instance.new("UICorner")
+    LinhaCorner.CornerRadius = UDim.new(1, 0)
+    LinhaCorner.Parent = LinhaStatus
+
+    -- ÍCONE
+    local Icone = Instance.new("TextLabel")
+    Icone.Name = "Icone"
+    Icone.Size = UDim2.fromOffset(24, 24)
+    Icone.AnchorPoint = Vector2.new(0.5, 0.5)
+    Icone.Position = UDim2.fromScale(0.5, 0.5)
+    Icone.BackgroundTransparency = 1
+    Icone.Text = "👻"
+    Icone.TextColor3 = Color3.fromRGB(245, 245, 248)
+    Icone.TextSize = 14
+    Icone.Font = Enum.Font.GothamBold
+    Icone.ZIndex = 52
+    Icone.Parent = BotaoFlutuante
+
+    -- ARRASTAR
+    BotaoFlutuante.InputBegan:Connect(function(Input)
+        if Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch then return end
+        ArrastandoBotao = true
+        local PosAbs = BotaoFlutuante.AbsolutePosition
+        ArrasteOffset = Input.Position - PosAbs
+    end)
+
+    UserInputService.InputChanged:Connect(function(Input)
+        if not ArrastandoBotao then return end
+        if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
+            local NovaX = Input.Position.X - ArrasteOffset.X
+            local NovaY = Input.Position.Y - ArrasteOffset.Y
+            local Tela = workspace.CurrentCamera.ViewportSize
+            local MaxX = Tela.X - TamanhoBotao
+            local MaxY = Tela.Y - TamanhoBotao
+            NovaX = math.clamp(NovaX, 0, MaxX)
+            NovaY = math.clamp(NovaY, 0, MaxY)
+            BotaoFlutuante.Position = UDim2.new(0, NovaX, 0, NovaY)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+            ArrastandoBotao = false
+        end
+    end)
+
+    -- CLICA PARA LIGAR/DESLIGAR
+    BotaoFlutuante.Activated:Connect(function()
+        InvisiBtnAtivo = not InvisiBtnAtivo
+        local Linha = BotaoFlutuante:FindFirstChild("LinhaStatus")
+        local IconeBtn = BotaoFlutuante:FindFirstChild("Icone")
+        if InvisiBtnAtivo then
+            if Linha then Linha.BackgroundColor3 = Color3.fromRGB(40, 225, 70) end
+            if IconeBtn then IconeBtn.Text = "✅" end
+        else
+            if Linha then Linha.BackgroundColor3 = Color3.fromRGB(225, 40, 56) end
+            if IconeBtn then IconeBtn.Text = "👻" end
+        end
+    end)
+end
 
 -- ================================================
 -- INVISÍVEL - SISTEMA
