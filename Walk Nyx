@@ -397,7 +397,221 @@ for Index, TabData in ipairs(TabsData) do
     elseif TabData.Name == "ESP" then
         -- (Conteúdo da aba ESP)
 
+--==============================================================
+-- SISTEMA DO BOTÃO FLUTUANTE
+--==============================================================
+
+local function CriarPlayerFloat()
+
+    if PlayerFloatGui then
+        PlayerFloatGui:Destroy()
+    end
+
+    PlayerFloatGui = Instance.new("ScreenGui")
+    PlayerFloatGui.Name = "WN_PlayerFloat"
+    PlayerFloatGui.ResetOnSpawn = false
+    PlayerFloatGui.IgnoreGuiInset = true
+    PlayerFloatGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    PlayerFloatGui.DisplayOrder = 2147483645
+    PlayerFloatGui.Parent = PlayerGui
+
+    -- BOTÃO
+    PlayerFloatButton = Instance.new("TextButton")
+    PlayerFloatButton.Name = "PlayerFloatButton"
+    PlayerFloatButton.Size = UDim2.fromOffset(
+        PlayerFloatSize,
+        PlayerFloatSize
+    )
+    PlayerFloatButton.Position = UDim2.new(
+        0.5,
+        0,
+        0.72,
+        0
+    )
+    PlayerFloatButton.AnchorPoint = Vector2.new(0.5, 0.5)
+
+    PlayerFloatButton.BackgroundColor3 =
+        Color3.fromRGB(18, 19, 24)
+
+    PlayerFloatButton.BorderSizePixel = 0
+    PlayerFloatButton.Text = "PLAYER"
+    PlayerFloatButton.TextColor3 =
+        Color3.fromRGB(245, 245, 248)
+
+    PlayerFloatButton.TextSize = 11
+    PlayerFloatButton.Font = Enum.Font.GothamBold
+    PlayerFloatButton.AutoButtonColor = false
+    PlayerFloatButton.Active = true
+    PlayerFloatButton.Parent = PlayerFloatGui
+
+    -- CANTOS
+    local Corner = Instance.new("UICorner")
+    Corner.Name = "Corner"
+    Corner.CornerRadius = UDim.new(0, 12)
+    Corner.Parent = PlayerFloatButton
+
+    -- BORDA
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Name = "Stroke"
+    Stroke.Thickness = 2
+    Stroke.Color = Color3.fromRGB(225, 40, 56)
+    Stroke.Parent = PlayerFloatButton
+
+    -- LINHA LATERAL
+    PlayerFloatLine = Instance.new("Frame")
+    PlayerFloatLine.Name = "StatusLine"
+    PlayerFloatLine.Size = UDim2.fromOffset(
+        4,
+        math.max(20, PlayerFloatSize - 20)
+    )
+    PlayerFloatLine.Position = UDim2.new(
+        0,
+        -8,
+        0.5,
+        0
+    )
+    PlayerFloatLine.AnchorPoint = Vector2.new(0, 0.5)
+    PlayerFloatLine.BackgroundColor3 =
+        Color3.fromRGB(225, 40, 56)
+
+    PlayerFloatLine.BorderSizePixel = 0
+    PlayerFloatLine.Parent = PlayerFloatButton
+
+    local LineCorner = Instance.new("UICorner")
+    LineCorner.CornerRadius = UDim.new(1, 0)
+    LineCorner.Parent = PlayerFloatLine
+
+    --==========================================================
+    -- ANIMAÇÃO AO TOCAR
+    --==========================================================
+
+    PlayerFloatButton.Activated:Connect(function()
+
+        if PlayerFloatAnimating then
+            return
+        end
+
+        PlayerFloatAnimating = true
+
+        local Normal = PlayerFloatSize
+        local Maior = Normal + 8
+
+        local Grow = TweenService:Create(
+            PlayerFloatButton,
+            TweenInfo.new(
+                0.10,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.Out
+            ),
+            {
+                Size = UDim2.fromOffset(
+                    Maior,
+                    Maior
+                )
+            }
+        )
+
+        local Back = TweenService:Create(
+            PlayerFloatButton,
+            TweenInfo.new(
+                0.12,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.Out
+            ),
+            {
+                Size = UDim2.fromOffset(
+                    Normal,
+                    Normal
+                )
+            }
+        )
+
+        Grow:Play()
+        Grow.Completed:Wait()
+
+        Back:Play()
+        Back.Completed:Wait()
+
+        PlayerFloatAnimating = false
+    end)
+end
+
+
+local function RemoverPlayerFloat()
+
+    if PlayerFloatGui then
+        PlayerFloatGui:Destroy()
+        PlayerFloatGui = nil
+        PlayerFloatButton = nil
+        PlayerFloatLine = nil
+    end
+end
+
+
+local function AtualizarPlayerFloatSize()
+
+    if not PlayerFloatButton then
+        return
+    end
+
+    PlayerFloatButton.Size =
+        UDim2.fromOffset(
+            PlayerFloatSize,
+            PlayerFloatSize
+        )
+
+    if PlayerFloatLine then
+        PlayerFloatLine.Size =
+            UDim2.fromOffset(
+                4,
+                math.max(
+                    20,
+                    PlayerFloatSize - 20
+                )
+            )
+    end
+end
+
+
+local function AtualizarPlayerFloatStatus()
+
+    if not PlayerFloatButton then
+        return
+    end
+
+    local Stroke =
+        PlayerFloatButton:FindFirstChild("Stroke")
+
+    if PlayerFloatEnabled then
+
+        if PlayerFloatLine then
+            PlayerFloatLine.BackgroundColor3 =
+                Color3.fromRGB(60, 220, 110)
+        end
+
+        if Stroke then
+            Stroke.Color =
+                Color3.fromRGB(60, 220, 110)
+        end
+
+    else
+
+        if PlayerFloatLine then
+            PlayerFloatLine.BackgroundColor3 =
+                Color3.fromRGB(225, 40, 56)
+        end
+
+        if Stroke then
+            Stroke.Color =
+                Color3.fromRGB(225, 40, 56)
+        end
+    end
+end
+
+-- =================================================
+--               ABA PLAYER
     elseif TabData.Name == "Player" then
+-- =================================================
 
 -- ================================================
 -- INVISÍVEL - VARIÁVEIS
