@@ -425,6 +425,11 @@ local player = Players.LocalPlayer
 local XRayAtivo = false
 local ValoresOriginais = {}
 
+-- ==================================
+-- 💰 VARIÁVEIS DO ESP MOEDAS
+-- ==================================
+local ESPMoedasAtivo = false
+local MoedasHighlight = {}
 
 -- ==================================
 -- ✨ 1. HIGHLIGHT ESP
