@@ -433,11 +433,15 @@ for Index, TabData in ipairs(TabsData) do
         -- ============================
         -- (Coloque a lógica/loops da aba ESP aqui)
 
-
+-- ======================================================
+-- ABA PLAYER
+-- ======================================================
     elseif TabData.Name == "Player" then
+
         -- ============================
         -- VARIÁVEIS DA ABA PLAYER
         -- ============================
+--             SPEED
         local SpeedEnabled = false
         local CurrentSpeed = 16
         local MinVal = 16
@@ -445,9 +449,18 @@ for Index, TabData in ipairs(TabsData) do
         local Sliding = false
         local ActiveInput = nil
 
+--        VARIÁVEIS DA ABA JAMP
+        local JampEnabled = false
+        local CurrentJamp = 50
+        local MinVal = 50
+        local MaxVal = 100
+        local Sliding = false
+        local ActiveInput = nil
+
         -- ============================
         -- BOTOES DA ABA PLAYER
         -- ============================
+--            SPEED
         local SpeedCard = Instance.new("Frame")
         SpeedCard.Name = "SpeedCard"
         SpeedCard.Size = UDim2.new(1, -6, 0, 85)
@@ -558,9 +571,123 @@ for Index, TabData in ipairs(TabsData) do
         SliderButton.AutoButtonColor = false
         SliderButton.Parent = SliderTrack
 
+-- ============================
+-- BOTOES DA ABA JAMP
+-- ============================
+local JampCard = Instance.new("Frame")
+JampCard.Name = "JampCard"
+JampCard.Size = UDim2.new(1, -6, 0, 85)
+JampCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+JampCard.BorderSizePixel = 0
+JampCard.Parent = PageFrame
+
+local JampCardCorner = Instance.new("UICorner")
+JampCardCorner.CornerRadius = UDim.new(0, 10)
+JampCardCorner.Parent = JampCard
+
+local JampCardStroke = Instance.new("UIStroke")
+JampCardStroke.Color = Color3.fromRGB(39, 40, 48)
+JampCardStroke.Thickness = 1
+JampCardStroke.Parent = JampCard
+
+local JampTitle = Instance.new("TextLabel")
+JampTitle.Name = "Title"
+JampTitle.Size = UDim2.new(1, -60, 0, 36)
+JampTitle.Position = UDim2.fromOffset(12, 0)
+JampTitle.BackgroundTransparency = 1
+JampTitle.Text = "Jump Power"
+JampTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+JampTitle.TextSize = 12
+JampTitle.Font = Enum.Font.GothamSemibold
+JampTitle.TextXAlignment = Enum.TextXAlignment.Left
+JampTitle.Parent = JampCard
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Size = UDim2.fromOffset(26, 26)
+ToggleButton.AnchorPoint = Vector2.new(1, 0)
+ToggleButton.Position = UDim2.new(1, -12, 0, 5)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Text = ""
+ToggleButton.AutoButtonColor = false
+ToggleButton.Parent = JampCard
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(0, 6)
+ToggleCorner.Parent = ToggleButton
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+ToggleStroke.Thickness = 1
+ToggleStroke.Parent = ToggleButton
+
+local CheckMark = Instance.new("TextLabel")
+CheckMark.Name = "CheckMark"
+CheckMark.Size = UDim2.fromScale(1, 1)
+CheckMark.BackgroundTransparency = 1
+CheckMark.Text = "✔"
+CheckMark.TextColor3 = Color3.new(1, 1, 1)
+CheckMark.TextSize = 14
+CheckMark.Font = Enum.Font.GothamBold
+CheckMark.TextTransparency = 1
+CheckMark.Parent = ToggleButton
+
+local SliderContainer = Instance.new("Frame")
+SliderContainer.Name = "SliderContainer"
+SliderContainer.Size = UDim2.new(1, -24, 0, 30)
+SliderContainer.Position = UDim2.fromOffset(12, 44)
+SliderContainer.BackgroundTransparency = 1
+SliderContainer.Parent = JampCard
+
+local SliderLabel = Instance.new("TextLabel")
+SliderLabel.Name = "SliderLabel"
+SliderLabel.Size = UDim2.new(1, 0, 0, 14)
+SliderLabel.BackgroundTransparency = 1
+SliderLabel.Text = "Jump: 50"
+SliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+SliderLabel.TextSize = 10
+SliderLabel.Font = Enum.Font.GothamMedium
+SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+SliderLabel.Parent = SliderContainer
+
+local SliderTrack = Instance.new("Frame")
+SliderTrack.Name = "SliderTrack"
+SliderTrack.Size = UDim2.new(1, 0, 0, 6)
+SliderTrack.Position = UDim2.fromOffset(0, 18)
+SliderTrack.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+SliderTrack.BorderSizePixel = 0
+SliderTrack.Parent = SliderContainer
+
+local SliderTrackCorner = Instance.new("UICorner")
+SliderTrackCorner.CornerRadius = UDim.new(1, 0)
+SliderTrackCorner.Parent = SliderTrack
+
+local SliderFill = Instance.new("Frame")
+SliderFill.Name = "SliderFill"
+SliderFill.Size = UDim2.new(0, 0, 1, 0)
+SliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+SliderFill.BorderSizePixel = 0
+SliderFill.Parent = SliderTrack
+
+local SliderFillCorner = Instance.new("UICorner")
+SliderFillCorner.CornerRadius = UDim.new(1, 0)
+SliderFillCorner.Parent = SliderFill
+
+local SliderButton = Instance.new("TextButton")
+SliderButton.Name = "SliderButton"
+SliderButton.Size = UDim2.new(1, 10, 1, 10)
+SliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+SliderButton.Position = UDim2.new(0, 0, 0.5, 0)
+SliderButton.BackgroundTransparency = 1
+SliderButton.Text = ""
+SliderButton.AutoButtonColor = false
+SliderButton.Parent = SliderTrack
+
         -- ============================
         -- SISTEMA DA ABA PLAYER
         -- ============================
+--                 SPEED
         local function UpdateSlider(InputPosition)
             local TrackPos = SliderTrack.AbsolutePosition.X
             local TrackSize = SliderTrack.AbsoluteSize.X
@@ -630,6 +757,81 @@ for Index, TabData in ipairs(TabsData) do
                 task.wait(0.1)
             end
         end)
+
+-- ============================
+-- SISTEMA DA ABA JAMP
+-- ============================
+local function UpdateSlider(InputPosition)
+    local TrackPos = SliderTrack.AbsolutePosition.X
+    local TrackSize = SliderTrack.AbsoluteSize.X
+    local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
+    local Percentage = ClampedX / TrackSize
+
+    CurrentJamp = math.floor(MinVal + (MaxVal - MinVal) * Percentage + 0.5)
+    SliderLabel.Text = "Jump: " .. tostring(CurrentJamp)
+
+    TweenService:Create(SliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
+    TweenService:Create(SliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, 0)}):Play()
+end
+
+SliderButton.InputBegan:Connect(function(Input)
+    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not ActiveInput then
+        ActiveInput = Input
+        Sliding = true
+    end
+end)
+
+SliderTrack.InputBegan:Connect(function(Input)
+    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not ActiveInput then
+        ActiveInput = Input
+        Sliding = true
+        UpdateSlider(Input.Position.X)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input == ActiveInput then
+        Sliding = false
+        ActiveInput = nil
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(Input)
+    if Sliding and Input == ActiveInput and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+        UpdateSlider(Input.Position.X)
+    end
+end)
+
+ToggleButton.Activated:Connect(function()
+    JampEnabled = not JampEnabled
+
+    local targetBgColor = JampEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = JampEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = JampEnabled and 0 or 1
+
+    TweenService:Create(ToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(ToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(CheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+    
+    if not JampEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+        Player.Character.Humanoid.JumpPower = 50
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            if JampEnabled then
+                Player.Character.Humanoid.JumpPower = CurrentJamp
+            else
+                Player.Character.Humanoid.JumpPower = 50
+            end
+        end
+        task.wait(0.1)
+    end
+end)
+
+
 
 
     elseif TabData.Name == "Settings" then
