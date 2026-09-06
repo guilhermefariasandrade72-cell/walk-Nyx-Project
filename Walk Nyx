@@ -415,16 +415,13 @@ for Index, TabData in ipairs(TabsData) do
     elseif TabData.Name == "Player" then
 
 --==============================================================--
--- VARIÁVEIS
+-- VARIÁVEIS (ABA PLAYER)
 --==============================================================--
-
-        
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Player = Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
 
 local SpeedEnabled = false
 local CurrentSpeed = 16
@@ -433,30 +430,27 @@ local MaxVal = 30
 local Sliding = false
 
 --==============================================================--
--- BOTÃO (INTERFACE DO TOGGLE E SLIDER)
+-- BOTÃO (INTERFACE DO TOGGLE E SLIDER PARA INSERIR NA ABA PLAYER)
 --==============================================================--
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "WN_SpeedControl"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
-
 local SpeedCard = Instance.new("Frame")
 SpeedCard.Name = "SpeedCard"
-SpeedCard.Size = UDim2.fromOffset(260, 85)
-SpeedCard.Position = UDim2.new(0.5, -130, 0.5, -42)
+SpeedCard.Size = UDim2.new(1, -6, 0, 85)
 SpeedCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
 SpeedCard.BorderSizePixel = 0
-SpeedCard.Active = true
-SpeedCard.Draggable = true
-SpeedCard.Parent = ScreenGui
+-- Defina o 'Parent' como a sua PageFrame da aba Player (ex: PageFrame.Parent = PlayerPage)
 
-local CardCorner = Instance.new("UICorner")
-CardCorner.CornerRadius = UDim.new(0, 10)
-CardCorner.Parent = SpeedCard
+local SpeedCardCorner = Instance.new("UICorner")
+SpeedCardCorner.CornerRadius = UDim.new(0, 10)
+SpeedCardCorner.Parent = SpeedCard
+
+local SpeedCardStroke = Instance.new("UIStroke")
+SpeedCardStroke.Color = Color3.fromRGB(39, 40, 48)
+SpeedCardStroke.Thickness = 1
+SpeedCardStroke.Parent = SpeedCard
 
 local SpeedTitle = Instance.new("TextLabel")
 SpeedTitle.Name = "Title"
-SpeedTitle.Size = UDim2.new(1, -50, 0, 36)
+SpeedTitle.Size = UDim2.new(1, -60, 0, 36)
 SpeedTitle.Position = UDim2.fromOffset(12, 0)
 SpeedTitle.BackgroundTransparency = 1
 SpeedTitle.Text = "Speed Hack (Walk)"
@@ -549,7 +543,7 @@ SliderButton.AutoButtonColor = false
 SliderButton.Parent = SliderTrack
 
 --==============================================================--
--- SISTEMA SEPARADO (LÓGICA DO TOGGLE, SLIDER E LOOP DE VELOCIDADE)
+-- SISTEMA SEPARADO (LÓGICA DE VELOCIDADE 16 FIXA QUANDO DESLIGADO)
 --==============================================================--
 
 local function UpdateSlider(InputPosition)
@@ -619,8 +613,9 @@ task.spawn(function()
     end
 end)
 
-
-
+-- ====================================================
+--                ABA SETTINGS
+-- ====================================================
     elseif TabData.Name == "Settings" then
         -- [5] ABA: SETTINGS
         -- Crie aqui as variáveis, botões de configuração e sistemas gerais
