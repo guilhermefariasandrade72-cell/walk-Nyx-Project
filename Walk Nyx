@@ -753,7 +753,45 @@ NoCorner.CornerRadius = UDim.new(0, 9)
 NoCorner.Parent = NoButton
 
 --==============================================================--
--- BOTÃO FLUTUANTE (WN) - CORRIGIDO
+-- BOTÃO FLUTUANTE WN - COMPLETO / MOBILE + PC
+-- SEM TELEPORTE / DRAG SUAVE / CLIQUE + ARRASTE
+--==============================================================--
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+--==============================================================--
+-- VARIÁVEIS
+--==============================================================--
+
+local DraggingFloat = false
+local FloatDragThreshold = 6
+
+local FloatDragInput = nil
+local FloatDragStart = nil
+local FloatStartPosition = nil
+local FloatGrabOffset = nil
+
+local FloatMouseChangedConnection = nil
+local FloatTouchMovedConnection = nil
+local FloatInputEndedConnection = nil
+
+--==============================================================--
+-- REMOVE GUI ANTIGA
+--==============================================================--
+
+local OldFloatGui = PlayerGui:FindFirstChild("WN_FloatGui")
+
+if OldFloatGui then
+    OldFloatGui:Destroy()
+end
+
+--==============================================================--
+-- GUI
 --==============================================================--
 
 local FloatGui = Instance.new("ScreenGui")
@@ -764,27 +802,46 @@ FloatGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 FloatGui.DisplayOrder = 2147483646
 FloatGui.Parent = PlayerGui
 
+--==============================================================--
+-- BOTÃO
+--==============================================================--
+
 local FloatButton = Instance.new("TextButton")
 FloatButton.Name = "WNFloat"
 FloatButton.Size = UDim2.fromOffset(54, 54)
--- [CORRIGIDO] AnchorPoint definido explicitamente para prevenir pulos ao arrastar
 FloatButton.AnchorPoint = Vector2.new(0, 0)
+
+-- Posição inicial
 FloatButton.Position = UDim2.new(1, -75, 1, -90)
+
 FloatButton.BackgroundColor3 = Theme.Window
+FloatButton.BackgroundTransparency = 0
 FloatButton.BorderSizePixel = 0
+
 FloatButton.Text = "WN"
 FloatButton.TextColor3 = Theme.AccentBright
 FloatButton.TextSize = 14
 FloatButton.Font = Enum.Font.GothamBold
+
 FloatButton.AutoButtonColor = false
+FloatButton.Active = true
+FloatButton.Selectable = true
+
 FloatButton.ZIndex = 100
 FloatButton.Parent = FloatGui
+
+--==============================================================--
+-- CANTO
+--==============================================================--
 
 local FloatCorner = Instance.new("UICorner")
 FloatCorner.CornerRadius = UDim.new(0, 14)
 FloatCorner.Parent = FloatButton
 
--- LINHA EM VOLTA DO BOTÃO FLUTUANTE
+--==============================================================--
+-- BORDA
+--==============================================================--
+
 local FloatStroke = Instance.new("UIStroke")
 FloatStroke.Color = Theme.Accent
 FloatStroke.Thickness = 1.5
@@ -792,53 +849,298 @@ FloatStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 FloatStroke.Parent = FloatButton
 
 --==============================================================--
--- CONTROLE DE ABRIR E FECHAR
+-- FUNÇÃO PARA LIMITAR O BOTÃO NA TELA
+--==============================================================--
+
+local function ClampFloatButton(Position)
+    local Camera = workspace.CurrentCamera
+
+    if not Camera then
+        return Position
+    end
+
+    local ViewportSize = Camera.ViewportSize
+    local ButtonSize = FloatButton.AbsoluteSize
+
+    local MaxX = math.max(0, ViewportSize.X - ButtonSize.X)
+    local MaxY = math.max(0, ViewportSize.Y - ButtonSize.Y)
+
+    local X = math.clamp(Position.X, 0, MaxX)
+    local Y = math.clamp(Position.Y, 0, MaxY)
+
+    return Vector2.new(X, Y)
+end
+
+--==============================================================--
+-- LIMPA CONEXÕES DO DRAG
+--==============================================================--
+
+local function ClearFloatDragConnections()
+    if FloatMouseChangedConnection then
+        FloatMouseChangedConnection:Disconnect()
+        FloatMouseChangedConnection = nil
+    end
+
+    if FloatTouchMovedConnection then
+        FloatTouchMovedConnection:Disconnect()
+        FloatTouchMovedConnection = nil
+    end
+
+    if FloatInputEndedConnection then
+        FloatInputEndedConnection:Disconnect()
+        FloatInputEndedConnection = nil
+    end
+end
+
+--==============================================================--
+-- FINALIZA DRAG
+--==============================================================--
+
+local function StopFloatDrag()
+    ClearFloatDragConnections()
+
+    FloatDragInput = nil
+    FloatDragStart = nil
+    FloatStartPosition = nil
+    FloatGrabOffset = nil
+
+    task.defer(function()
+        DraggingFloat = false
+    end)
+end
+
+--==============================================================--
+-- MOVE O BOTÃO
+--==============================================================--
+
+local function UpdateFloatPosition(CurrentPosition)
+    if not FloatDragStart or not FloatStartPosition then
+        return
+    end
+
+    local Delta = CurrentPosition - FloatDragStart
+
+    if not DraggingFloat then
+        if Delta.Magnitude < FloatDragThreshold then
+            return
+        end
+
+        DraggingFloat = true
+    end
+
+    -- Mantém o mesmo ponto do botão preso ao dedo/mouse
+    local NewPosition = CurrentPosition - FloatGrabOffset
+
+    local ClampedPosition = ClampFloatButton(NewPosition)
+
+    FloatButton.Position = UDim2.fromOffset(
+        math.floor(ClampedPosition.X + 0.5),
+        math.floor(ClampedPosition.Y + 0.5)
+    )
+end
+
+--==============================================================--
+-- COMEÇA O DRAG
+--==============================================================--
+
+FloatButton.InputBegan:Connect(function(Input)
+    local InputType = Input.UserInputType
+
+    if InputType ~= Enum.UserInputType.MouseButton1
+        and InputType ~= Enum.UserInputType.Touch then
+        return
+    end
+
+    ClearFloatDragConnections()
+
+    DraggingFloat = false
+
+    FloatDragInput = Input
+    FloatDragStart = Vector2.new(
+        Input.Position.X,
+        Input.Position.Y
+    )
+
+    -- IMPORTANTE:
+    -- AbsolutePosition evita o problema de Scale + Offset
+    local AbsolutePosition = FloatButton.AbsolutePosition
+
+    FloatStartPosition = Vector2.new(
+        AbsolutePosition.X,
+        AbsolutePosition.Y
+    )
+
+    -- Guarda exatamente onde o dedo/mouse encostou
+    -- dentro do botão para ele não "pular"
+    FloatGrabOffset = FloatDragStart - FloatStartPosition
+
+    --==========================================================--
+    -- MOUSE
+    --==========================================================--
+
+    if InputType == Enum.UserInputType.MouseButton1 then
+
+        FloatMouseChangedConnection = UserInputService.InputChanged:Connect(function(Change)
+            if FloatDragInput ~= Input then
+                return
+            end
+
+            if Change.UserInputType ~= Enum.UserInputType.MouseMovement then
+                return
+            end
+
+            UpdateFloatPosition(Vector2.new(
+                Change.Position.X,
+                Change.Position.Y
+            ))
+        end)
+
+    --==========================================================--
+    -- TOUCH / CELULAR
+    --==========================================================--
+
+    elseif InputType == Enum.UserInputType.Touch then
+
+        FloatTouchMovedConnection = UserInputService.TouchMoved:Connect(function(Touch)
+            -- Garante que estamos acompanhando o MESMO dedo
+            if FloatDragInput ~= Touch then
+                return
+            end
+
+            UpdateFloatPosition(Vector2.new(
+                Touch.Position.X,
+                Touch.Position.Y
+            ))
+        end)
+
+    end
+
+    --==========================================================--
+    -- SOLTOU
+    --==========================================================--
+
+    FloatInputEndedConnection = UserInputService.InputEnded:Connect(function(EndedInput)
+
+        if EndedInput ~= FloatDragInput then
+            return
+        end
+
+        StopFloatDrag()
+    end)
+end)
+
+--==============================================================--
+-- ABRIR / FECHAR JANELA
 --==============================================================--
 
 local function HideWindow()
-    if WindowAnimating or not WindowOpen then return end
+
+    if WindowAnimating or not WindowOpen then
+        return
+    end
+
     WindowAnimating = true
     WindowOpen = false
 
-    local HiddenWidth  = math.floor(CurrentWidth * 0.82)
+    local HiddenWidth = math.floor(CurrentWidth * 0.82)
     local HiddenHeight = math.floor(CurrentHeight * 0.82)
 
-    local SizeTween = TweenService:Create(Main, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
-        Size = UDim2.fromOffset(HiddenWidth, HiddenHeight)
-    })
+    local SizeTween = TweenService:Create(
+        Main,
+        TweenInfo.new(
+            0.28,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.In
+        ),
+        {
+            Size = UDim2.fromOffset(
+                HiddenWidth,
+                HiddenHeight
+            )
+        }
+    )
 
-    local FadeTween = TweenService:Create(WindowGroup, TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
-        GroupTransparency = 1
-    })
+    local FadeTween = TweenService:Create(
+        WindowGroup,
+        TweenInfo.new(
+            0.24,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.In
+        ),
+        {
+            GroupTransparency = 1
+        }
+    )
 
     SizeTween:Play()
     FadeTween:Play()
 
     FadeTween.Completed:Connect(function()
-        if not ScreenGui.Parent then return end
+
+        if not ScreenGui.Parent then
+            return
+        end
+
         Main.Visible = false
-        Main.Size = UDim2.fromOffset(CurrentWidth, CurrentHeight)
+
+        Main.Size = UDim2.fromOffset(
+            CurrentWidth,
+            CurrentHeight
+        )
+
         WindowGroup.GroupTransparency = 0
         WindowAnimating = false
     end)
 end
 
+--==============================================================--
+-- MOSTRAR JANELA
+--==============================================================--
+
 local function ShowWindow()
-    if WindowAnimating or WindowOpen then return end
+
+    if WindowAnimating or WindowOpen then
+        return
+    end
+
     WindowAnimating = true
     WindowOpen = true
 
     Main.Visible = true
-    Main.Size = UDim2.fromOffset(math.floor(CurrentWidth * 0.82), math.floor(CurrentHeight * 0.82))
+
+    Main.Size = UDim2.fromOffset(
+        math.floor(CurrentWidth * 0.82),
+        math.floor(CurrentHeight * 0.82)
+    )
+
     WindowGroup.GroupTransparency = 1
 
-    local SizeTween = TweenService:Create(Main, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Size = UDim2.fromOffset(CurrentWidth, CurrentHeight)
-    })
+    local SizeTween = TweenService:Create(
+        Main,
+        TweenInfo.new(
+            0.32,
+            Enum.EasingStyle.Back,
+            Enum.EasingDirection.Out
+        ),
+        {
+            Size = UDim2.fromOffset(
+                CurrentWidth,
+                CurrentHeight
+            )
+        }
+    )
 
-    local FadeTween = TweenService:Create(WindowGroup, TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-        GroupTransparency = 0
-    })
+    local FadeTween = TweenService:Create(
+        WindowGroup,
+        TweenInfo.new(
+            0.26,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.Out
+        ),
+        {
+            GroupTransparency = 0
+        }
+    )
 
     SizeTween:Play()
     FadeTween:Play()
@@ -848,8 +1150,17 @@ local function ShowWindow()
     end)
 end
 
+--==============================================================--
+-- CLIQUE / TOQUE NO WN
+--==============================================================--
+
 FloatButton.Activated:Connect(function()
-    if DraggingFloat then return end
+
+    -- Se arrastou, não considera como clique
+    if DraggingFloat then
+        return
+    end
+
     if WindowOpen then
         HideWindow()
     else
@@ -857,79 +1168,83 @@ FloatButton.Activated:Connect(function()
     end
 end)
 
+--==============================================================--
+-- BOTÃO X
+--==============================================================--
+
 CloseButton.Activated:Connect(function()
-    if WindowAnimating then return end
-    ConfirmOverlay.Visible = true
-    ConfirmCard.Size = UDim2.fromOffset(250, 140)
 
-    TweenService:Create(ConfirmCard, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Size = UDim2.fromOffset(285, 155)
-    }):Play()
-end)
-
-NoButton.Activated:Connect(function()
-    ConfirmOverlay.Visible = false
-end)
-
-YesButton.Activated:Connect(function()
-    ConfirmOverlay.Visible = false
-    WindowOpen = false
-    ScreenGui:Destroy()
-    FloatGui:Destroy()
-end)
-
---==============================================================--
--- ARRASTAR BOTÃO FLUTUANTE (SEM TELEPORTE)
---==============================================================--
-
-local FloatDragThreshold = 5
-local FloatStartPos = Vector2.zero
-
-FloatButton.InputBegan:Connect(function(Input)
-    if Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch then
+    if WindowAnimating then
         return
     end
 
-    DraggingFloat = false
-    FloatStartPos = Input.Position
+    ConfirmOverlay.Visible = true
 
-    -- [CORRIGIDO] Usa diretamente as propriedades de Offset para evitar deslocamentos indesejados
-    local StartX = FloatButton.Position.X.Offset
-    local StartY = FloatButton.Position.Y.Offset
+    ConfirmCard.Size = UDim2.fromOffset(
+        250,
+        140
+    )
 
-    local Changed, Ended
+    TweenService:Create(
+        ConfirmCard,
+        TweenInfo.new(
+            0.22,
+            Enum.EasingStyle.Back,
+            Enum.EasingDirection.Out
+        ),
+        {
+            Size = UDim2.fromOffset(
+                285,
+                155
+            )
+        }
+    ):Play()
+end)
 
-    Changed = UserInputService.InputChanged:Connect(function(Change)
-        if Change.UserInputType == Enum.UserInputType.MouseMovement or Change.UserInputType == Enum.UserInputType.Touch then
-            local Delta = Change.Position - FloatStartPos
+--==============================================================--
+-- NÃO
+--==============================================================--
 
-            if not DraggingFloat and Delta.Magnitude > FloatDragThreshold then
-                DraggingFloat = true
-            end
+NoButton.Activated:Connect(function()
 
-            if DraggingFloat then
-                local ViewportSize = workspace.CurrentCamera.ViewportSize
-                local RawX = StartX + Delta.X
-                local RawY = StartY + Delta.Y
+    ConfirmOverlay.Visible = false
+end)
 
-                local MaxX = ViewportSize.X - FloatButton.AbsoluteSize.X
-                local MaxY = ViewportSize.Y - FloatButton.AbsoluteSize.Y
+--==============================================================--
+-- SIM
+--==============================================================--
 
-                local ClampedX = math.clamp(RawX, 0, MaxX)
-                local ClampedY = math.clamp(RawY, 0, MaxY)
+YesButton.Activated:Connect(function()
 
-                FloatButton.Position = UDim2.fromOffset(ClampedX, ClampedY)
-            end
-        end
-    end)
+    ConfirmOverlay.Visible = false
+    WindowOpen = false
 
-    Ended = UserInputService.InputEnded:Connect(function(EndedInput)
-        if EndedInput.UserInputType == Enum.UserInputType.MouseButton1 or EndedInput.UserInputType == Enum.UserInputType.Touch then
-            if Changed then Changed:Disconnect() end
-            if Ended then Ended:Disconnect() end
-            task.delay(0.05, function()
-                DraggingFloat = false
-            end)
-        end
-    end)
+    ClearFloatDragConnections()
+
+    if ScreenGui then
+        ScreenGui:Destroy()
+    end
+
+    if FloatGui then
+        FloatGui:Destroy()
+    end
+end)
+
+--==============================================================--
+-- AJUSTE AO REDIMENSIONAR A TELA
+--==============================================================--
+
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+
+    if not FloatButton.Parent then
+        return
+    end
+
+    local CurrentPosition = FloatButton.AbsolutePosition
+    local ClampedPosition = ClampFloatButton(CurrentPosition)
+
+    FloatButton.Position = UDim2.fromOffset(
+        math.floor(ClampedPosition.X + 0.5),
+        math.floor(ClampedPosition.Y + 0.5)
+    )
 end)
