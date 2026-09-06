@@ -409,6 +409,20 @@ for Index, TabData in ipairs(TabsData) do
         local SpeedSliding = false
         local SpeedActiveInput = nil
 
+-- ===================
+-- VARIAVEIS DO SPEED GLITH 
+-- ===================
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+
+_G.SpeedNoPulo = false
+
+local VelocidadeNoPulo = 300
+local VelocidadePadrao = 16
+
         -- ============================
         -- VARIÁVEIS DA ABA JUMP
         -- ============================
@@ -558,6 +572,80 @@ local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("Play
         SpeedSliderButton.Text = ""
         SpeedSliderButton.AutoButtonColor = false
         SpeedSliderButton.Parent = SpeedSliderTrack
+
+-- =======================
+-- BOTAO DO SPEED GLITH
+-- =======================
+-- (Insira este código dentro da sua aba/container da Player)
+local SpeedJumpCard = Instance.new("Frame")
+SpeedJumpCard.Name = "SpeedJumpCard"
+SpeedJumpCard.Size = UDim2.new(1, -6, 0, 50)
+SpeedJumpCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+SpeedJumpCard.BorderSizePixel = 0
+SpeedJumpCard.Parent = PageFrame -- Altere para a sua página/container
+
+local SpeedJumpCardCorner = Instance.new("UICorner")
+SpeedJumpCardCorner.CornerRadius = UDim.new(0, 10)
+SpeedJumpCardCorner.Parent = SpeedJumpCard
+
+local SpeedJumpCardStroke = Instance.new("UIStroke")
+SpeedJumpCardStroke.Color = Color3.fromRGB(39, 40, 48)
+SpeedJumpCardStroke.Thickness = 1
+SpeedJumpCardStroke.Parent = SpeedJumpCard
+
+local SpeedJumpTitle = Instance.new("TextLabel")
+SpeedJumpTitle.Name = "Title"
+SpeedJumpTitle.Size = UDim2.new(1, -60, 1, 0)
+SpeedJumpTitle.Position = UDim2.fromOffset(12, 0)
+SpeedJumpTitle.BackgroundTransparency = 1
+SpeedJumpTitle.Text = "Speed Glitch (Pulo)"
+SpeedJumpTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+SpeedJumpTitle.TextSize = 12
+SpeedJumpTitle.Font = Enum.Font.GothamSemibold
+SpeedJumpTitle.TextXAlignment = Enum.TextXAlignment.Left
+SpeedJumpTitle.Parent = SpeedJumpCard
+
+local SpeedJumpToggle = Instance.new("TextButton")
+SpeedJumpToggle.Name = "ToggleButton"
+SpeedJumpToggle.Size = UDim2.fromOffset(26, 26)
+SpeedJumpToggle.AnchorPoint = Vector2.new(1, 0.5)
+SpeedJumpToggle.Position = UDim2.new(1, -12, 0.5, 0)
+SpeedJumpToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+SpeedJumpToggle.BorderSizePixel = 0
+SpeedJumpToggle.Text = ""
+SpeedJumpToggle.AutoButtonColor = false
+SpeedJumpToggle.Parent = SpeedJumpCard
+
+local SpeedJumpCorner = Instance.new("UICorner")
+SpeedJumpCorner.CornerRadius = UDim.new(0, 6)
+SpeedJumpCorner.Parent = SpeedJumpToggle
+
+local SpeedJumpStroke = Instance.new("UIStroke")
+SpeedJumpStroke.Color = Color3.fromRGB(39, 40, 48)
+SpeedJumpStroke.Thickness = 1
+SpeedJumpStroke.Parent = SpeedJumpToggle
+
+local SpeedJumpCheck = Instance.new("TextLabel")
+SpeedJumpCheck.Name = "CheckMark"
+SpeedJumpCheck.Size = UDim2.fromScale(1, 1)
+SpeedJumpCheck.BackgroundTransparency = 1
+SpeedJumpCheck.Text = "✔"
+SpeedJumpCheck.TextColor3 = Color3.new(1, 1, 1)
+SpeedJumpCheck.TextSize = 14
+SpeedJumpCheck.Font = Enum.Font.GothamBold
+SpeedJumpCheck.TextTransparency = 1
+SpeedJumpCheck.Parent = SpeedJumpToggle
+
+SpeedJumpToggle.Activated:Connect(function()
+    _G.SpeedNoPulo = not _G.SpeedNoPulo
+    local targetBg = _G.SpeedNoPulo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = _G.SpeedNoPulo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = _G.SpeedNoPulo and 0 or 1
+
+    TweenService:Create(SpeedJumpToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(SpeedJumpStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(SpeedJumpCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
 
         -- ============================
         -- BOTAO JUMP
@@ -1049,6 +1137,27 @@ end)
                 task.wait(0.1)
             end
         end)
+
+-- ====================
+-- SISTEMA DO SPEED GLITH 
+-- ====================
+RunService.Stepped:Connect(function()
+    local Char = player.Character
+
+    if not Char or not Char:FindFirstChild("Humanoid") then
+        return
+    end
+
+    local Hum = Char.Humanoid
+
+    if _G.SpeedNoPulo then
+        if Hum.FloorMaterial == Enum.Material.Air then
+            Hum.WalkSpeed = VelocidadeNoPulo
+        else
+            Hum.WalkSpeed = VelocidadePadrao
+        end
+    end
+end)
 
 -- ======================
 -- SISTEMA DO PULO INFINITO 
