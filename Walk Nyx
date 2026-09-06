@@ -738,7 +738,9 @@ local PlayerFloatCard = Instance.new("Frame")
 PlayerFloatCard.Name = "FloatingButtonCard"
 PlayerFloatCard.Size = UDim2.new(1, -6, 0, 85)
 PlayerFloatCard.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
+PlayerFloatCard.BackgroundTransparency = 0
 PlayerFloatCard.BorderSizePixel = 0
+PlayerFloatCard.Active = false
 PlayerFloatCard.Parent = PageFrame
 
 local PlayerFloatCardCorner = Instance.new("UICorner")
@@ -757,6 +759,7 @@ PlayerFloatCardStroke.Parent = PlayerFloatCard
 --==============================================================--
 
 local PlayerFloatTitle = Instance.new("TextLabel")
+PlayerFloatTitle.Name = "Title"
 PlayerFloatTitle.Size = UDim2.new(1, -60, 0, 36)
 PlayerFloatTitle.Position = UDim2.fromOffset(12, 0)
 
@@ -766,6 +769,11 @@ PlayerFloatTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 PlayerFloatTitle.TextSize = 14
 PlayerFloatTitle.Font = Enum.Font.GothamSemibold
 PlayerFloatTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+-- IMPORTANTE:
+-- não captura clique
+PlayerFloatTitle.Active = false
+
 PlayerFloatTitle.Parent = PlayerFloatCard
 
 
@@ -774,109 +782,274 @@ PlayerFloatTitle.Parent = PlayerFloatCard
 --==============================================================--
 
 local PlayerFloatToggle = Instance.new("TextButton")
+PlayerFloatToggle.Name = "Toggle"
 PlayerFloatToggle.Size = UDim2.fromOffset(26, 26)
 
 PlayerFloatToggle.AnchorPoint = Vector2.new(1, 0)
 PlayerFloatToggle.Position = UDim2.new(1, -12, 0, 5)
 
-PlayerFloatToggle.BackgroundColor3 =
-    Color3.fromRGB(35, 35, 40)
-
+PlayerFloatToggle.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+PlayerFloatToggle.BackgroundTransparency = 0
 PlayerFloatToggle.BorderSizePixel = 0
+
 PlayerFloatToggle.Text = ""
 PlayerFloatToggle.AutoButtonColor = false
+PlayerFloatToggle.Active = true
+
 PlayerFloatToggle.Parent = PlayerFloatCard
+
 
 local PlayerFloatToggleCorner = Instance.new("UICorner")
 PlayerFloatToggleCorner.CornerRadius = UDim.new(0, 6)
 PlayerFloatToggleCorner.Parent = PlayerFloatToggle
 
+
 local PlayerFloatToggleStroke = Instance.new("UIStroke")
 PlayerFloatToggleStroke.Color = Color3.fromRGB(70, 70, 78)
 PlayerFloatToggleStroke.Thickness = 1
+PlayerFloatToggleStroke.Transparency = 0
 PlayerFloatToggleStroke.Parent = PlayerFloatToggle
 
 
--- CHECK
 local PlayerFloatCheck = Instance.new("TextLabel")
+PlayerFloatCheck.Name = "Check"
 PlayerFloatCheck.Size = UDim2.fromScale(1, 1)
+
 PlayerFloatCheck.BackgroundTransparency = 1
 PlayerFloatCheck.Text = "✓"
 PlayerFloatCheck.TextSize = 15
 PlayerFloatCheck.Font = Enum.Font.GothamBold
 PlayerFloatCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
 PlayerFloatCheck.TextTransparency = 1
+
+-- não captura clique separado do toggle
+PlayerFloatCheck.Active = false
+
 PlayerFloatCheck.Parent = PlayerFloatToggle
 
 
 --==============================================================--
---                          SLIDER
+--                         SLIDER
 --==============================================================--
 
 local PlayerFloatSliderContainer = Instance.new("Frame")
+PlayerFloatSliderContainer.Name = "SliderContainer"
+
 PlayerFloatSliderContainer.Size = UDim2.new(1, -24, 0, 30)
 PlayerFloatSliderContainer.Position = UDim2.fromOffset(12, 44)
 
 PlayerFloatSliderContainer.BackgroundTransparency = 1
+PlayerFloatSliderContainer.Active = false
 PlayerFloatSliderContainer.Parent = PlayerFloatCard
 
 
 local PlayerFloatSliderLabel = Instance.new("TextLabel")
+PlayerFloatSliderLabel.Name = "SliderLabel"
 PlayerFloatSliderLabel.Size = UDim2.new(1, 0, 0, 14)
 
 PlayerFloatSliderLabel.BackgroundTransparency = 1
-PlayerFloatSliderLabel.Text =
-    "Tamanho: " .. tostring(PlayerFloatSize)
+PlayerFloatSliderLabel.Text = "Tamanho: " .. tostring(PlayerFloatSize)
 
-PlayerFloatSliderLabel.TextColor3 =
-    Color3.fromRGB(150, 150, 155)
-
+PlayerFloatSliderLabel.TextColor3 = Color3.fromRGB(150, 150, 155)
 PlayerFloatSliderLabel.TextSize = 11
 PlayerFloatSliderLabel.Font = Enum.Font.Gotham
-PlayerFloatSliderLabel.TextXAlignment =
-    Enum.TextXAlignment.Left
+PlayerFloatSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-PlayerFloatSliderLabel.Parent =
-    PlayerFloatSliderContainer
+-- não captura clique
+PlayerFloatSliderLabel.Active = false
+
+PlayerFloatSliderLabel.Parent = PlayerFloatSliderContainer
 
 
-local PlayerFloatSliderTrack = Instance.new("Frame")
+--==============================================================--
+--                       ÁREA DO SLIDER
+--==============================================================--
+
+local PlayerFloatSliderTrack = Instance.new("TextButton")
+PlayerFloatSliderTrack.Name = "SliderTrack"
+
 PlayerFloatSliderTrack.Size = UDim2.new(1, 0, 0, 6)
 PlayerFloatSliderTrack.Position = UDim2.new(0, 0, 0, 19)
 
-PlayerFloatSliderTrack.BackgroundColor3 =
-    Color3.fromRGB(45, 45, 50)
+PlayerFloatSliderTrack.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+PlayerFloatSliderTrack.BackgroundTransparency = 0
 
 PlayerFloatSliderTrack.BorderSizePixel = 0
-PlayerFloatSliderTrack.Parent =
-    PlayerFloatSliderContainer
+PlayerFloatSliderTrack.Text = ""
+PlayerFloatSliderTrack.AutoButtonColor = false
+PlayerFloatSliderTrack.Active = true
+
+PlayerFloatSliderTrack.Parent = PlayerFloatSliderContainer
+
 
 local PlayerFloatTrackCorner = Instance.new("UICorner")
 PlayerFloatTrackCorner.CornerRadius = UDim.new(1, 0)
-PlayerFloatTrackCorner.Parent =
-    PlayerFloatSliderTrack
+PlayerFloatTrackCorner.Parent = PlayerFloatSliderTrack
 
+
+--==============================================================--
+--                         SLIDER FILL
+--==============================================================--
 
 local PlayerFloatSliderFill = Instance.new("Frame")
-PlayerFloatSliderFill.Size = UDim2.new(
-    (PlayerFloatSize - 40) / 120,
-    0,
-    1,
-    0
-)
+PlayerFloatSliderFill.Name = "Fill"
+
+local InitialPercent =
+    math.clamp(
+        (PlayerFloatSize - 40) / 120,
+        0,
+        1
+    )
+
+PlayerFloatSliderFill.Size =
+    UDim2.new(InitialPercent, 0, 1, 0)
 
 PlayerFloatSliderFill.BackgroundColor3 =
     Color3.fromRGB(180, 45, 55)
 
+PlayerFloatSliderFill.BackgroundTransparency = 0
 PlayerFloatSliderFill.BorderSizePixel = 0
+
+-- NÃO captura clique
+PlayerFloatSliderFill.Active = false
+
 PlayerFloatSliderFill.Parent =
     PlayerFloatSliderTrack
+
 
 local PlayerFloatFillCorner = Instance.new("UICorner")
 PlayerFloatFillCorner.CornerRadius = UDim.new(1, 0)
 PlayerFloatFillCorner.Parent =
     PlayerFloatSliderFill
 
+
+--==============================================================--
+--                     ATUALIZAR SLIDER
+--==============================================================--
+
+local function UpdatePlayerFloatSlider(Input)
+
+    local TrackX =
+        PlayerFloatSliderTrack.AbsolutePosition.X
+
+    local TrackWidth =
+        PlayerFloatSliderTrack.AbsoluteSize.X
+
+    if TrackWidth <= 0 then
+        return
+    end
+
+    local Relative =
+        math.clamp(
+            (Input.Position.X - TrackX) / TrackWidth,
+            0,
+            1
+        )
+
+    PlayerFloatSize =
+        math.floor(40 + (Relative * 120))
+
+    PlayerFloatSliderFill.Size =
+        UDim2.new(
+            Relative,
+            0,
+            1,
+            0
+        )
+
+    PlayerFloatSliderLabel.Text =
+        "Tamanho: " .. tostring(PlayerFloatSize)
+
+    if PlayerFloatButton then
+
+        PlayerFloatButton.Size =
+            UDim2.fromOffset(
+                PlayerFloatSize,
+                PlayerFloatSize
+            )
+    end
+end
+
+
+--==============================================================--
+--                    CONTROLE DO SLIDER
+--==============================================================--
+
+local PlayerFloatSliding = false
+
+
+PlayerFloatSliderTrack.InputBegan:Connect(function(Input)
+
+    if Input.UserInputType == Enum.UserInputType.MouseButton1
+    or Input.UserInputType == Enum.UserInputType.Touch then
+
+        PlayerFloatSliding = true
+
+        UpdatePlayerFloatSlider(Input)
+    end
+end)
+
+
+PlayerFloatSliderTrack.InputEnded:Connect(function(Input)
+
+    if Input.UserInputType == Enum.UserInputType.MouseButton1
+    or Input.UserInputType == Enum.UserInputType.Touch then
+
+        PlayerFloatSliding = false
+    end
+end)
+
+
+UserInputService.InputChanged:Connect(function(Input)
+
+    if not PlayerFloatSliding then
+        return
+    end
+
+    if Input.UserInputType ~= Enum.UserInputType.MouseMovement
+    and Input.UserInputType ~= Enum.UserInputType.Touch then
+        return
+    end
+
+    UpdatePlayerFloatSlider(Input)
+end)
+
+--==============================================================--
+--                         TOGGLE
+--==============================================================--
+
+PlayerFloatToggle.Activated:Connect(function()
+
+    PlayerFloatEnabled =
+        not PlayerFloatEnabled
+
+    if PlayerFloatEnabled then
+
+        CreatePlayerFloatingButton()
+
+        PlayerFloatToggle.BackgroundColor3 =
+            Color3.fromRGB(90, 35, 42)
+
+        PlayerFloatToggleStroke.Color =
+            Color3.fromRGB(180, 55, 65)
+
+        PlayerFloatCheck.TextTransparency = 0
+
+    else
+
+        DestroyPlayerFloatingButton()
+
+        PlayerFloatActive = false
+
+        PlayerFloatToggle.BackgroundColor3 =
+            Color3.fromRGB(35, 35, 40)
+
+        PlayerFloatToggleStroke.Color =
+            Color3.fromRGB(70, 70, 78)
+
+        PlayerFloatCheck.TextTransparency = 1
+    end
+end)
 
 --==============================================================--
 --                       ATUALIZAR SLIDER
