@@ -393,6 +393,37 @@ for Index, TabData in ipairs(TabsData) do
     PageFrame.Visible = (Index == 1)
     PageFrame.Parent = ContentContainer
 
+    --==============================================================--
+    -- ÁREA DE VARIÁVEIS, BOTÕES E SISTEMA DA ABA:[span_0](start_span)[span_0](end_span)
+    -- TabData.Name ("Main", "Auto Farm", "ESP", "Player", "Settings")
+    --==============================================================--
+    if TabData.Name == "Main" then
+        -- [Coloque as variáveis, botões e sistemas da aba Main aqui]
+
+
+
+    elseif TabData.Name == "Auto Farm" then
+        -- [Coloque as variáveis, botões e sistemas da aba Auto Farm aqui]
+
+
+
+    elseif TabData.Name == "ESP" then
+        -- [Coloque as variáveis, botões e sistemas da aba ESP aqui]
+
+
+
+    elseif TabData.Name == "Player" then
+        -- [Coloque as variáveis, botões e sistemas da aba Player aqui]
+
+
+
+    elseif TabData.Name == "Settings" then
+        -- [Coloque as variáveis, botões e sistemas da aba Settings aqui]
+    end
+
+
+    --==============================================================--
+
     local ListLayout = Instance.new("UIListLayout")
     ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
     ListLayout.Padding = UDim.new(0, 8)
