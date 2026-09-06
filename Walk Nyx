@@ -411,6 +411,14 @@ local Humanoid = nil
 local Raiz = nil
 local PartesCorpo = {}
 
+-- ================================================
+-- 👻 VARIÁVEIS DO BOTÃO FLUTUANTE INVISÍVEL
+-- ================================================
+local InvisivelAtivo = false
+local InvisivelButtonGui = nil
+local isDraggingInvis = false
+local CoreGui = game:GetService("CoreGui")
+
         -- ============================
         -- VARIÁVEIS DA ABA SPEED
         -- ============================
@@ -565,6 +573,131 @@ InvisivelToggle.Activated:Connect(function()
     TweenService:Create(InvisivelBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
     TweenService:Create(InvisivelCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
 end)
+
+-- ================================================
+-- 👻 BOTÃO TOGGLE — ABA PLAYER
+-- ================================================
+local BtnToggleInvis = Instance.new("TextButton")
+BtnToggleInvis.Name = "ToggleMostrarInvisivel"
+BtnToggleInvis.Size = UDim2.new(1, 0, 0, 44)
+BtnToggleInvis.BackgroundColor3 = Theme.Card
+BtnToggleInvis.Text = "👻 Mostrar Botão Invisível"
+BtnToggleInvis.TextColor3 = Theme.Text
+BtnToggleInvis.TextSize = 13
+BtnToggleInvis.Font = Enum.Font.GothamBold
+BtnToggleInvis.AutoButtonColor = false
+BtnToggleInvis.Parent = PageFrame
+Instance.new("UICorner", BtnToggleInvis).CornerRadius = UDim.new(0, 10)
+
+BtnToggleInvis.Activated:Connect(function()
+    if not InvisivelButtonGui then
+        CreateInvisivelButton()
+        BtnToggleInvis.Text = "👻 Ocultar Botão Invisível ✅"
+        BtnToggleInvis.BackgroundColor3 = Theme.Accent
+    else
+        RemoveInvisivelButton()
+        BtnToggleInvis.Text = "👻 Mostrar Botão Invisível"
+        BtnToggleInvis.BackgroundColor3 = Theme.Card
+    end
+end)
+
+-- ================================================
+-- 👻 SISTEMA DO BOTÃO FLUTUANTE INVISÍVEL
+-- ================================================
+local function CreateInvisivelButton()
+    if InvisivelButtonGui then return end
+
+    local ParentGui = CoreGui
+    pcall(function()
+        if not CoreGui then ParentGui = Player:WaitForChild("PlayerGui") end
+    end)
+
+    local GuiBtn = Instance.new("ScreenGui")
+    GuiBtn.Name = "AstralX_InvisivelButton"
+    GuiBtn.ResetOnSpawn = false
+    GuiBtn.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    GuiBtn.Parent = ParentGui
+
+    local Btn = Instance.new("ImageButton")
+    Btn.Size = UDim2.new(0, 110, 0, 42)
+    Btn.Position = UDim2.new(0.5, -55, 0.3, -21)
+    
+    Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.BackgroundTransparency = 0.3
+    Btn.Parent = GuiBtn
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 12)
+    Corner.Parent = Btn
+
+    local Borda = Instance.new("UIStroke")
+    Borda.Color = Color3.fromRGB(200, 200, 200)
+    Borda.Thickness = 2
+    Borda.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    Borda.Parent = Btn
+
+    local Texto = Instance.new("TextLabel")
+    Texto.Size = UDim2.new(1, 0, 1, 0)
+    Texto.BackgroundTransparency = 1
+    Texto.Text = "Invisible"
+    Texto.TextColor3 = Color3.fromRGB(0, 0, 0)
+    Texto.TextSize = 14
+    Texto.Font = Enum.Font.GothamBold
+    Texto.Parent = Btn
+
+    local dragThreshold = 10
+    local dragStartMousePos, buttonStartPosScreen
+
+    Btn.InputBegan:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDraggingInvis = false
+            dragStartMousePos = Input.Position
+            buttonStartPosScreen = Btn.Position
+        end
+    end)
+
+    Btn.InputChanged:Connect(function(Input)
+        if (Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseMovement) and dragStartMousePos then
+            local delta = Input.Position - dragStartMousePos
+            if delta.Magnitude > dragThreshold then
+                isDraggingInvis = true
+                Btn.Position = buttonStartPosScreen + UDim2.fromOffset(delta.X, delta.Y)
+            end
+        end
+    end)
+
+    Btn.InputEnded:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if not isDraggingInvis then
+                InvisivelAtivo = not InvisivelAtivo
+
+                if InvisivelAtivo then
+                    Btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+                    Btn.BackgroundTransparency = 0.3
+                    Borda.Color = Color3.fromRGB(255, 20, 147)
+                    Texto.TextColor3 = Color3.fromRGB(255, 255, 255)
+                else
+                    Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                    Btn.BackgroundTransparency = 0.3
+                    Borda.Color = Color3.fromRGB(200, 200, 200)
+                    Texto.TextColor3 = Color3.fromRGB(0, 0, 0)
+                end
+            end
+            dragStartMousePos = nil
+            isDraggingInvis = false
+        end
+    end)
+
+    InvisivelButtonGui = GuiBtn
+end
+
+local function RemoveInvisivelButton()
+    if InvisivelButtonGui then 
+        InvisivelButtonGui:Destroy() 
+        InvisivelButtonGui = nil 
+    end
+    InvisivelAtivo = false
+end
 
 -- ================================================
 -- INVISÍVEL - SISTEMA
