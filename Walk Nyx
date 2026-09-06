@@ -460,6 +460,11 @@ local player = Players.LocalPlayer
 local bv, bg, con
 local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
 
+-- =============================
+-- ANTI-FLING (Variáveis)
+-- =============================
+_G.AntiFling = false
+
         -- ============================
         -- BOTAO SPEED
         -- ============================
@@ -1069,6 +1074,79 @@ FlySliderButton.Parent = FlySliderTrack
             end
         end)
 
+-- =============================
+-- ANTI-FLING (Botão)
+-- =============================
+local AntiFlingCard = Instance.new("Frame")
+AntiFlingCard.Name = "AntiFlingCard"
+AntiFlingCard.Size = UDim2.new(1, -6, 0, 50)
+AntiFlingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+AntiFlingCard.BorderSizePixel = 0
+AntiFlingCard.Parent = PageFrame
+
+local AntiFlingCorner = Instance.new("UICorner")
+AntiFlingCorner.CornerRadius = UDim.new(0, 10)
+AntiFlingCorner.Parent = AntiFlingCard
+
+local AntiFlingStroke = Instance.new("UIStroke")
+AntiFlingStroke.Color = Color3.fromRGB(39, 40, 48)
+AntiFlingStroke.Thickness = 1
+AntiFlingStroke.Parent = AntiFlingCard
+
+local AntiFlingTitle = Instance.new("TextLabel")
+AntiFlingTitle.Name = "Title"
+AntiFlingTitle.Size = UDim2.new(1, -60, 1, 0)
+AntiFlingTitle.Position = UDim2.fromOffset(12, 0)
+AntiFlingTitle.BackgroundTransparency = 1
+AntiFlingTitle.Text = "Anti-Fling"
+AntiFlingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+AntiFlingTitle.TextSize = 12
+AntiFlingTitle.Font = Enum.Font.GothamSemibold
+AntiFlingTitle.TextXAlignment = Enum.TextXAlignment.Left
+AntiFlingTitle.Parent = AntiFlingCard
+
+local AntiFlingToggle = Instance.new("TextButton")
+AntiFlingToggle.Name = "ToggleButton"
+AntiFlingToggle.Size = UDim2.fromOffset(26, 26)
+AntiFlingToggle.AnchorPoint = Vector2.new(1, 0.5)
+AntiFlingToggle.Position = UDim2.new(1, -12, 0.5, 0)
+AntiFlingToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+AntiFlingToggle.BorderSizePixel = 0
+AntiFlingToggle.Text = ""
+AntiFlingToggle.AutoButtonColor = false
+AntiFlingToggle.Parent = AntiFlingCard
+
+local AntiFlingBtnCorner = Instance.new("UICorner")
+AntiFlingBtnCorner.CornerRadius = UDim.new(0, 6)
+AntiFlingBtnCorner.Parent = AntiFlingToggle
+
+local AntiFlingBtnStroke = Instance.new("UIStroke")
+AntiFlingBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+AntiFlingBtnStroke.Thickness = 1
+AntiFlingBtnStroke.Parent = AntiFlingToggle
+
+local AntiFlingCheck = Instance.new("TextLabel")
+AntiFlingCheck.Name = "CheckMark"
+AntiFlingCheck.Size = UDim2.fromScale(1, 1)
+AntiFlingCheck.BackgroundTransparency = 1
+AntiFlingCheck.Text = "✔"
+AntiFlingCheck.TextColor3 = Color3.new(1, 1, 1)
+AntiFlingCheck.TextSize = 14
+AntiFlingCheck.Font = Enum.Font.GothamBold
+AntiFlingCheck.TextTransparency = 1
+AntiFlingCheck.Parent = AntiFlingToggle
+
+AntiFlingToggle.Activated:Connect(function()
+    _G.AntiFling = not _G.AntiFling
+    local targetBg = _G.AntiFling and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = _G.AntiFling and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = _G.AntiFling and 0 or 1
+
+    TweenService:Create(AntiFlingToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(AntiFlingBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(AntiFlingCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
+
 -- ============================
 -- SLIDER DO FLY
 -- ============================
@@ -1252,6 +1330,30 @@ player.CharacterAdded:Connect(function()
     task.wait(0.8)
     if FlyAtivo then 
         StartFly() 
+    end
+end)
+
+-- =============================
+-- ANTI-FLING (Sistema)
+-- =============================
+task.spawn(function()
+    while true do
+        if _G.AntiFling then
+            pcall(function()
+                for _, OtherPlayer in ipairs(game:GetService("Players"):GetPlayers()) do
+                    if OtherPlayer ~= player and OtherPlayer.Character then
+                        for _, Part in ipairs(OtherPlayer.Character:GetChildren()) do
+                            if Part:IsA("BasePart") then
+                                Part.CanCollide = false
+                                Part.AssemblyLinearVelocity = Vector3.zero
+                                Part.AssemblyAngularVelocity = Vector3.zero
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+        game:GetService("RunService").Stepped:Wait()
     end
 end)
 
