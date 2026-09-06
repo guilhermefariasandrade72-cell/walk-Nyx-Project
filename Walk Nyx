@@ -465,6 +465,13 @@ local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("Play
 -- =============================
 _G.AntiFling = false
 
+-- =============================
+-- WALK FLING (Variáveis)
+-- =============================
+local WalkFlingAtivo = false
+local FlingPower = 50000
+local FlingConnection = nil
+
         -- ============================
         -- BOTAO SPEED
         -- ============================
@@ -953,6 +960,154 @@ FlySliderButton.Text = ""
 FlySliderButton.AutoButtonColor = false
 FlySliderButton.Parent = FlySliderTrack
 
+-- =============================
+-- WALK FLING (Botão)
+-- =============================
+local WalkFlingCard = Instance.new("Frame")
+WalkFlingCard.Name = "WalkFlingCard"
+WalkFlingCard.Size = UDim2.new(1, -6, 0, 50)
+WalkFlingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+WalkFlingCard.BorderSizePixel = 0
+WalkFlingCard.Parent = PageFrame
+
+local WalkFlingCorner = Instance.new("UICorner")
+WalkFlingCorner.CornerRadius = UDim.new(0, 10)
+WalkFlingCorner.Parent = WalkFlingCard
+
+local WalkFlingStroke = Instance.new("UIStroke")
+WalkFlingStroke.Color = Color3.fromRGB(39, 40, 48)
+WalkFlingStroke.Thickness = 1
+WalkFlingStroke.Parent = WalkFlingCard
+
+local WalkFlingTitle = Instance.new("TextLabel")
+WalkFlingTitle.Name = "Title"
+WalkFlingTitle.Size = UDim2.new(1, -60, 1, 0)
+WalkFlingTitle.Position = UDim2.fromOffset(12, 0)
+WalkFlingTitle.BackgroundTransparency = 1
+WalkFlingTitle.Text = "Walk Fling"
+WalkFlingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+WalkFlingTitle.TextSize = 12
+WalkFlingTitle.Font = Enum.Font.GothamSemibold
+WalkFlingTitle.TextXAlignment = Enum.TextXAlignment.Left
+WalkFlingTitle.Parent = WalkFlingCard
+
+local WalkFlingToggle = Instance.new("TextButton")
+WalkFlingToggle.Name = "ToggleButton"
+WalkFlingToggle.Size = UDim2.fromOffset(26, 26)
+WalkFlingToggle.AnchorPoint = Vector2.new(1, 0.5)
+WalkFlingToggle.Position = UDim2.new(1, -12, 0.5, 0)
+WalkFlingToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+WalkFlingToggle.BorderSizePixel = 0
+WalkFlingToggle.Text = ""
+WalkFlingToggle.AutoButtonColor = false
+WalkFlingToggle.Parent = WalkFlingCard
+
+local WalkFlingBtnCorner = Instance.new("UICorner")
+WalkFlingBtnCorner.CornerRadius = UDim.new(0, 6)
+WalkFlingBtnCorner.Parent = WalkFlingToggle
+
+local WalkFlingBtnStroke = Instance.new("UIStroke")
+WalkFlingBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+WalkFlingBtnStroke.Thickness = 1
+WalkFlingBtnStroke.Parent = WalkFlingToggle
+
+local WalkFlingCheck = Instance.new("TextLabel")
+WalkFlingCheck.Name = "CheckMark"
+WalkFlingCheck.Size = UDim2.fromScale(1, 1)
+WalkFlingCheck.BackgroundTransparency = 1
+WalkFlingCheck.Text = "✔"
+WalkFlingCheck.TextColor3 = Color3.new(1, 1, 1)
+WalkFlingCheck.TextSize = 14
+WalkFlingCheck.Font = Enum.Font.GothamBold
+WalkFlingCheck.TextTransparency = 1
+WalkFlingCheck.Parent = WalkFlingToggle
+
+WalkFlingToggle.Activated:Connect(function()
+    local newState = not WalkFlingAtivo
+    ToggleWalkFling(newState)
+
+    local targetBg = newState and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = newState and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = newState and 0 or 1
+
+    TweenService:Create(WalkFlingToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(WalkFlingBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(WalkFlingCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
+
+-- =============================
+-- ANTI-FLING (Botão)
+-- =============================
+local AntiFlingCard = Instance.new("Frame")
+AntiFlingCard.Name = "AntiFlingCard"
+AntiFlingCard.Size = UDim2.new(1, -6, 0, 50)
+AntiFlingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+AntiFlingCard.BorderSizePixel = 0
+AntiFlingCard.Parent = PageFrame
+
+local AntiFlingCorner = Instance.new("UICorner")
+AntiFlingCorner.CornerRadius = UDim.new(0, 10)
+AntiFlingCorner.Parent = AntiFlingCard
+
+local AntiFlingStroke = Instance.new("UIStroke")
+AntiFlingStroke.Color = Color3.fromRGB(39, 40, 48)
+AntiFlingStroke.Thickness = 1
+AntiFlingStroke.Parent = AntiFlingCard
+
+local AntiFlingTitle = Instance.new("TextLabel")
+AntiFlingTitle.Name = "Title"
+AntiFlingTitle.Size = UDim2.new(1, -60, 1, 0)
+AntiFlingTitle.Position = UDim2.fromOffset(12, 0)
+AntiFlingTitle.BackgroundTransparency = 1
+AntiFlingTitle.Text = "Anti-Fling"
+AntiFlingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+AntiFlingTitle.TextSize = 12
+AntiFlingTitle.Font = Enum.Font.GothamSemibold
+AntiFlingTitle.TextXAlignment = Enum.TextXAlignment.Left
+AntiFlingTitle.Parent = AntiFlingCard
+
+local AntiFlingToggle = Instance.new("TextButton")
+AntiFlingToggle.Name = "ToggleButton"
+AntiFlingToggle.Size = UDim2.fromOffset(26, 26)
+AntiFlingToggle.AnchorPoint = Vector2.new(1, 0.5)
+AntiFlingToggle.Position = UDim2.new(1, -12, 0.5, 0)
+AntiFlingToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+AntiFlingToggle.BorderSizePixel = 0
+AntiFlingToggle.Text = ""
+AntiFlingToggle.AutoButtonColor = false
+AntiFlingToggle.Parent = AntiFlingCard
+
+local AntiFlingBtnCorner = Instance.new("UICorner")
+AntiFlingBtnCorner.CornerRadius = UDim.new(0, 6)
+AntiFlingBtnCorner.Parent = AntiFlingToggle
+
+local AntiFlingBtnStroke = Instance.new("UIStroke")
+AntiFlingBtnStroke.Color = Color3.fromRGB(39, 40, 48)
+AntiFlingBtnStroke.Thickness = 1
+AntiFlingBtnStroke.Parent = AntiFlingToggle
+
+local AntiFlingCheck = Instance.new("TextLabel")
+AntiFlingCheck.Name = "CheckMark"
+AntiFlingCheck.Size = UDim2.fromScale(1, 1)
+AntiFlingCheck.BackgroundTransparency = 1
+AntiFlingCheck.Text = "✔"
+AntiFlingCheck.TextColor3 = Color3.new(1, 1, 1)
+AntiFlingCheck.TextSize = 14
+AntiFlingCheck.Font = Enum.Font.GothamBold
+AntiFlingCheck.TextTransparency = 1
+AntiFlingCheck.Parent = AntiFlingToggle
+
+AntiFlingToggle.Activated:Connect(function()
+    _G.AntiFling = not _G.AntiFling
+    local targetBg = _G.AntiFling and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStroke = _G.AntiFling and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTrans = _G.AntiFling and 0 or 1
+
+    TweenService:Create(AntiFlingToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
+    TweenService:Create(AntiFlingBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
+    TweenService:Create(AntiFlingCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
+end)
+
         -- ============================
         -- LÓGICA DO SLIDER DE SPEED
         -- ============================
@@ -1073,79 +1228,6 @@ FlySliderButton.Parent = FlySliderTrack
                 Player.Character.Humanoid.JumpPower = 50
             end
         end)
-
--- =============================
--- ANTI-FLING (Botão)
--- =============================
-local AntiFlingCard = Instance.new("Frame")
-AntiFlingCard.Name = "AntiFlingCard"
-AntiFlingCard.Size = UDim2.new(1, -6, 0, 50)
-AntiFlingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-AntiFlingCard.BorderSizePixel = 0
-AntiFlingCard.Parent = PageFrame
-
-local AntiFlingCorner = Instance.new("UICorner")
-AntiFlingCorner.CornerRadius = UDim.new(0, 10)
-AntiFlingCorner.Parent = AntiFlingCard
-
-local AntiFlingStroke = Instance.new("UIStroke")
-AntiFlingStroke.Color = Color3.fromRGB(39, 40, 48)
-AntiFlingStroke.Thickness = 1
-AntiFlingStroke.Parent = AntiFlingCard
-
-local AntiFlingTitle = Instance.new("TextLabel")
-AntiFlingTitle.Name = "Title"
-AntiFlingTitle.Size = UDim2.new(1, -60, 1, 0)
-AntiFlingTitle.Position = UDim2.fromOffset(12, 0)
-AntiFlingTitle.BackgroundTransparency = 1
-AntiFlingTitle.Text = "Anti-Fling"
-AntiFlingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
-AntiFlingTitle.TextSize = 12
-AntiFlingTitle.Font = Enum.Font.GothamSemibold
-AntiFlingTitle.TextXAlignment = Enum.TextXAlignment.Left
-AntiFlingTitle.Parent = AntiFlingCard
-
-local AntiFlingToggle = Instance.new("TextButton")
-AntiFlingToggle.Name = "ToggleButton"
-AntiFlingToggle.Size = UDim2.fromOffset(26, 26)
-AntiFlingToggle.AnchorPoint = Vector2.new(1, 0.5)
-AntiFlingToggle.Position = UDim2.new(1, -12, 0.5, 0)
-AntiFlingToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-AntiFlingToggle.BorderSizePixel = 0
-AntiFlingToggle.Text = ""
-AntiFlingToggle.AutoButtonColor = false
-AntiFlingToggle.Parent = AntiFlingCard
-
-local AntiFlingBtnCorner = Instance.new("UICorner")
-AntiFlingBtnCorner.CornerRadius = UDim.new(0, 6)
-AntiFlingBtnCorner.Parent = AntiFlingToggle
-
-local AntiFlingBtnStroke = Instance.new("UIStroke")
-AntiFlingBtnStroke.Color = Color3.fromRGB(39, 40, 48)
-AntiFlingBtnStroke.Thickness = 1
-AntiFlingBtnStroke.Parent = AntiFlingToggle
-
-local AntiFlingCheck = Instance.new("TextLabel")
-AntiFlingCheck.Name = "CheckMark"
-AntiFlingCheck.Size = UDim2.fromScale(1, 1)
-AntiFlingCheck.BackgroundTransparency = 1
-AntiFlingCheck.Text = "✔"
-AntiFlingCheck.TextColor3 = Color3.new(1, 1, 1)
-AntiFlingCheck.TextSize = 14
-AntiFlingCheck.Font = Enum.Font.GothamBold
-AntiFlingCheck.TextTransparency = 1
-AntiFlingCheck.Parent = AntiFlingToggle
-
-AntiFlingToggle.Activated:Connect(function()
-    _G.AntiFling = not _G.AntiFling
-    local targetBg = _G.AntiFling and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-    local targetStroke = _G.AntiFling and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-    local targetTrans = _G.AntiFling and 0 or 1
-
-    TweenService:Create(AntiFlingToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
-    TweenService:Create(AntiFlingBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
-    TweenService:Create(AntiFlingCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
-end)
 
 -- ============================
 -- SLIDER DO FLY
@@ -1354,6 +1436,61 @@ task.spawn(function()
             end)
         end
         game:GetService("RunService").Stepped:Wait()
+    end
+end)
+
+-- =============================
+-- WALK FLING (Sistema)
+-- =============================
+local function ToggleWalkFling(state)
+    WalkFlingAtivo = state
+
+    if not WalkFlingAtivo then
+        if FlingConnection then
+            FlingConnection:Disconnect()
+            FlingConnection = nil
+        end
+        return
+    end
+
+    FlingConnection = RunService.Heartbeat:Connect(function()
+        if not WalkFlingAtivo then return end
+
+        local char = player.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+
+        if hrp and humanoid then
+            for _, part in ipairs(char:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+
+            local oldCFrame = hrp.CFrame
+            local vel = hrp.AssemblyLinearVelocity
+
+            -- Aplica a velocidade fixa extrema
+            hrp.CFrame = oldCFrame * CFrame.Angles(0, math.rad(math.random(1, 360)), 0)
+            hrp.AssemblyAngularVelocity = Vector3.new(0, FlingPower, 0)
+
+            RunService.RenderStepped:Wait()
+            if hrp then
+                hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                if humanoid.MoveDirection.Magnitude > 0 then
+                    hrp.AssemblyLinearVelocity = vel
+                else
+                    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                end
+            end
+        end
+    end)
+end
+
+player.CharacterAdded:Connect(function()
+    if WalkFlingAtivo then
+        task.wait(1.5)
+        ToggleWalkFling(true)
     end
 end)
 
