@@ -604,12 +604,18 @@ local SliderFillCorner = Instance.new("UICorner")
 SliderFillCorner.CornerRadius = UDim.new(1, 0)
 SliderFillCorner.Parent = SliderFill
 
--- Criação da ScreenGui do Botão Flutuante na Tela
+-- ================================================
+-- BOTÃO FLUTUANTE - SCREEN GUI
+-- ================================================
+
 local FloatScreenGui = Instance.new("ScreenGui")
 FloatScreenGui.Name = "FloatInvisGui"
 FloatScreenGui.Enabled = false
 FloatScreenGui.ResetOnSpawn = false
-FloatScreenGui.Parent = game:GetService("CoreGui")
+FloatScreenGui.IgnoreGuiInset = true
+FloatScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+FloatScreenGui.DisplayOrder = 2147483646
+FloatScreenGui.Parent = PlayerGui
 
 local FloatingButton = Instance.new("TextButton")
 FloatingButton.Name = "FloatingButton"
