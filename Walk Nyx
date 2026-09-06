@@ -600,16 +600,20 @@ local function CreateInvisivelButton()
     GuiBtn.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     GuiBtn.Parent = ParentGui
 
-    -- Botão quadrado perfeito 70x70 e SEM UICorner (totalmente quadrado)
+    -- Botão quadrado 70x70 com bordas arredondadas (UICorner)
     local Btn = Instance.new("ImageButton")
     Btn.Size = UDim2.new(0, 70, 0, 70)
     Btn.Position = UDim2.new(0.5, -35, 0.3, -35)
     Btn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-    Btn.BackgroundTransparency = 0.3 -- Semi preto translúcido no centro
+    Btn.BackgroundTransparency = 0.3 -- Semi preto no centro
     Btn.BorderSizePixel = 0
     Btn.Parent = GuiBtn
 
-    -- Linha vermelha contornando o quadrado em volta
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 12) -- Bordas arredondadas
+    Corner.Parent = Btn
+
+    -- Linha contornando em volta
     local Borda = Instance.new("UIStroke")
     Borda.Color = Color3.fromRGB(255, 0, 0) -- Vermelho desligado
     Borda.Thickness = 3
