@@ -384,58 +384,14 @@ for Index, TabData in ipairs(TabsData) do
     PageFrame.Parent = ContentContainer
 
     if TabData.Name == "Main" then
-        -- ============================
-        -- VARIÁVEIS DA ABA MAIN
-        -- ============================
-        -- (Coloque suas variáveis da aba Main aqui se precisar)
-
-        -- ============================
-        -- BOTOES DA ABA MAIN
-        -- ============================
-        -- (Coloque seus botões/cards da aba Main aqui)
-
-        -- ============================
-        -- SISTEMA DA ABA MAIN
-        -- ============================
-        -- (Coloque a lógica/loops da aba Main aqui)
-
+        -- (Conteúdo da aba Main)
 
     elseif TabData.Name == "Auto Farm" then
-        -- ============================
-        -- VARIÁVEIS DA ABA AUTO FARM
-        -- ============================
-        -- (Coloque suas variáveis da aba Auto Farm aqui)
-
-        -- ============================
-        -- BOTOES DA ABA AUTO FARM
-        -- ============================
-        -- (Coloque seus botões/cards da aba Auto Farm aqui)
-
-        -- ============================
-        -- SISTEMA DA ABA AUTO FARM
-        -- ============================
-        -- (Coloque a lógica/loops da aba Auto Farm aqui)
-
+        -- (Conteúdo da aba Auto Farm)
 
     elseif TabData.Name == "ESP" then
-        -- ============================
-        -- VARIÁVEIS DA ABA ESP
-        -- ============================
-        -- (Coloque suas variáveis da aba ESP aqui)
+        -- (Conteúdo da aba ESP)
 
-        -- ============================
-        -- BOTOES DA ABA ESP
-        -- ============================
-        -- (Coloque seus botões/cards da aba ESP aqui)
-
-        -- ============================
-        -- SISTEMA DA ABA ESP
-        -- ============================
-        -- (Coloque a lógica/loops da aba ESP aqui)
-
--- ======================================================
--- ABA PLAYER
--- ======================================================
     elseif TabData.Name == "Player" then
 
         -- ============================
@@ -813,14 +769,12 @@ for Index, TabData in ipairs(TabsData) do
                 if Player.Character and Player.Character:FindFirstChild("Humanoid") then
                     local Humanoid = Player.Character.Humanoid
                     
-                    -- Aplica Speed
                     if SpeedEnabled then
                         Humanoid.WalkSpeed = CurrentSpeed
                     else
                         Humanoid.WalkSpeed = 16
                     end
 
-                    -- Aplica Jump
                     Humanoid.UseJumpPower = true
                     if JampEnabled then
                         Humanoid.JumpPower = CurrentJamp
@@ -833,23 +787,12 @@ for Index, TabData in ipairs(TabsData) do
         end)
 
 
-
-
+-- ================================================
+-- ABA SETTINGS
+-- ================================================
     elseif TabData.Name == "Settings" then
-        -- ============================
-        -- VARIÁVEIS DA ABA SETTINGS
-        -- ============================
-        -- (Coloque suas variáveis da aba Settings aqui)
 
-        -- ============================
-        -- BOTOES DA ABA SETTINGS
-        -- ============================
-        -- (Coloque seus botões/cards da aba Settings aqui)
 
-        -- ============================
-        -- SISTEMA DA ABA SETTINGS
-        -- ============================
-        -- (Coloque a lógica/loops da aba Settings aqui)
 
     end
 
