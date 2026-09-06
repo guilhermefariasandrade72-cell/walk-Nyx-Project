@@ -408,9 +408,218 @@ for Index, TabData in ipairs(TabsData) do
         -- [3] ABA: ESP
         -- Crie aqui as variáveis, toggles, botões e sistemas de ESP
 
+-- =============================================================
+--                  ABA PLAYER
+-- =============================================================--
+
     elseif TabData.Name == "Player" then
-        -- [4] ABA: PLAYER
-        -- Crie aqui as variáveis, sliders, botões e sistemas de Player
+
+--==============================================================--
+-- VARIÁVEIS
+--==============================================================--
+
+        
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+local SpeedEnabled = false
+local CurrentSpeed = 16
+local MinVal = 16
+local MaxVal = 30
+local Sliding = false
+
+--==============================================================--
+-- BOTÃO (INTERFACE DO TOGGLE E SLIDER)
+--==============================================================--
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "WN_SpeedControl"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui
+
+local SpeedCard = Instance.new("Frame")
+SpeedCard.Name = "SpeedCard"
+SpeedCard.Size = UDim2.fromOffset(260, 85)
+SpeedCard.Position = UDim2.new(0.5, -130, 0.5, -42)
+SpeedCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+SpeedCard.BorderSizePixel = 0
+SpeedCard.Active = true
+SpeedCard.Draggable = true
+SpeedCard.Parent = ScreenGui
+
+local CardCorner = Instance.new("UICorner")
+CardCorner.CornerRadius = UDim.new(0, 10)
+CardCorner.Parent = SpeedCard
+
+local SpeedTitle = Instance.new("TextLabel")
+SpeedTitle.Name = "Title"
+SpeedTitle.Size = UDim2.new(1, -50, 0, 36)
+SpeedTitle.Position = UDim2.fromOffset(12, 0)
+SpeedTitle.BackgroundTransparency = 1
+SpeedTitle.Text = "Speed Hack (Walk)"
+SpeedTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+SpeedTitle.TextSize = 12
+SpeedTitle.Font = Enum.Font.GothamSemibold
+SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+SpeedTitle.Parent = SpeedCard
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Size = UDim2.fromOffset(26, 26)
+ToggleButton.AnchorPoint = Vector2.new(1, 0)
+ToggleButton.Position = UDim2.new(1, -12, 0, 5)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Text = ""
+ToggleButton.AutoButtonColor = false
+ToggleButton.Parent = SpeedCard
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(0, 6)
+ToggleCorner.Parent = ToggleButton
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+ToggleStroke.Thickness = 1
+ToggleStroke.Parent = ToggleButton
+
+local CheckMark = Instance.new("TextLabel")
+CheckMark.Name = "CheckMark"
+CheckMark.Size = UDim2.fromScale(1, 1)
+CheckMark.BackgroundTransparency = 1
+CheckMark.Text = "✔"
+CheckMark.TextColor3 = Color3.new(1, 1, 1)
+CheckMark.TextSize = 14
+CheckMark.Font = Enum.Font.GothamBold
+CheckMark.TextTransparency = 1
+CheckMark.Parent = ToggleButton
+
+local SliderContainer = Instance.new("Frame")
+SliderContainer.Name = "SliderContainer"
+SliderContainer.Size = UDim2.new(1, -24, 0, 30)
+SliderContainer.Position = UDim2.fromOffset(12, 44)
+SliderContainer.BackgroundTransparency = 1
+SliderContainer.Parent = SpeedCard
+
+local SliderLabel = Instance.new("TextLabel")
+SliderLabel.Name = "SliderLabel"
+SliderLabel.Size = UDim2.new(1, 0, 0, 14)
+SliderLabel.BackgroundTransparency = 1
+SliderLabel.Text = "Velocidade: 16"
+SliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+SliderLabel.TextSize = 10
+SliderLabel.Font = Enum.Font.GothamMedium
+SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+SliderLabel.Parent = SliderContainer
+
+local SliderTrack = Instance.new("Frame")
+SliderTrack.Name = "SliderTrack"
+SliderTrack.Size = UDim2.new(1, 0, 0, 6)
+SliderTrack.Position = UDim2.fromOffset(0, 18)
+SliderTrack.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+SliderTrack.BorderSizePixel = 0
+SliderTrack.Parent = SliderContainer
+
+local SliderTrackCorner = Instance.new("UICorner")
+SliderTrackCorner.CornerRadius = UDim.new(1, 0)
+SliderTrackCorner.Parent = SliderTrack
+
+local SliderFill = Instance.new("Frame")
+SliderFill.Name = "SliderFill"
+SliderFill.Size = UDim2.new(0, 0, 1, 0)
+SliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+SliderFill.BorderSizePixel = 0
+SliderFill.Parent = SliderTrack
+
+local SliderFillCorner = Instance.new("UICorner")
+SliderFillCorner.CornerRadius = UDim.new(1, 0)
+SliderFillCorner.Parent = SliderFill
+
+local SliderButton = Instance.new("TextButton")
+SliderButton.Name = "SliderButton"
+SliderButton.Size = UDim2.new(1, 10, 1, 10)
+SliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+SliderButton.Position = UDim2.new(0, 0, 0.5, 0)
+SliderButton.BackgroundTransparency = 1
+SliderButton.Text = ""
+SliderButton.AutoButtonColor = false
+SliderButton.Parent = SliderTrack
+
+--==============================================================--
+-- SISTEMA SEPARADO (LÓGICA DO TOGGLE, SLIDER E LOOP DE VELOCIDADE)
+--==============================================================--
+
+local function UpdateSlider(InputPosition)
+    local TrackPos = SliderTrack.AbsolutePosition.X
+    local TrackSize = SliderTrack.AbsoluteSize.X
+    local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
+    local Percentage = ClampedX / TrackSize
+
+    CurrentSpeed = math.floor(MinVal + (MaxVal - MinVal) * Percentage + 0.5)
+    SliderLabel.Text = "Velocidade: " .. tostring(CurrentSpeed)
+
+    TweenService:Create(SliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
+    TweenService:Create(SliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, 0)}):Play()
+end
+
+SliderButton.InputBegan:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+        Sliding = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+        Sliding = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(Input)
+    if Sliding and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+        UpdateSlider(Input.Position.X)
+    end
+end)
+
+SliderTrack.InputBegan:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+        Sliding = true
+        UpdateSlider(Input.Position.X)
+    end
+end)
+
+ToggleButton.Activated:Connect(function()
+    SpeedEnabled = not SpeedEnabled
+
+    local targetBgColor = SpeedEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = SpeedEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = SpeedEnabled and 0 or 1
+
+    TweenService:Create(ToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(ToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(CheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+    
+    if not SpeedEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+        Player.Character.Humanoid.WalkSpeed = 16
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            if SpeedEnabled then
+                Player.Character.Humanoid.WalkSpeed = CurrentSpeed
+            else
+                Player.Character.Humanoid.WalkSpeed = 16
+            end
+        end
+        task.wait(0.1)
+    end
+end)
+
+
 
     elseif TabData.Name == "Settings" then
         -- [5] ABA: SETTINGS
