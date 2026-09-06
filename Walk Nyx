@@ -439,115 +439,398 @@ for Index, TabData in ipairs(TabsData) do
     elseif TabData.Name == "Player" then
 
         -- ============================
-        -- VARIÁVEIS DA ABA PLAYER
+        -- VARIÁVEIS DA ABA SPEED
         -- ============================
---             SPEED
-local SpeedEnabled = false
-local CurrentSpeed = 16
-local MinSpeed = 16
-local MaxSpeed = 30
-local SpeedSliding = false
-local SpeedActiveInput = nil
-
---        VARIÁVEIS DA ABA JAMP
-        
-        -- ============================
-        -- BOTOES DA ABA PLAYER
-        -- ============================
---            SPEED
-SpeedToggleButton.Activated:Connect(function()
-    SpeedEnabled = not SpeedEnabled
-    
-    local targetBg = SpeedEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-    local targetStroke = SpeedEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-    local targetCheck = SpeedEnabled and 0 or 1
-    
-    TweenService:Create(SpeedToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
-    TweenService:Create(SpeedToggleStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
-    TweenService:Create(SpeedCheckMark, TweenInfo.new(0.2), {TextTransparency = targetCheck}):Play()
-    
-    if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-        Player.Character.Humanoid.WalkSpeed = SpeedEnabled and CurrentSpeed or 16
-    end
-end)
-
-SpeedSliderButton.InputBegan:Connect(function(Input)
-    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not SpeedActiveInput then
-        SpeedActiveInput = Input
-        SpeedSliding = true
-    end
-end)
-
-SpeedSliderTrack.InputBegan:Connect(function(Input)
-    if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not SpeedActiveInput then
-        SpeedActiveInput = Input
-        SpeedSliding = true
-        UpdateSpeedSlider(Input.Position.X)
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(Input)
-    if Input == SpeedActiveInput then
-        SpeedSliding = false
-        SpeedActiveInput = nil
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(Input)
-    if SpeedSliding and Input == SpeedActiveInput and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
-        UpdateSpeedSlider(Input.Position.X)
-    end
-end)
+        local SpeedEnabled = false
+        local CurrentSpeed = 16
+        local SpeedMinVal = 16
+        local SpeedMaxVal = 30
+        local SpeedSliding = false
+        local SpeedActiveInput = nil
 
         -- ============================
-        -- BOTOES DA ABA JAMP
+        -- VARIÁVEIS DA ABA JUMP
         -- ============================
+        local JampEnabled = false
+        local CurrentJamp = 50
+        local JampMinVal = 50
+        local JampMaxVal = 100
+        local JampSliding = false
+        local JampActiveInput = nil
 
         -- ============================
-        -- SISTEMA DA ABA PLAYER
+        -- BOTAO SPEED
         -- ============================
---                 SPEED
-task.spawn(function()
-    while true do
-        local c = Player.Character
-        if c then
-            local Humanoid = c:FindFirstChild("Humanoid")
-            if Humanoid then
-                if SpeedEnabled then
-                    Humanoid.WalkSpeed = CurrentSpeed
-                else
-                    Humanoid.WalkSpeed = 16
-                end
-            end
+        local SpeedCard = Instance.new("Frame")
+        SpeedCard.Name = "SpeedCard"
+        SpeedCard.Size = UDim2.new(1, -6, 0, 85)
+        SpeedCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+        SpeedCard.BorderSizePixel = 0
+        SpeedCard.Parent = PageFrame
+
+        local SpeedCardCorner = Instance.new("UICorner")
+        SpeedCardCorner.CornerRadius = UDim.new(0, 10)
+        SpeedCardCorner.Parent = SpeedCard
+
+        local SpeedCardStroke = Instance.new("UIStroke")
+        SpeedCardStroke.Color = Color3.fromRGB(39, 40, 48)
+        SpeedCardStroke.Thickness = 1
+        SpeedCardStroke.Parent = SpeedCard
+
+        local SpeedTitle = Instance.new("TextLabel")
+        SpeedTitle.Name = "Title"
+        SpeedTitle.Size = UDim2.new(1, -60, 0, 36)
+        SpeedTitle.Position = UDim2.fromOffset(12, 0)
+        SpeedTitle.BackgroundTransparency = 1
+        SpeedTitle.Text = "Speed Hack (Walk)"
+        SpeedTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+        SpeedTitle.TextSize = 12
+        SpeedTitle.Font = Enum.Font.GothamSemibold
+        SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+        SpeedTitle.Parent = SpeedCard
+
+        local SpeedToggleButton = Instance.new("TextButton")
+        SpeedToggleButton.Name = "ToggleButton"
+        SpeedToggleButton.Size = UDim2.fromOffset(26, 26)
+        SpeedToggleButton.AnchorPoint = Vector2.new(1, 0)
+        SpeedToggleButton.Position = UDim2.new(1, -12, 0, 5)
+        SpeedToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        SpeedToggleButton.BorderSizePixel = 0
+        SpeedToggleButton.Text = ""
+        SpeedToggleButton.AutoButtonColor = false
+        SpeedToggleButton.Parent = SpeedCard
+
+        local SpeedToggleCorner = Instance.new("UICorner")
+        SpeedToggleCorner.CornerRadius = UDim.new(0, 6)
+        SpeedToggleCorner.Parent = SpeedToggleButton
+
+        local SpeedToggleStroke = Instance.new("UIStroke")
+        SpeedToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+        SpeedToggleStroke.Thickness = 1
+        SpeedToggleStroke.Parent = SpeedToggleButton
+
+        local SpeedCheckMark = Instance.new("TextLabel")
+        SpeedCheckMark.Name = "CheckMark"
+        SpeedCheckMark.Size = UDim2.fromScale(1, 1)
+        SpeedCheckMark.BackgroundTransparency = 1
+        SpeedCheckMark.Text = "✔"
+        SpeedCheckMark.TextColor3 = Color3.new(1, 1, 1)
+        SpeedCheckMark.TextSize = 14
+        SpeedCheckMark.Font = Enum.Font.GothamBold
+        SpeedCheckMark.TextTransparency = 1
+        SpeedCheckMark.Parent = SpeedToggleButton
+
+        local SpeedSliderContainer = Instance.new("Frame")
+        SpeedSliderContainer.Name = "SliderContainer"
+        SpeedSliderContainer.Size = UDim2.new(1, -24, 0, 30)
+        SpeedSliderContainer.Position = UDim2.fromOffset(12, 44)
+        SpeedSliderContainer.BackgroundTransparency = 1
+        SpeedSliderContainer.Parent = SpeedCard
+
+        local SpeedSliderLabel = Instance.new("TextLabel")
+        SpeedSliderLabel.Name = "SliderLabel"
+        SpeedSliderLabel.Size = UDim2.new(1, 0, 0, 14)
+        SpeedSliderLabel.BackgroundTransparency = 1
+        SpeedSliderLabel.Text = "Velocidade: 16"
+        SpeedSliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+        SpeedSliderLabel.TextSize = 10
+        SpeedSliderLabel.Font = Enum.Font.GothamMedium
+        SpeedSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+        SpeedSliderLabel.Parent = SpeedSliderContainer
+
+        local SpeedSliderTrack = Instance.new("Frame")
+        SpeedSliderTrack.Name = "SliderTrack"
+        SpeedSliderTrack.Size = UDim2.new(1, 0, 0, 6)
+        SpeedSliderTrack.Position = UDim2.fromOffset(0, 18)
+        SpeedSliderTrack.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        SpeedSliderTrack.BorderSizePixel = 0
+        SpeedSliderTrack.Parent = SpeedSliderContainer
+
+        local SpeedSliderTrackCorner = Instance.new("UICorner")
+        SpeedSliderTrackCorner.CornerRadius = UDim.new(1, 0)
+        SpeedSliderTrackCorner.Parent = SpeedSliderTrack
+
+        local SpeedSliderFill = Instance.new("Frame")
+        SpeedSliderFill.Name = "SliderFill"
+        SpeedSliderFill.Size = UDim2.new(0, 0, 1, 0)
+        SpeedSliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+        SpeedSliderFill.BorderSizePixel = 0
+        SpeedSliderFill.Parent = SpeedSliderTrack
+
+        local SpeedSliderFillCorner = Instance.new("UICorner")
+        SpeedSliderFillCorner.CornerRadius = UDim.new(1, 0)
+        SpeedSliderFillCorner.Parent = SpeedSliderFill
+
+        local SpeedSliderButton = Instance.new("TextButton")
+        SpeedSliderButton.Name = "SliderButton"
+        SpeedSliderButton.Size = UDim2.new(1, 10, 1, 10)
+        SpeedSliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        SpeedSliderButton.Position = UDim2.new(0, 0, 0.5, 0)
+        SpeedSliderButton.BackgroundTransparency = 1
+        SpeedSliderButton.Text = ""
+        SpeedSliderButton.AutoButtonColor = false
+        SpeedSliderButton.Parent = SpeedSliderTrack
+
+        -- ============================
+        -- BOTAO JUMP
+        -- ============================
+        local JampCard = Instance.new("Frame")
+        JampCard.Name = "JampCard"
+        JampCard.Size = UDim2.new(1, -6, 0, 85)
+        JampCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+        JampCard.BorderSizePixel = 0
+        JampCard.Parent = PageFrame
+
+        local JampCardCorner = Instance.new("UICorner")
+        JampCardCorner.CornerRadius = UDim.new(0, 10)
+        JampCardCorner.Parent = JampCard
+
+        local JampCardStroke = Instance.new("UIStroke")
+        JampCardStroke.Color = Color3.fromRGB(39, 40, 48)
+        JampCardStroke.Thickness = 1
+        JampCardStroke.Parent = JampCard
+
+        local JampTitle = Instance.new("TextLabel")
+        JampTitle.Name = "Title"
+        JampTitle.Size = UDim2.new(1, -60, 0, 36)
+        JampTitle.Position = UDim2.fromOffset(12, 0)
+        JampTitle.BackgroundTransparency = 1
+        JampTitle.Text = "Jump Power"
+        JampTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+        JampTitle.TextSize = 12
+        JampTitle.Font = Enum.Font.GothamSemibold
+        JampTitle.TextXAlignment = Enum.TextXAlignment.Left
+        JampTitle.Parent = JampCard
+
+        local JampToggleButton = Instance.new("TextButton")
+        JampToggleButton.Name = "ToggleButton"
+        JampToggleButton.Size = UDim2.fromOffset(26, 26)
+        JampToggleButton.AnchorPoint = Vector2.new(1, 0)
+        JampToggleButton.Position = UDim2.new(1, -12, 0, 5)
+        JampToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        JampToggleButton.BorderSizePixel = 0
+        JampToggleButton.Text = ""
+        JampToggleButton.AutoButtonColor = false
+        JampToggleButton.Parent = JampCard
+
+        local JampToggleCorner = Instance.new("UICorner")
+        JampToggleCorner.CornerRadius = UDim.new(0, 6)
+        JampToggleCorner.Parent = JampToggleButton
+
+        local JampToggleStroke = Instance.new("UIStroke")
+        JampToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+        JampToggleStroke.Thickness = 1
+        JampToggleStroke.Parent = JampToggleButton
+
+        local JampCheckMark = Instance.new("TextLabel")
+        JampCheckMark.Name = "CheckMark"
+        JampCheckMark.Size = UDim2.fromScale(1, 1)
+        JampCheckMark.BackgroundTransparency = 1
+        JampCheckMark.Text = "✔"
+        JampCheckMark.TextColor3 = Color3.new(1, 1, 1)
+        JampCheckMark.TextSize = 14
+        JampCheckMark.Font = Enum.Font.GothamBold
+        JampCheckMark.TextTransparency = 1
+        JampCheckMark.Parent = JampToggleButton
+
+        local JampSliderContainer = Instance.new("Frame")
+        JampSliderContainer.Name = "SliderContainer"
+        JampSliderContainer.Size = UDim2.new(1, -24, 0, 30)
+        JampSliderContainer.Position = UDim2.fromOffset(12, 44)
+        JampSliderContainer.BackgroundTransparency = 1
+        JampSliderContainer.Parent = JampCard
+
+        local JampSliderLabel = Instance.new("TextLabel")
+        JampSliderLabel.Name = "SliderLabel"
+        JampSliderLabel.Size = UDim2.new(1, 0, 0, 14)
+        JampSliderLabel.BackgroundTransparency = 1
+        JampSliderLabel.Text = "Jump: 50"
+        JampSliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+        JampSliderLabel.TextSize = 10
+        JampSliderLabel.Font = Enum.Font.GothamMedium
+        JampSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+        JampSliderLabel.Parent = JampSliderContainer
+
+        local JampSliderTrack = Instance.new("Frame")
+        JampSliderTrack.Name = "SliderTrack"
+        JampSliderTrack.Size = UDim2.new(1, 0, 0, 6)
+        JampSliderTrack.Position = UDim2.fromOffset(0, 18)
+        JampSliderTrack.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        JampSliderTrack.BorderSizePixel = 0
+        JampSliderTrack.Parent = JampSliderContainer
+
+        local JampSliderTrackCorner = Instance.new("UICorner")
+        JampSliderTrackCorner.CornerRadius = UDim.new(1, 0)
+        JampSliderTrackCorner.Parent = JampSliderTrack
+
+        local JampSliderFill = Instance.new("Frame")
+        JampSliderFill.Name = "SliderFill"
+        JampSliderFill.Size = UDim2.new(0, 0, 1, 0)
+        JampSliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+        JampSliderFill.BorderSizePixel = 0
+        JampSliderFill.Parent = JampSliderTrack
+
+        local JampSliderFillCorner = Instance.new("UICorner")
+        JampSliderFillCorner.CornerRadius = UDim.new(1, 0)
+        JampSliderFillCorner.Parent = JampSliderFill
+
+        local JampSliderButton = Instance.new("TextButton")
+        JampSliderButton.Name = "SliderButton"
+        JampSliderButton.Size = UDim2.new(1, 10, 1, 10)
+        JampSliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+        JampSliderButton.Position = UDim2.new(0, 0, 0.5, 0)
+        JampSliderButton.BackgroundTransparency = 1
+        JampSliderButton.Text = ""
+        JampSliderButton.AutoButtonColor = false
+        JampSliderButton.Parent = JampSliderTrack
+
+        -- ============================
+        -- LÓGICA DO SLIDER DE SPEED
+        -- ============================
+        local function UpdateSpeedSlider(InputPosition)
+            local TrackPos = SpeedSliderTrack.AbsolutePosition.X
+            local TrackSize = SpeedSliderTrack.AbsoluteSize.X
+            local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
+            local Percentage = ClampedX / TrackSize
+
+            CurrentSpeed = math.floor(SpeedMinVal + (SpeedMaxVal - SpeedMinVal) * Percentage + 0.5)
+            SpeedSliderLabel.Text = "Velocidade: " .. tostring(CurrentSpeed)
+
+            TweenService:Create(SpeedSliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
+            TweenService:Create(SpeedSliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, 0)}):Play()
         end
-        task.wait(0.1)
-    end
-end)
 
-local function UpdateSpeedSlider(InputPosition)
-    local TrackPos = SpeedSliderTrack.AbsolutePosition.X
-    local TrackSize = SpeedSliderTrack.AbsoluteSize.X
-    local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
-    local Percentage = ClampedX / TrackSize
+        SpeedSliderButton.InputBegan:Connect(function(Input)
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not SpeedActiveInput then
+                SpeedActiveInput = Input
+                SpeedSliding = true
+            end
+        end)
 
-    CurrentSpeed = math.floor(MinSpeed + (MaxSpeed - MinSpeed) * Percentage + 0.5)
-    SpeedSliderLabel.Text = "Speed: " .. tostring(CurrentSpeed)
+        SpeedSliderTrack.InputBegan:Connect(function(Input)
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not SpeedActiveInput then
+                SpeedActiveInput = Input
+                SpeedSliding = true
+                UpdateSpeedSlider(Input.Position.X)
+            end
+        end)
 
-    TweenService:Create(SpeedSliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
-    TweenService:Create(SpeedSliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, -12)}):Play()
-    
-    if SpeedEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
-        Player.Character.Humanoid.WalkSpeed = CurrentSpeed
-    end
-end)
+        UserInputService.InputEnded:Connect(function(Input)
+            if Input == SpeedActiveInput then
+                SpeedSliding = false
+                SpeedActiveInput = nil
+            end
+        end)
 
+        UserInputService.InputChanged:Connect(function(Input)
+            if SpeedSliding and Input == SpeedActiveInput and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+                UpdateSpeedSlider(Input.Position.X)
+            end
+        end)
+
+        SpeedToggleButton.Activated:Connect(function()
+            SpeedEnabled = not SpeedEnabled
+
+            local targetBgColor = SpeedEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+            local targetStrokeColor = SpeedEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+            local targetTextTrans = SpeedEnabled and 0 or 1
+
+            TweenService:Create(SpeedToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+            TweenService:Create(SpeedToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+            TweenService:Create(SpeedCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+            
+            if not SpeedEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                Player.Character.Humanoid.WalkSpeed = 16
+            end
+        end)
 
         -- ============================
-        -- 🦘 SISTEMA DE PULO CORRIGIDO
+        -- LÓGICA DO SLIDER DE JUMP
         -- ============================
+        local function UpdateJampSlider(InputPosition)
+            local TrackPos = JampSliderTrack.AbsolutePosition.X
+            local TrackSize = JampSliderTrack.AbsoluteSize.X
+            local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
+            local Percentage = ClampedX / TrackSize
 
+            CurrentJamp = math.floor(JampMinVal + (JampMaxVal - JampMinVal) * Percentage + 0.5)
+            JampSliderLabel.Text = "Jump: " .. tostring(CurrentJamp)
 
+            TweenService:Create(JampSliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
+            TweenService:Create(JampSliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, 0)}):Play()
+        end
 
+        JampSliderButton.InputBegan:Connect(function(Input)
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not JampActiveInput then
+                JampActiveInput = Input
+                JampSliding = true
+            end
+        end)
+
+        JampSliderTrack.InputBegan:Connect(function(Input)
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not JampActiveInput then
+                JampActiveInput = Input
+                JampSliding = true
+                UpdateJampSlider(Input.Position.X)
+            end
+        end)
+
+        UserInputService.InputEnded:Connect(function(Input)
+            if Input == JampActiveInput then
+                JampSliding = false
+                JampActiveInput = nil
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(Input)
+            if JampSliding and Input == JampActiveInput and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+                UpdateJampSlider(Input.Position.X)
+            end
+        end)
+
+        JampToggleButton.Activated:Connect(function()
+            JampEnabled = not JampEnabled
+
+            local targetBgColor = JampEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+            local targetStrokeColor = JampEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+            local targetTextTrans = JampEnabled and 0 or 1
+
+            TweenService:Create(JampToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+            TweenService:Create(JampToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+            TweenService:Create(JampCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+            
+            if not JampEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                Player.Character.Humanoid.UseJumpPower = true
+                Player.Character.Humanoid.JumpPower = 50
+            end
+        end)
+
+        -- ============================
+        -- LOOP PRINCIPAL UNIFICADO
+        -- ============================
+        task.spawn(function()
+            while true do
+                if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                    local Humanoid = Player.Character.Humanoid
+                    
+                    -- Aplica Speed
+                    if SpeedEnabled then
+                        Humanoid.WalkSpeed = CurrentSpeed
+                    else
+                        Humanoid.WalkSpeed = 16
+                    end
+
+                    -- Aplica Jump
+                    Humanoid.UseJumpPower = true
+                    if JampEnabled then
+                        Humanoid.JumpPower = CurrentJamp
+                    else
+                        Humanoid.JumpPower = 50
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
 
 
 
