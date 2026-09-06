@@ -892,7 +892,7 @@ FlySliderButton.Parent = FlySliderTrack
         end)
 
 -- ============================
--- SLIDER (LÓGICA)
+-- SLIDER DO FLY
 -- ============================
 local function UpdateFlySlider(InputPosition)
     local TrackPos = FlySliderTrack.AbsolutePosition.X
@@ -960,6 +960,86 @@ end)
             end
         end)
 
+-- ============================
+-- SISTEMA DO FLY
+-- ============================
+local function StartFly()
+    local c = player.Character
+    if not c then return end
+    local h = c:FindFirstChild("Humanoid")
+    local r = c:FindFirstChild("HumanoidRootPart")
+    if not h or not r then return end
+
+    if bv then bv:Destroy() end
+    if bg then bg:Destroy() end
+
+    bv = Instance.new("BodyVelocity")
+    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    bv.Velocity = Vector3.new(0, 0, 0)
+    bv.P = 3000
+    bv.Parent = r
+
+    bg = Instance.new("BodyGyro")
+    bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+    bg.P = 30000
+    bg.D = 500
+    bg.CFrame = r.CFrame
+    bg.Parent = r
+
+    h.PlatformStand = true
+
+    if con then con:Disconnect() end
+    con = RunService.Heartbeat:Connect(function()
+        if not FlyAtivo or not bv or not bg then return end
+        local cam = workspace.CurrentCamera
+        local m = controls:GetMoveVector()
+        local dir = (cam.CFrame.RightVector * m.X) + (cam.CFrame.LookVector * -m.Z)
+        
+        bv.Velocity = dir * FlyVelocidade
+        bg.CFrame = cam.CFrame
+    end)
+end
+
+local function StopFly()
+    FlyAtivo = false
+    if con then con:Disconnect() con = nil end
+    if bv then bv:Destroy() bv = nil end
+    if bg then bg:Destroy() bg = nil end
+
+    local c = player.Character
+    if c and c:FindFirstChild("Humanoid") then
+        c.Humanoid.PlatformStand = false
+    end
+end
+
+local function ToggleFly(state)
+    FlyAtivo = state
+    if FlyAtivo then
+        StartFly()
+    else
+        StopFly()
+    end
+end
+
+FlyToggleButton.Activated:Connect(function()
+    local newState = not FlyAtivo
+    ToggleFly(newState)
+
+    local targetBgColor = newState and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = newState and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = newState and 0 or 1
+
+    TweenService:Create(FlyToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(FlyToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(FlyCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
+
+player.CharacterAdded:Connect(function()
+    task.wait(0.8)
+    if FlyAtivo then 
+        StartFly() 
+    end
+end)
 
 -- ================================================
 -- ABA SETTINGS
