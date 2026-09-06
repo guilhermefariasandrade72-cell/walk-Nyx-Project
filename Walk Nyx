@@ -411,6 +411,27 @@ local Humanoid = nil
 local Raiz = nil
 local PartesCorpo = {}
 
+--==============================================================--
+--              FLOATING BUTTON - VARIÁVEIS
+--==============================================================--
+
+local PlayerFloatEnabled = false
+local PlayerFloatActive = false
+
+local PlayerFloatSize = 80
+
+local PlayerFloatGui = nil
+local PlayerFloatButton = nil
+local PlayerFloatStatusLine = nil
+
+local PlayerFloatDragging = false
+local PlayerFloatDragStart = nil
+local PlayerFloatStartPos = nil
+
+local PlayerFloatAnimating = false
+
+local FloatActiveInput = nil
+local FloatSliding = false
 
         -- ============================
         -- VARIÁVEIS DA ABA SPEED
@@ -478,6 +499,143 @@ local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("Play
 -- =============================
 _G.AntiFling = false
 
+--==============================================================--
+--              FLOATING BUTTON - BOTÃO
+--==============================================================--
+
+local function DestroyPlayerFloatingButton()
+
+    if PlayerFloatGui then
+        PlayerFloatGui:Destroy()
+    end
+
+    PlayerFloatGui = nil
+    PlayerFloatButton = nil
+    PlayerFloatStatusLine = nil
+end
+
+
+local function CreatePlayerFloatingButton()
+
+    DestroyPlayerFloatingButton()
+
+    --==========================================================--
+    -- SCREEN GUI
+    --==========================================================--
+
+    PlayerFloatGui = Instance.new("ScreenGui")
+    PlayerFloatGui.Name = "WalkNyx_PlayerFloatingButton"
+    PlayerFloatGui.ResetOnSpawn = false
+    PlayerFloatGui.IgnoreGuiInset = true
+    PlayerFloatGui.Enabled = true
+    PlayerFloatGui.DisplayOrder = 2147483647
+    PlayerFloatGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    PlayerFloatGui.Parent = PlayerGui
+
+
+    --==========================================================--
+    -- BOTÃO
+    --==========================================================--
+
+    PlayerFloatButton = Instance.new("TextButton")
+    PlayerFloatButton.Name = "FloatingButton"
+
+    PlayerFloatButton.Size = UDim2.fromOffset(
+        PlayerFloatSize,
+        PlayerFloatSize
+    )
+
+    PlayerFloatButton.Position = UDim2.new(
+        0.5,
+        -(PlayerFloatSize / 2),
+        0.3,
+        0
+    )
+
+    PlayerFloatButton.BackgroundColor3 =
+        Color3.fromRGB(16, 17, 22)
+
+    PlayerFloatButton.BackgroundTransparency = 0
+
+    PlayerFloatButton.BorderSizePixel = 0
+
+    PlayerFloatButton.Text = "FLOAT"
+
+    PlayerFloatButton.TextColor3 =
+        Color3.fromRGB(245, 245, 248)
+
+    PlayerFloatButton.TextSize = 12
+    PlayerFloatButton.Font = Enum.Font.GothamBold
+
+    PlayerFloatButton.AutoButtonColor = false
+    PlayerFloatButton.Active = true
+    PlayerFloatButton.Visible = true
+
+    PlayerFloatButton.Parent = PlayerFloatGui
+
+
+    --==========================================================--
+    -- CANTOS
+    --==========================================================--
+
+    local ButtonCorner = Instance.new("UICorner")
+
+    ButtonCorner.CornerRadius =
+        UDim.new(0, 10)
+
+    ButtonCorner.Parent =
+        PlayerFloatButton
+
+
+    --==========================================================--
+    -- BORDA
+    --==========================================================--
+
+    local ButtonStroke = Instance.new("UIStroke")
+
+    ButtonStroke.Color =
+        Color3.fromRGB(225, 40, 56)
+
+    ButtonStroke.Thickness = 1.5
+    ButtonStroke.Transparency = 0
+
+    ButtonStroke.Parent =
+        PlayerFloatButton
+
+
+    --==========================================================--
+    -- LINHA DE STATUS
+    --==========================================================--
+
+    PlayerFloatStatusLine = Instance.new("Frame")
+
+    PlayerFloatStatusLine.Name =
+        "StatusLine"
+
+    PlayerFloatStatusLine.Size =
+        UDim2.new(0, 4, 1, -12)
+
+    PlayerFloatStatusLine.Position =
+        UDim2.fromOffset(6, 6)
+
+    PlayerFloatStatusLine.BackgroundColor3 =
+        Color3.fromRGB(225, 40, 56)
+
+    PlayerFloatStatusLine.BorderSizePixel = 0
+
+    PlayerFloatStatusLine.Parent =
+        PlayerFloatButton
+
+
+    local StatusCorner = Instance.new("UICorner")
+
+    StatusCorner.CornerRadius =
+        UDim.new(0, 3)
+
+    StatusCorner.Parent =
+        PlayerFloatStatusLine
+end
+
 -- ===============================
 -- TITULO MOVIMENTO
 -- ===============================
@@ -492,10 +650,6 @@ SectionLabel.Font = Enum.Font.GothamBold
 SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
 SectionLabel.TextTransparency = 0
 SectionLabel.Parent = PageFrame
-
--- ============================
--- BOTÃO FLOATING
--- ============================
 
 -- ================================================
 -- INVISÍVEL - BOTÃO
@@ -571,10 +725,6 @@ InvisivelToggle.Activated:Connect(function()
     TweenService:Create(InvisivelCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
 end)
 
---==============================================================--
---        PLAYER FLOATING BUTTON - SISTEMA
---==============================================================--
-
 -- ================================================
 -- INVISÍVEL - SISTEMA
 -- ================================================
@@ -644,6 +794,614 @@ end)
 if player.Character then
     ConfigurarPersonagem()
 end
+
+-- ============================
+-- CARD
+-- ============================
+
+local FloatCard = Instance.new("Frame")
+FloatCard.Name = "FloatCard"
+FloatCard.Size = UDim2.new(1, -6, 0, 85)
+FloatCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+FloatCard.BorderSizePixel = 0
+FloatCard.Parent = PageFrame
+
+
+local FloatCardCorner = Instance.new("UICorner")
+FloatCardCorner.CornerRadius = UDim.new(0, 10)
+FloatCardCorner.Parent = FloatCard
+
+
+local FloatCardStroke = Instance.new("UIStroke")
+FloatCardStroke.Color = Color3.fromRGB(39, 40, 48)
+FloatCardStroke.Thickness = 1
+FloatCardStroke.Parent = FloatCard
+
+
+-- ============================
+-- TÍTULO
+-- ============================
+
+local FloatTitle = Instance.new("TextLabel")
+FloatTitle.Name = "Title"
+FloatTitle.Size = UDim2.new(1, -60, 0, 36)
+FloatTitle.Position = UDim2.fromOffset(12, 0)
+
+FloatTitle.BackgroundTransparency = 1
+
+FloatTitle.Text =
+    "Floating Button"
+
+FloatTitle.TextColor3 =
+    Color3.fromRGB(245, 245, 248)
+
+FloatTitle.TextSize = 12
+FloatTitle.Font = Enum.Font.GothamSemibold
+FloatTitle.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+FloatTitle.Parent = FloatCard
+
+
+-- ============================
+-- TOGGLE
+-- ============================
+
+local FloatToggleButton = Instance.new("TextButton")
+
+FloatToggleButton.Name =
+    "ToggleButton"
+
+FloatToggleButton.Size =
+    UDim2.fromOffset(26, 26)
+
+FloatToggleButton.AnchorPoint =
+    Vector2.new(1, 0)
+
+FloatToggleButton.Position =
+    UDim2.new(1, -12, 0, 5)
+
+FloatToggleButton.BackgroundColor3 =
+    Color3.fromRGB(11, 12, 16)
+
+FloatToggleButton.BorderSizePixel = 0
+
+FloatToggleButton.Text = ""
+
+FloatToggleButton.AutoButtonColor = false
+
+FloatToggleButton.Parent =
+    FloatCard
+
+
+local FloatToggleCorner = Instance.new("UICorner")
+
+FloatToggleCorner.CornerRadius =
+    UDim.new(0, 6)
+
+FloatToggleCorner.Parent =
+    FloatToggleButton
+
+
+local FloatToggleStroke = Instance.new("UIStroke")
+
+FloatToggleStroke.Color =
+    Color3.fromRGB(39, 40, 48)
+
+FloatToggleStroke.Thickness = 1
+
+FloatToggleStroke.Parent =
+    FloatToggleButton
+
+
+local FloatCheckMark = Instance.new("TextLabel")
+
+FloatCheckMark.Name =
+    "CheckMark"
+
+FloatCheckMark.Size =
+    UDim2.fromScale(1, 1)
+
+FloatCheckMark.BackgroundTransparency = 1
+
+FloatCheckMark.Text = "✔"
+
+FloatCheckMark.TextColor3 =
+    Color3.new(1, 1, 1)
+
+FloatCheckMark.TextSize = 14
+
+FloatCheckMark.Font =
+    Enum.Font.GothamBold
+
+FloatCheckMark.TextTransparency = 1
+
+FloatCheckMark.Parent =
+    FloatToggleButton
+
+
+-- ============================
+-- SLIDER CONTAINER
+-- ============================
+
+local FloatSliderContainer = Instance.new("Frame")
+
+FloatSliderContainer.Name =
+    "SliderContainer"
+
+FloatSliderContainer.Size =
+    UDim2.new(1, -24, 0, 30)
+
+FloatSliderContainer.Position =
+    UDim2.fromOffset(12, 44)
+
+FloatSliderContainer.BackgroundTransparency = 1
+
+FloatSliderContainer.Parent =
+    FloatCard
+
+
+-- ============================
+-- LABEL
+-- ============================
+
+local FloatSliderLabel = Instance.new("TextLabel")
+
+FloatSliderLabel.Name =
+    "SliderLabel"
+
+FloatSliderLabel.Size =
+    UDim2.new(1, 0, 0, 14)
+
+FloatSliderLabel.BackgroundTransparency = 1
+
+FloatSliderLabel.Text =
+    "Tamanho: " .. tostring(PlayerFloatSize)
+
+FloatSliderLabel.TextColor3 =
+    Color3.fromRGB(165, 166, 177)
+
+FloatSliderLabel.TextSize = 10
+
+FloatSliderLabel.Font =
+    Enum.Font.GothamMedium
+
+FloatSliderLabel.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+FloatSliderLabel.Parent =
+    FloatSliderContainer
+
+
+-- ============================
+-- TRACK
+-- ============================
+
+local FloatSliderTrack = Instance.new("Frame")
+
+FloatSliderTrack.Name =
+    "SliderTrack"
+
+FloatSliderTrack.Size =
+    UDim2.new(1, 0, 0, 6)
+
+FloatSliderTrack.Position =
+    UDim2.fromOffset(0, 18)
+
+FloatSliderTrack.BackgroundColor3 =
+    Color3.fromRGB(11, 12, 16)
+
+FloatSliderTrack.BorderSizePixel = 0
+
+FloatSliderTrack.Parent =
+    FloatSliderContainer
+
+
+local FloatSliderTrackCorner =
+    Instance.new("UICorner")
+
+FloatSliderTrackCorner.CornerRadius =
+    UDim.new(1, 0)
+
+FloatSliderTrackCorner.Parent =
+    FloatSliderTrack
+
+
+-- ============================
+-- FILL
+-- ============================
+
+local FloatSliderFill =
+    Instance.new("Frame")
+
+FloatSliderFill.Name =
+    "SliderFill"
+
+local InitialPercentage =
+    math.clamp(
+        (PlayerFloatSize - 40) / 120,
+        0,
+        1
+    )
+
+FloatSliderFill.Size =
+    UDim2.new(
+        InitialPercentage,
+        0,
+        1,
+        0
+    )
+
+FloatSliderFill.BackgroundColor3 =
+    Color3.fromRGB(225, 40, 56)
+
+FloatSliderFill.BorderSizePixel = 0
+
+FloatSliderFill.Parent =
+    FloatSliderTrack
+
+
+local FloatSliderFillCorner =
+    Instance.new("UICorner")
+
+FloatSliderFillCorner.CornerRadius =
+    UDim.new(1, 0)
+
+FloatSliderFillCorner.Parent =
+    FloatSliderFill
+
+
+-- ============================
+-- SLIDER BUTTON
+-- ============================
+
+local FloatSliderButton =
+    Instance.new("TextButton")
+
+FloatSliderButton.Name =
+    "SliderButton"
+
+FloatSliderButton.Size =
+    UDim2.new(1, 10, 1, 10)
+
+FloatSliderButton.AnchorPoint =
+    Vector2.new(0.5, 0.5)
+
+FloatSliderButton.Position =
+    UDim2.new(
+        InitialPercentage,
+        0,
+        0.5,
+        0
+    )
+
+FloatSliderButton.BackgroundTransparency = 1
+
+FloatSliderButton.Text = ""
+
+FloatSliderButton.AutoButtonColor = false
+
+FloatSliderButton.Parent =
+    FloatSliderTrack
+
+
+--==============================================================--
+--                       SLIDER SYSTEM
+--==============================================================--
+
+local function UpdateFloatSlider(InputX)
+
+    local TrackPos =
+        FloatSliderTrack.AbsolutePosition.X
+
+    local TrackSize =
+        FloatSliderTrack.AbsoluteSize.X
+
+    if TrackSize <= 0 then
+        return
+    end
+
+    local ClampedX =
+        math.clamp(
+            InputX - TrackPos,
+            0,
+            TrackSize
+        )
+
+    local Percentage =
+        ClampedX / TrackSize
+
+
+    PlayerFloatSize =
+        math.floor(
+            40 +
+            ((160 - 40) * Percentage)
+            + 0.5
+        )
+
+
+    FloatSliderLabel.Text =
+        "Tamanho: " ..
+        tostring(PlayerFloatSize)
+
+
+    TweenService:Create(
+        FloatSliderFill,
+
+        TweenInfo.new(
+            0.08,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        ),
+
+        {
+            Size = UDim2.new(
+                Percentage,
+                0,
+                1,
+                0
+            )
+        }
+
+    ):Play()
+
+
+    TweenService:Create(
+        FloatSliderButton,
+
+        TweenInfo.new(
+            0.08,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        ),
+
+        {
+            Position = UDim2.new(
+                Percentage,
+                0,
+                0.5,
+                0
+            )
+        }
+
+    ):Play()
+
+
+    if PlayerFloatButton
+    and PlayerFloatButton.Parent then
+
+        PlayerFloatButton.Size =
+            UDim2.fromOffset(
+                PlayerFloatSize,
+                PlayerFloatSize
+            )
+    end
+end
+
+
+--==============================================================--
+--                       INICIAR SLIDER
+--==============================================================--
+
+FloatSliderButton.InputBegan:Connect(function(Input)
+
+    if FloatActiveInput then
+        return
+    end
+
+    if Input.UserInputType ==
+        Enum.UserInputType.Touch
+
+    or Input.UserInputType ==
+        Enum.UserInputType.MouseButton1 then
+
+        FloatActiveInput = Input
+        FloatSliding = true
+
+        UpdateFloatSlider(
+            Input.Position.X
+        )
+    end
+end)
+
+
+FloatSliderTrack.InputBegan:Connect(function(Input)
+
+    if FloatActiveInput then
+        return
+    end
+
+    if Input.UserInputType ==
+        Enum.UserInputType.Touch
+
+    or Input.UserInputType ==
+        Enum.UserInputType.MouseButton1 then
+
+        FloatActiveInput = Input
+        FloatSliding = true
+
+        UpdateFloatSlider(
+            Input.Position.X
+        )
+    end
+end)
+
+
+--==============================================================--
+--                       MOVER SLIDER
+--==============================================================--
+
+UserInputService.InputChanged:Connect(function(Input)
+
+    if not FloatSliding then
+        return
+    end
+
+    if not FloatActiveInput then
+        return
+    end
+
+
+    -- CELULAR
+    if FloatActiveInput.UserInputType ==
+        Enum.UserInputType.Touch then
+
+        if Input ~= FloatActiveInput then
+            return
+        end
+
+        UpdateFloatSlider(
+            Input.Position.X
+        )
+
+        return
+    end
+
+
+    -- PC
+    if FloatActiveInput.UserInputType ==
+        Enum.UserInputType.MouseButton1 then
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseMovement then
+
+            UpdateFloatSlider(
+                Input.Position.X
+            )
+        end
+    end
+end)
+
+
+--==============================================================--
+--                       SOLTAR SLIDER
+--==============================================================--
+
+UserInputService.InputEnded:Connect(function(Input)
+
+    if Input ~= FloatActiveInput then
+        return
+    end
+
+    FloatSliding = false
+    FloatActiveInput = nil
+end)
+
+
+--==============================================================--
+--                          TOGGLE
+--==============================================================--
+
+FloatToggleButton.Activated:Connect(function()
+
+    PlayerFloatEnabled =
+        not PlayerFloatEnabled
+
+
+    local TargetBG
+
+    local TargetStroke
+
+    local TargetText
+
+
+    if PlayerFloatEnabled then
+
+        TargetBG =
+            Color3.fromRGB(
+                225,
+                40,
+                56
+            )
+
+        TargetStroke =
+            Color3.fromRGB(
+                255,
+                65,
+                80
+            )
+
+        TargetText = 0
+
+    else
+
+        TargetBG =
+            Color3.fromRGB(
+                11,
+                12,
+                16
+            )
+
+        TargetStroke =
+            Color3.fromRGB(
+                39,
+                40,
+                48
+            )
+
+        TargetText = 1
+    end
+
+
+    TweenService:Create(
+        FloatToggleButton,
+
+        TweenInfo.new(
+            0.2,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.Out
+        ),
+
+        {
+            BackgroundColor3 = TargetBG
+        }
+
+    ):Play()
+
+
+    TweenService:Create(
+        FloatToggleStroke,
+
+        TweenInfo.new(
+            0.2,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.Out
+        ),
+
+        {
+            Color = TargetStroke
+        }
+
+    ):Play()
+
+
+    TweenService:Create(
+        FloatCheckMark,
+
+        TweenInfo.new(
+            0.2,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.Out
+        ),
+
+        {
+            TextTransparency = TargetText
+        }
+
+    ):Play()
+
+
+    if PlayerFloatEnabled then
+
+        CreatePlayerFloatingButton()
+
+    else
+
+        DestroyPlayerFloatingButton()
+
+        PlayerFloatActive = false
+    end
+end)
 
 -- ===============================
 -- TITULO MOVIMENTO
