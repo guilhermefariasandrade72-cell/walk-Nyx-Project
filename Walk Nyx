@@ -759,8 +759,10 @@ SliderButton.Parent = SliderTrack
         end)
 
 -- ============================
--- SISTEMA DA ABA JAMP
+-- 🦘 SISTEMA DE PULO CORRIGIDO
 -- ============================
+
+-- ⚙️ ATUALIZAÇÃO DO SLIDER
 local function UpdateSlider(InputPosition)
     local TrackPos = SliderTrack.AbsolutePosition.X
     local TrackSize = SliderTrack.AbsoluteSize.X
@@ -771,9 +773,10 @@ local function UpdateSlider(InputPosition)
     SliderLabel.Text = "Jump: " .. tostring(CurrentJamp)
 
     TweenService:Create(SliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
-    TweenService:Create(SliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, 0)}):Play()
+    TweenService:Create(SliderButton, TweenInfo.new(0.08), {Position = UDim2.new(Percentage, 0, 0.5, -12)}):Play()
 end
 
+-- 🎚️ ARRASTAR SLIDER
 SliderButton.InputBegan:Connect(function(Input)
     if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and not ActiveInput then
         ActiveInput = Input
@@ -802,6 +805,7 @@ UserInputService.InputChanged:Connect(function(Input)
     end
 end)
 
+-- 🔘 BOTÃO TOGGLE
 ToggleButton.Activated:Connect(function()
     JampEnabled = not JampEnabled
 
@@ -813,25 +817,38 @@ ToggleButton.Activated:Connect(function()
     TweenService:Create(ToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
     TweenService:Create(CheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
     
+    -- ✅ DESLIGADO → VOLTA AO PULO NORMAL
     if not JampEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
-        Player.Character.Humanoid.UseJumpPower = true
-        Player.Character.Humanoid.JumpPower = 50
+        local Humanoid = Player.Character.Humanoid
+        Humanoid.UseJumpPower = true
+        Humanoid.JumpPower = 50
+        -- ✅ GARANTE QUE A VELOCIDADE NÃO MUDA!
+        Humanoid.WalkSpeed = 16
     end
 end)
 
+-- 🔄 LOOP PRINCIPAL — SÓ ALTERA PULO, NUNCA VELOCIDADE!
 task.spawn(function()
     while true do
         if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-            Player.Character.Humanoid.UseJumpPower = true
+            local Humanoid = Player.Character.Humanoid
+            Humanoid.UseJumpPower = true
+            
+            -- ✅ SÓ MUDA O PULO
             if JampEnabled then
-                Player.Character.Humanoid.JumpPower = CurrentJamp
+                Humanoid.JumpPower = CurrentJamp
             else
-                Player.Character.Humanoid.JumpPower = 50
+                Humanoid.JumpPower = 50
             end
+            
+            -- ✅ GARANTE QUE A VELOCIDADE SEMPRE PERMANECE 16
+            Humanoid.WalkSpeed = 16
         end
         task.wait(0.1)
     end
 end)
+
+
 
 
 
