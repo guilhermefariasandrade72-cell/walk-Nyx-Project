@@ -814,6 +814,7 @@ ToggleButton.Activated:Connect(function()
     TweenService:Create(CheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
     
     if not JampEnabled and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+        Player.Character.Humanoid.UseJumpPower = true
         Player.Character.Humanoid.JumpPower = 50
     end
 end)
@@ -821,6 +822,7 @@ end)
 task.spawn(function()
     while true do
         if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.UseJumpPower = true
             if JampEnabled then
                 Player.Character.Humanoid.JumpPower = CurrentJamp
             else
@@ -830,6 +832,7 @@ task.spawn(function()
         task.wait(0.1)
     end
 end)
+
 
 
 
