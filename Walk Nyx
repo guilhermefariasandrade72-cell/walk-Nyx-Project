@@ -419,6 +419,16 @@ for Index, TabData in ipairs(TabsData) do
         local JampSliding = false
         local JampActiveInput = nil
 
+-- ===========================
+-- VARIÁVEIS DO PULO INFINITO 
+-- ===========================
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+
+_G.PuloInfinito = false
+
 -- ============================
 -- VARIÁVEIS DA ABA FLY
 -- ============================
@@ -661,6 +671,42 @@ local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("Play
         JampSliderButton.Text = ""
         JampSliderButton.AutoButtonColor = false
         JampSliderButton.Parent = JampSliderTrack
+
+-- ========================
+-- BOTAO DO PULO INFINITO 
+-- ========================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "InfJumpGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "ToggleInfJump"
+ToggleButton.Size = UDim2.fromOffset(120, 50)
+ToggleButton.Position = UDim2.new(0, 50, 0, 200)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 14
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Text = "Pulo Infinito: OFF"
+ToggleButton.Active = true
+ToggleButton.Draggable = true
+ToggleButton.Parent = ScreenGui
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 8)
+Corner.Parent = ToggleButton
+
+ToggleButton.MouseButton1Click:Connect(function()
+    _G.PuloInfinito = not _G.PuloInfinito
+    if _G.PuloInfinito then
+        ToggleButton.Text = "Pulo Infinito: ON"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+    else
+        ToggleButton.Text = "Pulo Infinito: OFF"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    end
+end)
 
 -- ============================
 -- BOTÃO FLY
@@ -964,6 +1010,21 @@ end)
                 task.wait(0.1)
             end
         end)
+
+-- ======================
+-- SISTEMA DO PULO INFINITO 
+-- ======================
+UserInputService.JumpRequest:Connect(function()
+    if _G.PuloInfinito then
+        local Char = player.Character
+
+        if Char and Char:FindFirstChild("Humanoid") then
+            Char.Humanoid:ChangeState(
+                Enum.HumanoidStateType.Jumping
+            )
+        end
+    end
+end)
 
 -- ============================
 -- SISTEMA DO FLY
