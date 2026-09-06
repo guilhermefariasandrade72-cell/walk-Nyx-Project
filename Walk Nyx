@@ -877,60 +877,49 @@ ESPMoedasToggleButton.Activated:Connect(function()
 end)
 
 -- ==================================
--- 💰 SISTEMA DO ESP MOEDAS (Coin_Server — CORRIGIDO)
+-- 💰 SISTEMA DO ESP MOEDAS (SIMPLES E DIRETO)
 -- ==================================
 task.spawn(function()
     while true do
-        task.wait(0.4)
-
-        if ESPMoedasAtivo then
-            -- Atualiza referência do container se precisar
-            if not cachedCoinContainer or not cachedCoinContainer.Parent then
-                cachedCoinContainer = Workspace:FindFirstChild("CoinContainer", true)
-            end
-
-            if not cachedCoinContainer then
-                task.wait(1)
-                continue
-            end
-
-            -- Limpa moedas que já não existem
-            for Moeda, H in pairs(MoedasHighlight) do
-                if not Moeda or not Moeda:IsDescendantOf(cachedCoinContainer) then
-                    H:Destroy()
-                    MoedasHighlight[Moeda] = nil
-                end
-            end
-
-            -- ✅ PEGA SOMENTE Coin_Server DENTRO DO CONTAINER
-            for _, moeda in ipairs(cachedCoinContainer:GetChildren()) do
-                if moeda:IsA("BasePart")
-                and moeda.Name == "Coin_Server"
-                and moeda:FindFirstChild("TouchInterest")
-                and not moeda:GetAttribute("Collected") then
-
-                    if not MoedasHighlight[moeda] then
-                        local H = Instance.new("Highlight")
-                        H.Name = "ESP_Moeda"
-                        H.Adornee = moeda
-                        H.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                        H.FillColor = Color3.fromRGB(255, 215, 0) -- Dourado
-                        H.OutlineColor = Color3.fromRGB(255, 255, 0)
-                        H.FillTransparency = 0.3
-                        H.OutlineTransparency = 0
-                        H.Parent = moeda
-                        MoedasHighlight[moeda] = H
-                    else
-                        MoedasHighlight[moeda].Enabled = true
-                    end
-                end
-            end
-        else
-            -- Desliga tudo
-            for Moeda, H in pairs(MoedasHighlight) do
+        task.wait(0.5)
+        
+        if not ESPMoedasAtivo then
+            -- Limpa tudo quando desligado
+            for _, H in pairs(MoedasHighlight) do
                 if H then H:Destroy() end
             end
             table.clear(MoedasHighlight)
+            continue
+        end
+
+        -- Procura o container
+        local CoinContainer = Workspace:FindFirstChild("CoinContainer", true)
+        if not CoinContainer then 
+            task.wait(1)
+            continue 
+        end
+
+        -- Adiciona highlight em TODAS as moedas
+        for _, moeda in ipairs(CoinContainer:GetChildren()) do
+            if moeda:IsA("BasePart") then
+                -- Tenta vários nomes possíveis
+                local EhMoeda = moeda.Name == "Coin_Server" 
+                             or moeda.Name == "CoinArea"
+                             or moeda.Name == "Coin"
+                
+                if EhMoeda and not MoedasHighlight[moeda] then
+                    local H = Instance.new("Highlight")
+                    H.Adornee = moeda
+                    H.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    H.FillColor = Color3.fromRGB(255, 215, 0)
+                    H.OutlineColor = Color3.fromRGB(255, 255, 0)
+                    H.FillTransparency = 0.3
+                    H.OutlineTransparency = 0
+                    H.Parent = moeda
+                    MoedasHighlight[moeda] = H
+                    print("✅ Highlight adicionado em: " .. moeda.Name)
+                end
+            end
         end
     end
 end)
