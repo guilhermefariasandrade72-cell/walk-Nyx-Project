@@ -1004,36 +1004,7 @@ WalkFlingToggle.Parent = WalkFlingCard
 
 local WalkFlingBtnCorner = Instance.new("UICorner")
 WalkFlingBtnCorner.CornerRadius = UDim.new(0, 6)
-WalkFlingBtnCorner.Parent = WalkFlingToggle
-
-local WalkFlingBtnStroke = Instance.new("UIStroke")
-WalkFlingBtnStroke.Color = Color3.fromRGB(39, 40, 48)
-WalkFlingBtnStroke.Thickness = 1
-WalkFlingBtnStroke.Parent = WalkFlingToggle
-
-local WalkFlingCheck = Instance.new("TextLabel")
-WalkFlingCheck.Name = "CheckMark"
-WalkFlingCheck.Size = UDim2.fromScale(1, 1)
-WalkFlingCheck.BackgroundTransparency = 1
-WalkFlingCheck.Text = "✔"
-WalkFlingCheck.TextColor3 = Color3.new(1, 1, 1)
-WalkFlingCheck.TextSize = 14
-WalkFlingCheck.Font = Enum.Font.GothamBold
-WalkFlingCheck.TextTransparency = 1
-WalkFlingCheck.Parent = WalkFlingToggle
-
-WalkFlingToggle.Activated:Connect(function()
-    local newState = not WalkFlingAtivo
-    ToggleWalkFling(newState)
-
-    local targetBg = newState and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-    local targetStroke = newState and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-    local targetTrans = newState and 0 or 1
-
-    TweenService:Create(WalkFlingToggle, TweenInfo.new(0.2), {BackgroundColor3 = targetBg}):Play()
-    TweenService:Create(WalkFlingBtnStroke, TweenInfo.new(0.2), {Color = targetStroke}):Play()
-    TweenService:Create(WalkFlingCheck, TweenInfo.new(0.2), {TextTransparency = targetTrans}):Play()
-end)
+WalkFlingBtnCorner.Parent = WalkFLogoToggle -- mantido o nome correto do botão abaixo
 
 -- =============================
 -- ANTI-FLING (Botão)
