@@ -394,114 +394,6 @@ for Index, TabData in ipairs(TabsData) do
 -- ================================================
 
 -- ==================================
--- 🔴 KILL ALL LOOP — APENAS INTERFACE
--- ==================================
-
-local KillAllLoop = false
-
-local KillAllLoopCard = Instance.new("Frame")
-KillAllLoopCard.Name = "KillAllLoopCard"
-KillAllLoopCard.Size = UDim2.new(1, -6, 0, 85)
-KillAllLoopCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-KillAllLoopCard.BorderSizePixel = 0
-KillAllLoopCard.Parent = PageFrame
-
-local KillAllLoopCorner = Instance.new("UICorner")
-KillAllLoopCorner.CornerRadius = UDim.new(0, 10)
-KillAllLoopCorner.Parent = KillAllLoopCard
-
-local KillAllLoopStroke = Instance.new("UIStroke")
-KillAllLoopStroke.Color = Color3.fromRGB(39, 40, 48)
-KillAllLoopStroke.Thickness = 1
-KillAllLoopStroke.Parent = KillAllLoopCard
-
--- ==================================
--- 🔁 TÍTULO
--- ==================================
-
-local KillAllLoopTitle = Instance.new("TextLabel")
-KillAllLoopTitle.Name = "KillAllLoopTitle"
-KillAllLoopTitle.Size = UDim2.new(1, -55, 0, 25)
-KillAllLoopTitle.Position = UDim2.fromOffset(12, 12)
-KillAllLoopTitle.BackgroundTransparency = 1
-KillAllLoopTitle.Text = "🔁 Kill All Loop"
-KillAllLoopTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
-KillAllLoopTitle.TextSize = 12
-KillAllLoopTitle.Font = Enum.Font.GothamSemibold
-KillAllLoopTitle.TextXAlignment = Enum.TextXAlignment.Left
-KillAllLoopTitle.Parent = KillAllLoopCard
-
--- ==================================
--- 🔘 BOTÃO
--- ==================================
-
-local KillAllLoopToggle = Instance.new("TextButton")
-KillAllLoopToggle.Name = "KillAllLoopToggle"
-KillAllLoopToggle.Size = UDim2.fromOffset(26, 26)
-KillAllLoopToggle.Position = UDim2.new(1, -38, 0, 12)
-KillAllLoopToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-KillAllLoopToggle.BorderSizePixel = 0
-KillAllLoopToggle.Text = ""
-KillAllLoopToggle.AutoButtonColor = false
-KillAllLoopToggle.Parent = KillAllLoopCard
-
-local KillAllLoopToggleCorner = Instance.new("UICorner")
-KillAllLoopToggleCorner.CornerRadius = UDim.new(0, 6)
-KillAllLoopToggleCorner.Parent = KillAllLoopToggle
-
-local KillAllLoopToggleStroke = Instance.new("UIStroke")
-KillAllLoopToggleStroke.Color = Color3.fromRGB(39, 40, 48)
-KillAllLoopToggleStroke.Thickness = 1
-KillAllLoopToggleStroke.Parent = KillAllLoopToggle
-
--- ==================================
--- ✔ CHECK
--- ==================================
-
-local KillAllLoopCheck = Instance.new("TextLabel")
-KillAllLoopCheck.Name = "KillAllLoopCheck"
-KillAllLoopCheck.Size = UDim2.fromScale(1, 1)
-KillAllLoopCheck.BackgroundTransparency = 1
-KillAllLoopCheck.Text = "✔"
-KillAllLoopCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
-KillAllLoopCheck.TextSize = 14
-KillAllLoopCheck.Font = Enum.Font.GothamBold
-KillAllLoopCheck.TextTransparency = 1
-KillAllLoopCheck.Parent = KillAllLoopToggle
-
--- ==================================
--- 🖱️ CLIQUE
--- ==================================
-
-KillAllLoopToggle.Activated:Connect(function()
-
-    KillAllLoop = not KillAllLoop
-
-    if KillAllLoop then
-
-        KillAllLoopToggle.BackgroundColor3 =
-            Color3.fromRGB(190, 30, 45)
-
-        KillAllLoopToggleStroke.Color =
-            Color3.fromRGB(230, 50, 65)
-
-        KillAllLoopCheck.TextTransparency = 0
-
-    else
-
-        KillAllLoopToggle.BackgroundColor3 =
-            Color3.fromRGB(11, 12, 16)
-
-        KillAllLoopToggleStroke.Color =
-            Color3.fromRGB(39, 40, 48)
-
-        KillAllLoopCheck.TextTransparency = 1
-
-    end
-
-end)
-
--- ==================================
 -- 🔴 VARIÁVEIS DO KILL AURA
 -- ==================================
 local Players = game:GetService("Players")
@@ -529,6 +421,68 @@ KillAuraLabel.TextSize = 20
 KillAuraLabel.Font = Enum.Font.GothamBold
 KillAuraLabel.TextXAlignment = Enum.TextXAlignment.Left
 KillAuraLabel.Parent = PageFrame
+
+-- ==================================
+-- 🔴 KILL ALL LOOP — BOTÃO ÚNICO
+-- ==================================
+
+local KillAllLoop = false
+
+local KillAllButton = Instance.new("TextButton")
+KillAllButton.Name = "KillAllButton"
+KillAllButton.Size = UDim2.fromOffset(130, 38)
+KillAllButton.Position = UDim2.fromOffset(12, 8)
+KillAllButton.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+KillAllButton.BorderSizePixel = 0
+KillAllButton.Text = "🔁 Kill All"
+KillAllButton.TextColor3 = Color3.fromRGB(245, 245, 248)
+KillAllButton.TextSize = 12
+KillAllButton.Font = Enum.Font.GothamSemibold
+KillAllButton.AutoButtonColor = false
+KillAllButton.Parent = PageFrame
+
+local KillAllCorner = Instance.new("UICorner")
+KillAllCorner.CornerRadius = UDim.new(0, 8)
+KillAllCorner.Parent = KillAllButton
+
+local KillAllStroke = Instance.new("UIStroke")
+KillAllStroke.Color = Color3.fromRGB(39, 40, 48)
+KillAllStroke.Thickness = 1
+KillAllStroke.Parent = KillAllButton
+
+-- ==================================
+-- 🖱️ CLIQUE
+-- ==================================
+
+KillAllButton.Activated:Connect(function()
+
+    KillAllLoop = not KillAllLoop
+
+    if KillAllLoop then
+
+        -- ATIVADO
+        KillAllButton.BackgroundColor3 =
+            Color3.fromRGB(190, 30, 45)
+
+        KillAllStroke.Color =
+            Color3.fromRGB(230, 50, 65)
+
+        KillAllButton.Text = "✔ Kill All"
+
+    else
+
+        -- DESATIVADO
+        KillAllButton.BackgroundColor3 =
+            Color3.fromRGB(16, 17, 22)
+
+        KillAllStroke.Color =
+            Color3.fromRGB(39, 40, 48)
+
+        KillAllButton.Text = "🔁 Kill All"
+
+    end
+
+end)
 
 local KillAuraLabel = Instance.new("TextLabel")
 KillAuraLabel.Size = UDim2.new(1, -6, 0, 30)
