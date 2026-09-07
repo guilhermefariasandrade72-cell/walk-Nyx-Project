@@ -871,16 +871,16 @@ SectionLabel_AutoFarm.ZIndex = 10
 SectionLabel_AutoFarm.Parent = PageFrame
 
 -- ==================================
--- 🛡️ VARIÁVEIS — TELEPORTE SAFE
+-- 🛡️ VARIABLES — TELEPORT TO SAFE PLATFORM
 -- ==================================
-local TPSafeAoEncher = false
+local TPSafeWhenFull = false
 local SafePlatform = nil
 local SafePosition = Vector3.new(38013.93, 1101.06, -26257.38)
 
 -- ==================================
--- 🛡️ FUNÇÃO TELEPORTE SAFE
+-- 🛡️ TELEPORT TO SAFE PLATFORM FUNCTION
 -- ==================================
-local function TeleportarParaSafe()
+local function TeleportToSafe()
     local char = LocalPlayer.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
@@ -902,25 +902,25 @@ local function TeleportarParaSafe()
 end
 
 -- ==================================
--- 🛡️ MONITOR DE BOLSA CHEIA → TP SAFE
+-- 🛡️ FULL BAG DETECTOR → TELEPORT SAFE
 -- ==================================
 task.spawn(function()
     while true do
-        if TPSafeAoEncher then
-            local emPartidaValido = (typeof(EmPartida) == "function" and EmPartida()) or true
+        if TPSafeWhenFull then
+            local inGameValid = (typeof(InGame) == "function" and InGame()) or true
             
-            if (BolsaCheia or (VerificarTextoBolsaCheia and VerificarTextoBolsaCheia())) and emPartidaValido then
-                print("⏳ Bolsa cheia! Teleportando para Safe...")
+            if (BagFull or (CheckBagFullText and CheckBagFullText())) and inGameValid then
+                print("⏳ Bag full detected! Teleporting to Safe...")
                 task.wait(0.2)
                 
-                if TPSafeAoEncher then
-                    TeleportarParaSafe()
-                    print("📍 Teleportado para plataforma segura!")
+                if TPSafeWhenFull then
+                    TeleportToSafe()
+                    print("📍 Teleported to safe platform!")
                 end
                 
                 repeat
                     RunService.Heartbeat:Wait()
-                until not TPSafeAoEncher or not (BolsaCheia or (VerificarTextoBolsaCheia and VerificarTextoBolsaCheia())) or LocalPlayer:GetAttribute("Alive") == false
+                until not TPSafeWhenFull or not (BagFull or (CheckBagFullText and CheckBagFullText())) or LocalPlayer:GetAttribute("Alive") == false
             end
         end
         RunService.Heartbeat:Wait()
@@ -928,7 +928,7 @@ task.spawn(function()
 end)
 
 -- ==================================
--- 🔘 BOTÃO — TELEPORTE SAFE AO ENCHER
+-- 🔘 BUTTON — TELEPORT TO SAFE PLATFORM WHEN BAG FULL
 -- ==================================
 if PageFrame then
     local TPSafeCard = Instance.new("Frame")
@@ -952,7 +952,7 @@ if PageFrame then
     TPSafeTitle.Size = UDim2.new(1, -60, 1, 0)
     TPSafeTitle.Position = UDim2.fromOffset(12, 0)
     TPSafeTitle.BackgroundTransparency = 1
-    TPSafeTitle.Text = "🛡️ TP Safe ao Encher Bolsa"
+    TPSafeTitle.Text = "Teleport to Safe Platform on Full Bag"
     TPSafeTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
     TPSafeTitle.TextSize = 12
     TPSafeTitle.Font = Enum.Font.GothamSemibold
@@ -991,18 +991,18 @@ if PageFrame then
     TPSafeCheckMark.Parent = TPSafeToggleButton
 
     TPSafeToggleButton.Activated:Connect(function()
-        TPSafeAoEncher = not TPSafeAoEncher
+        TPSafeWhenFull = not TPSafeWhenFull
         
-        local targetBgColor = TPSafeAoEncher and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-        local targetStrokeColor = TPSafeAoEncher and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-        local targetTextTrans = TPSafeAoEncher and 0 or 1
+        local targetBgColor = TPSafeWhenFull and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+        local targetStrokeColor = TPSafeWhenFull and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+        local targetTextTrans = TPSafeWhenFull and 0 or 1
 
         TweenService:Create(TPSafeToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
         TweenService:Create(TPSafeToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
         TweenService:Create(TPSafeCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
     end)
 else
-    warn("Erro: PageFrame não encontrado ao tentar criar o botão TP Safe!")
+    warn("Error: PageFrame not found when creating Teleport Safe button!")
 end
 
 -- ============================================
