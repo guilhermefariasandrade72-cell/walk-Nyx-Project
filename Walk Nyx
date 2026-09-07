@@ -1021,7 +1021,7 @@ local function ObterMurderer()
 end
 
 -- ==================================
--- 📬 CRIAR NOTIFICAÇÃO (CANTO INFERIOR DIREITO FIXO)
+-- 📬 CRIAR NOTIFICAÇÃO (CANTO INFERIOR DIREITO - ACIMA DO PULO)
 -- ==================================
 local function CriarNotificacao()
     if NotificacaoGui then return end
@@ -1032,12 +1032,11 @@ local function CriarNotificacao()
     NotificacaoGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     NotificacaoGui.Parent = player:WaitForChild("PlayerGui")
     
-    -- FUNDO RETANGULAR (Fixado no canto direito inferior, bem em cima do botão de pulo)
     local NotifBox = Instance.new("Frame")
     NotifBox.Name = "NotifBox"
     NotifBox.Size = UDim2.new(0, 280, 0, 75)
     NotifBox.AnchorPoint = Vector2.new(1, 1)
-    NotifBox.Position = UDim2.new(1, -20, 1, -140)
+    NotifBox.Position = UDim2.new(1, -20, 1, -70) -- Ajustado para ficar bem em cima do botão de pulo
     NotifBox.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
     NotifBox.BorderSizePixel = 0
     NotifBox.Visible = false
@@ -1052,7 +1051,6 @@ local function CriarNotificacao()
     NotifStroke.Thickness = 2
     NotifStroke.Parent = NotifBox
     
-    -- TÍTULO "Walk Nyx"
     local Titulo = Instance.new("TextLabel")
     Titulo.Name = "Titulo"
     Titulo.Size = UDim2.new(1, -24, 0, 24)
@@ -1065,7 +1063,6 @@ local function CriarNotificacao()
     Titulo.TextXAlignment = Enum.TextXAlignment.Left
     Titulo.Parent = NotifBox
     
-    -- MENSAGEM (Sem linhas extras abaixo)
     local Mensagem = Instance.new("TextLabel")
     Mensagem.Name = "Mensagem"
     Mensagem.Size = UDim2.new(1, -24, 0, 30)
@@ -1094,25 +1091,22 @@ local function MostrarNotificacaoMurderer(NomeMurderer)
     Animando = true
     
     task.spawn(function()
-        -- Começa fora da tela à direita e desliza para a posição fixa (1, -20)
-        NotifBox.Position = UDim2.new(1, 300, 1, -140)
+        NotifBox.Position = UDim2.new(1, 300, 1, -70)
         
         for i = 1, 20 do
             if not NotifBox then break end
             local currentX = 300 - (i * 16)
-            NotifBox.Position = UDim2.new(1, currentX, 1, -140)
+            NotifBox.Position = UDim2.new(1, currentX, 1, -70)
             task.wait(0.015)
         end
-        NotifBox.Position = UDim2.new(1, -20, 1, -140)
+        NotifBox.Position = UDim2.new(1, -20, 1, -70)
         
-        -- Fica visível por 4 segundos
         task.wait(4)
         
-        -- Sai deslizando de volta para a direita
         for i = 1, 20 do
             if not NotifBox then break end
             local currentX = -20 + (i * 16)
-            NotifBox.Position = UDim2.new(1, currentX, 1, -140)
+            NotifBox.Position = UDim2.new(1, currentX, 1, -70)
             task.wait(0.015)
         end
         
