@@ -925,7 +925,6 @@ local UltimoHeroNotificado = nil
 local AnimandoNotificacao = false
 
 -- Variável global de dados de cargos (compartilhada com o ESP)
--- Certifique-se de que o seu script principal já define e atualiza essa tabela via GetPlayerData
 DadosCargos = DadosCargos or {}
 
 -- ==================================
@@ -1072,8 +1071,8 @@ NotifSheriffCheckMark.Parent = NotifSheriffToggleButton
 NotifSheriffToggleButton.Activated:Connect(function()
     MostrarNotifSheriff = not MostrarNotifSheriff
     
-    local targetBgColor = MostrarNotifSheriff and Color3.fromRGB(40, 120, 225) or Color3.fromRGB(11, 12, 16)
-    local targetStrokeColor = MostrarNotifSheriff and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(39, 40, 48)
+    local targetBgColor = MostrarNotifSheriff and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = MostrarNotifSheriff and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
     local targetTextTrans = MostrarNotifSheriff and 0 or 1
 
     TweenService:Create(NotifSheriffToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
@@ -1151,8 +1150,8 @@ NotifHeroCheckMark.Parent = NotifHeroToggleButton
 NotifHeroToggleButton.Activated:Connect(function()
     MostrarNotifHero = not MostrarNotifHero
     
-    local targetBgColor = MostrarNotifHero and Color3.fromRGB(210, 170, 30) or Color3.fromRGB(11, 12, 16)
-    local targetStrokeColor = MostrarNotifHero and Color3.fromRGB(255, 205, 50) or Color3.fromRGB(39, 40, 48)
+    local targetBgColor = MostrarNotifHero and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = MostrarNotifHero and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
     local targetTextTrans = MostrarNotifHero and 0 or 1
 
     TweenService:Create(NotifHeroToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
@@ -1166,18 +1165,16 @@ end)
 
 
 -- ==================================
--- 🔍 DETECÇÃO DE CARGOS VIA DADOS DO ESP (DadosCargos)
+-- 🔍 DETECÇÃO DE CARGOS VIA DADOS DO ESP (Incluindo você mesmo)
 -- ==================================
 local function getPlayerByRole(roleName)
     if not DadosCargos then return nil end
     
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            local info = DadosCargos[player.Name]
-            if info and not info.Killed and not info.Dead then
-                if info.Role == roleName then
-                    return player
-                end
+        local info = DadosCargos[player.Name]
+        if info and not info.Killed and not info.Dead then
+            if info.Role == roleName then
+                return player
             end
         end
     end
@@ -1304,7 +1301,8 @@ task.spawn(function()
             local SheriffAtual = getPlayerByRole("Sheriff")
             if SheriffAtual and SheriffAtual ~= UltimoSheriffNotificado then
                 UltimoSheriffNotificado = SheriffAtual
-                DispararAlerta(SheriffAtual.Name .. " is the Sheriff", Color3.fromRGB(40, 120, 225))
+                DisprandoTexto = SheriffAtual.Name .. " is the Sheriff"
+                DispararAlerta(DisprandoTexto, Color3.fromRGB(40, 120, 225))
             elseif not SheriffAtual then
                 UltimoSheriffNotificado = nil
             end
