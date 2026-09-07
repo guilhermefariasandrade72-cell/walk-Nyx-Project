@@ -903,6 +903,253 @@ local player = Players.LocalPlayer
 local XRayAtivo = false
 local ValoresOriginais = {}
 
+-- ==================================
+-- 🔔 VARIÁVEIS DA NOTIFICAÇÃO
+-- ==================================
+local TweenService = game:GetService("TweenService")
+local NotificacaoGui = nil
+local UltimoMurdererNotificado = nil
+local MostrarNotificacao = true
+local Animando = false
+
+-- ==================================
+-- 🔘 BOTÃO — NOTIFICAÇÃO MURDERER
+-- ==================================
+
+local NotifMurdererCard = Instance.new("Frame")
+NotifMurdererCard.Name = "NotifMurdererCard"
+NotifMurdererCard.Size = UDim2.new(1, -6, 0, 50)
+NotifMurdererCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+NotifMurdererCard.BorderSizePixel = 0
+NotifMurdererCard.Parent = PageFrame
+
+local NotifMurdererCardCorner = Instance.new("UICorner")
+NotifMurdererCardCorner.CornerRadius = UDim.new(0, 10)
+NotifMurdererCardCorner.Parent = NotifMurdererCard
+
+local NotifMurdererCardStroke = Instance.new("UIStroke")
+NotifMurdererCardStroke.Color = Color3.fromRGB(39, 40, 48)
+NotifMurdererCardStroke.Thickness = 1
+NotifMurdererCardStroke.Parent = NotifMurdererCard
+
+local NotifMurdererTitle = Instance.new("TextLabel")
+NotifMurdererTitle.Name = "Title"
+NotifMurdererTitle.Size = UDim2.new(1, -60, 1, 0)
+NotifMurdererTitle.Position = UDim2.fromOffset(12, 0)
+NotifMurdererTitle.BackgroundTransparency = 1
+NotifMurdererTitle.Text = "🔔 Notificação Murderer"
+NotifMurdererTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+NotifMurdererTitle.TextSize = 12
+NotifMurdererTitle.Font = Enum.Font.GothamSemibold
+NotifMurdererTitle.TextXAlignment = Enum.TextXAlignment.Left
+NotifMurdererTitle.Parent = NotifMurdererCard
+
+local NotifMurdererToggleButton = Instance.new("TextButton")
+NotifMurdererToggleButton.Name = "ToggleButton"
+NotifMurdererToggleButton.Size = UDim2.fromOffset(26, 26)
+NotifMurdererToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+NotifMurdererToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+NotifMurdererToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+NotifMurdererToggleButton.BorderSizePixel = 0
+NotifMurdererToggleButton.Text = ""
+NotifMurdererToggleButton.AutoButtonColor = false
+NotifMurdererToggleButton.Parent = NotifMurdererCard
+
+local NotifMurdererToggleCorner = Instance.new("UICorner")
+NotifMurdererToggleCorner.CornerRadius = UDim.new(0, 6)
+NotifMurdererToggleCorner.Parent = NotifMurdererToggleButton
+
+local NotifMurdererToggleStroke = Instance.new("UIStroke")
+NotifMurdererToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+NotifMurdererToggleStroke.Thickness = 1
+NotifMurdererToggleStroke.Parent = NotifMurdererToggleButton
+
+local NotifMurdererCheckMark = Instance.new("TextLabel")
+NotifMurdererCheckMark.Name = "CheckMark"
+NotifMurdererCheckMark.Size = UDim2.fromScale(1, 1)
+NotifMurdererCheckMark.BackgroundTransparency = 1
+NotifMurdererCheckMark.Text = "✔"
+NotifMurdererCheckMark.TextColor3 = Color3.new(1, 1, 1)
+NotifMurdererCheckMark.TextSize = 14
+NotifMurdererCheckMark.Font = Enum.Font.GothamBold
+NotifMurdererCheckMark.TextTransparency = 0
+NotifMurdererCheckMark.Parent = NotifMurdererToggleButton
+
+NotifMurdererToggleButton.Activated:Connect(function()
+    MostrarNotificacao = not MostrarNotificacao
+    
+    local targetBgColor = MostrarNotificacao and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = MostrarNotificacao and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = MostrarNotificacao and 0 or 1
+
+    TweenService:Create(NotifMurdererToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(NotifMurdererToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(NotifMurdererCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+    
+    if not MostrarNotificacao then
+        if NotificacaoGui and NotificacaoGui.NotifBox then
+            NotificacaoGui.NotifBox.Visible = false
+        end
+    end
+end)
+
+-- ==================================
+-- 🔍 DETECTA QUEM É O MURDERER — MESMO SISTEMA DO SEU ESP
+-- ==================================
+local function ObterMurderer()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local char = p.Character
+            local hum = char:FindFirstChild("Humanoid")
+            
+            if hum and hum.Health > 0 then
+                -- ✅ MÉTODO 1: Atributo do jogador
+                if p:GetAttribute("Role") == "Murderer" then
+                    return p
+                end
+                
+                -- ✅ MÉTODO 2: Está segurando a faca
+                local temFaca = char:FindFirstChild("Knife") 
+                    or (p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Knife"))
+                if temFaca then
+                    return p
+                end
+            end
+        end
+    end
+    return nil
+end
+
+-- ==================================
+-- 📬 CRIAR NOTIFICAÇÃO
+-- ==================================
+local function CriarNotificacao()
+    if NotificacaoGui then return end
+    
+    NotificacaoGui = Instance.new("ScreenGui")
+    NotificacaoGui.Name = "WalkNyx_Notificacao"
+    NotificacaoGui.ResetOnSpawn = false
+    NotificacaoGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    NotificacaoGui.Parent = player:WaitForChild("PlayerGui")
+    
+    -- FUNDO RETANGULAR
+    local NotifBox = Instance.new("Frame")
+    NotifBox.Name = "NotifBox"
+    NotifBox.Size = UDim2.new(0, 260, 0, 65)
+    NotifBox.Position = UDim2.new(1, 10, 0.88, -32)
+    NotifBox.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+    NotifBox.BorderSizePixel = 0
+    NotifBox.Visible = false
+    NotifBox.Parent = NotificacaoGui
+    
+    local NotifCorner = Instance.new("UICorner")
+    NotifCorner.CornerRadius = UDim.new(0, 10)
+    NotifCorner.Parent = NotifBox
+    
+    local NotifStroke = Instance.new("UIStroke")
+    NotifStroke.Color = Color3.fromRGB(220, 40, 60)
+    NotifStroke.Thickness = 2
+    NotifStroke.Parent = NotifBox
+    
+    -- TÍTULO
+    local Titulo = Instance.new("TextLabel")
+    Titulo.Name = "Titulo"
+    Titulo.Size = UDim2.new(1, -20, 0, 20)
+    Titulo.Position = UDim2.fromOffset(10, 8)
+    Titulo.BackgroundTransparency = 1
+    Titulo.Text = "Walk Nyx"
+    Titulo.TextColor3 = Color3.fromRGB(180, 180, 195)
+    Titulo.TextSize = 12
+    Titulo.Font = Enum.Font.GothamBold
+    Titulo.TextXAlignment = Enum.TextXAlignment.Left
+    Titulo.Parent = NotifBox
+    
+    -- LINHA DIVISÓRIA
+    local Linha = Instance.new("Frame")
+    Linha.Size = UDim2.new(1, -20, 0, 1)
+    Linha.Position = UDim2.fromOffset(10, 30)
+    Linha.BackgroundColor3 = Color3.fromRGB(60, 60, 75)
+    Linha.Parent = NotifBox
+    
+    -- MENSAGEM
+    local Mensagem = Instance.new("TextLabel")
+    Mensagem.Name = "Mensagem"
+    Mensagem.Size = UDim2.new(1, -20, 0, 24)
+    Mensagem.Position = UDim2.fromOffset(10, 36)
+    Mensagem.BackgroundTransparency = 1
+    Mensagem.Text = "Carregando..."
+    Mensagem.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Mensagem.TextSize = 14
+    Mensagem.Font = Enum.Font.GothamBold
+    Mensagem.TextXAlignment = Enum.TextXAlignment.Center
+    Mensagem.Parent = NotifBox
+end
+
+-- ==================================
+-- ✅ ANIMAÇÃO: ENTRA DA DIREITA → FICA → SAI PELA DIREITA
+-- ==================================
+local function MostrarNotificacaoMurderer(NomeMurderer)
+    if not NotificacaoGui then CriarNotificacao() end
+    if Animando then return end
+    
+    local NotifBox = NotificacaoGui.NotifBox
+    local Mensagem = NotifBox.Mensagem
+    
+    Mensagem.Text = NomeMurderer .. " is the Murderer"
+    NotifBox.Visible = true
+    Animando = true
+    
+    -- 📥 ENTRADA: vem da direita
+    task.spawn(function()
+        for i = 1, 25 do
+            if not NotifBox then break end
+            NotifBox.Position = UDim2.new(1, 10 - (i * 11), 0.88, -32)
+            task.wait(0.015)
+        end
+        NotifBox.Position = UDim2.new(0.5, -130, 0.88, -32)
+        
+        -- ⏸️ FICA VISÍVEL POR 4 SEGUNDOS
+        task.wait(4)
+        
+        -- 📤 SAÍDA: vai para a direita
+        for i = 1, 25 do
+            if not NotifBox then break end
+            NotifBox.Position = UDim2.new(0.5, -130 + (i * 11), 0.88, -32)
+            task.wait(0.015)
+        end
+        
+        NotifBox.Visible = false
+        Animando = false
+    end)
+end
+
+-- ==================================
+-- 🔄 LOOP PRINCIPAL
+-- ==================================
+task.spawn(function()
+    CriarNotificacao()
+    while true do
+        task.wait(0.5)
+        
+        if not MostrarNotificacao then
+            UltimoMurdererNotificado = nil
+            continue
+        end
+        
+        local MurdererAtual = ObterMurderer()
+        
+        -- ✅ NOVO MURDERER DETECTADO
+        if MurdererAtual and MurdererAtual ~= UltimoMurdererNotificado then
+            UltimoMurdererNotificado = MurdererAtual
+            MostrarNotificacaoMurderer(MurdererAtual.Name)
+        end
+        
+        -- ✅ MURDERER MORREU/SAIU
+        if not MurdererAtual and UltimoMurdererNotificado then
+            UltimoMurdererNotificado = nil
+        end
+    end
+end)
 
 
 -- ===============================
