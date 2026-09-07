@@ -399,11 +399,42 @@ for Index, TabData in ipairs(TabsData) do
 local KillAura = false
 local KillAllLoop = false
 
+-- ==================================
+-- 🟥 CARD KILL AURA
+-- ==================================
+local KillAuraCard = Instance.new("Frame")
+KillAuraCard.Name = "KillAuraCard"
+KillAuraCard.Size = UDim2.new(1, -6, 0, 85)
+KillAuraCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+KillAuraCard.BorderSizePixel = 0
+KillAuraCard.Parent = PageFrame
+
+local KillAuraCorner = Instance.new("UICorner")
+KillAuraCorner.CornerRadius = UDim.new(0, 10)
+KillAuraCorner.Parent = KillAuraCard
+
+local KillAuraStroke = Instance.new("UIStroke")
+KillAuraStroke.Color = Color3.fromRGB(39, 40, 48)
+KillAuraStroke.Thickness = 1
+KillAuraStroke.Parent = KillAuraCard
 
 -- ==================================
--- 🔘 BOTÃO — KILL ALL LOOP
+-- 🔁 TÍTULO
 -- ==================================
+local KillAllLoopTitle = Instance.new("TextLabel")
+KillAllLoopTitle.Size = UDim2.new(1, -55, 0, 25)
+KillAllLoopTitle.Position = UDim2.fromOffset(12, 12)
+KillAllLoopTitle.BackgroundTransparency = 1
+KillAllLoopTitle.Text = "🔁 Kill All Loop"
+KillAllLoopTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+KillAllLoopTitle.TextSize = 12
+KillAllLoopTitle.Font = Enum.Font.GothamSemibold
+KillAllLoopTitle.TextXAlignment = Enum.TextXAlignment.Left
+KillAllLoopTitle.Parent = KillAuraCard
 
+-- ==================================
+-- 🔘 TOGGLE
+-- ==================================
 local KillAllLoopToggle = Instance.new("TextButton")
 KillAllLoopToggle.Size = UDim2.fromOffset(26, 26)
 KillAllLoopToggle.Position = UDim2.new(1, -38, 0, 12)
@@ -432,19 +463,12 @@ KillAllLoopCheck.Font = Enum.Font.GothamBold
 KillAllLoopCheck.TextTransparency = 1
 KillAllLoopCheck.Parent = KillAllLoopToggle
 
-local KillAllLoopTitle = Instance.new("TextLabel")
-KillAllLoopTitle.Size = UDim2.new(1, -55, 0, 25)
-KillAllLoopTitle.Position = UDim2.fromOffset(12, 12)
-KillAllLoopTitle.BackgroundTransparency = 1
-KillAllLoopTitle.Text = "Kill All Loop"
-KillAllLoopTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
-KillAllLoopTitle.TextSize = 12
-KillAllLoopTitle.Font = Enum.Font.GothamSemibold
-KillAllLoopTitle.TextXAlignment = Enum.TextXAlignment.Left
-KillAllLoopTitle.Parent = KillAuraCard
-
+-- ==================================
+-- 🖱️ TOGGLE
+-- ==================================
 KillAllLoopToggle.Activated:Connect(function()
     KillAllLoop = not KillAllLoop
+
     if KillAllLoop then
         KillAllLoopToggle.BackgroundColor3 = Color3.fromRGB(190, 30, 45)
         KillAllLoopToggleStroke.Color = Color3.fromRGB(230, 50, 65)
@@ -453,103 +477,6 @@ KillAllLoopToggle.Activated:Connect(function()
         KillAllLoopToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
         KillAllLoopToggleStroke.Color = Color3.fromRGB(39, 40, 48)
         KillAllLoopCheck.TextTransparency = 1
-    end
-end)
-
-
--- ==================================
--- 🔍 VERIFICA SE É MURDERER
--- ==================================
-local function EhMurderer()
-    local char = player.Character
-    if not char then return false end
-    
-    if player:GetAttribute("Role") == "Murderer" then
-        return true
-    end
-    
-    local temFaca = char:FindFirstChild("Knife") 
-        or (player.Backpack and player.Backpack:FindFirstChild("Knife"))
-    if temFaca then
-        return true
-    end
-    
-    return false
-end
-
--- ==================================
--- ⚔️ EXECUTAR ATAQUE
--- ==================================
-local function ExecutarAtaque(Alvo)
-    if not EhMurderer() then return end
-    
-    local Char = player.Character
-    if not Char then return end
-    
-    local Faca = Char:FindFirstChild("Knife") or (player.Backpack and player.Backpack:FindFirstChild("Knife"))
-    if not Faca then return end
-    
-    if Faca.Parent ~= Char then 
-        Faca.Parent = Char 
-        task.wait(0.02) 
-    end
-    
-    local Eventos = Faca:FindFirstChild("Events")
-    if not Eventos then return end
-
-    if Alvo and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
-        pcall(function()
-            Eventos.KnifeStabbed:FireServer()
-            Eventos.HandleTouched:FireServer(Alvo.Character.Head)
-        end)
-    end
-end
-
--- ==================================
--- 💀 KILL ALL — MATA TODOS AGORA (1x)
--- ==================================
-local function KillAllInstantaneo()
-    if not EhMurderer() then return end
-    for _, Alvo in ipairs(Players:GetPlayers()) do
-        if Alvo ~= player and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
-            ExecutarAtaque(Alvo)
-        end
-    end
-end
-
--- ==================================
--- 🔁 KILL ALL LOOP — MATA TODOS SEMPRE QUE LIGADO
--- ==================================
-task.spawn(function()
-    while true do
-        task.wait(0.5)
-        if KillAllLoop and EhMurderer() then
-            KillAllInstantaneo()
-        end
-    end
-end)
-
--- ==================================
--- ⚔️ KILL AURA — MATA 1 POR 1 NO RAIO
--- ==================================
-local function KillAuraLoop()
-    if not EhMurderer() then return end
-    for _, Alvo in ipairs(Players:GetPlayers()) do
-        if not KillAura then break end
-        if Alvo ~= player and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
-            ExecutarAtaque(Alvo)
-            task.wait(0.15)
-        end
-    end
-end
-
--- 🔄 LOOP DO KILL AURA
-task.spawn(function()
-    while true do
-        task.wait(0.3)
-        if KillAura and EhMurderer() then
-            KillAuraLoop()
-        end
     end
 end)
 
