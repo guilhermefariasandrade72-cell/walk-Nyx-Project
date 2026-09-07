@@ -907,11 +907,13 @@ local ValoresOriginais = {}
 -- 🔔 VARIÁVEIS DA NOTIFICAÇÃO
 -- ==================================
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
 local NotificacaoGui = nil
 local UltimoMurdererNotificado = nil
 local MostrarNotificacao = true
 local Animando = false
-
 
 -- ==================================
 -- 🔘 BOTÃO — NOTIFICAÇÃO MURDERER
@@ -950,7 +952,7 @@ NotifMurdererToggleButton.Name = "ToggleButton"
 NotifMurdererToggleButton.Size = UDim2.fromOffset(26, 26)
 NotifMurdererToggleButton.AnchorPoint = Vector2.new(1, 0.5)
 NotifMurdererToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
-NotifMurdererToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+NotifMurdererToggleButton.BackgroundColor3 = Color3.fromRGB(225, 40, 56) -- Inicia ativado por padrão
 NotifMurdererToggleButton.BorderSizePixel = 0
 NotifMurdererToggleButton.Text = ""
 NotifMurdererToggleButton.AutoButtonColor = false
@@ -961,7 +963,7 @@ NotifMurdererToggleCorner.CornerRadius = UDim.new(0, 6)
 NotifMurdererToggleCorner.Parent = NotifMurdererToggleButton
 
 local NotifMurdererToggleStroke = Instance.new("UIStroke")
-NotifMurdererToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+NotifMurdererToggleStroke.Color = Color3.fromRGB(255, 65, 80)
 NotifMurdererToggleStroke.Thickness = 1
 NotifMurdererToggleStroke.Parent = NotifMurdererToggleButton
 
@@ -973,7 +975,7 @@ NotifMurdererCheckMark.Text = "✔"
 NotifMurdererCheckMark.TextColor3 = Color3.new(1, 1, 1)
 NotifMurdererCheckMark.TextSize = 14
 NotifMurdererCheckMark.Font = Enum.Font.GothamBold
-NotifMurdererCheckMark.TextTransparency = 0
+NotifMurdererCheckMark.TextTransparency = 0 -- Inicia visível
 NotifMurdererCheckMark.Parent = NotifMurdererToggleButton
 
 NotifMurdererToggleButton.Activated:Connect(function()
@@ -988,7 +990,8 @@ NotifMurdererToggleButton.Activated:Connect(function()
     TweenService:Create(NotifMurdererCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
     
     if not MostrarNotificacao then
-        if NotificacaoGui and NotificacaoGui.NotifBox then
+        UltimoMurdererNotificado = nil
+        if NotificacaoGui and NotificacaoGui:FindFirstChild("NotifBox") then
             NotificacaoGui.NotifBox.Visible = false
         end
     end
@@ -1021,7 +1024,7 @@ local function ObterMurderer()
 end
 
 -- ==================================
--- 📬 CRIAR NOTIFICAÇÃO (BEM MAIS ABAIXO)
+-- 📬 CRIAR NOTIFICAÇÃO 
 -- ==================================
 local function CriarNotificacao()
     if NotificacaoGui then return end
@@ -1036,7 +1039,8 @@ local function CriarNotificacao()
     NotifBox.Name = "NotifBox"
     NotifBox.Size = UDim2.new(0, 280, 0, 75)
     NotifBox.AnchorPoint = Vector2.new(1, 1)
-    NotifBox.Position = UDim2.new(1, -20, 1, -20) -- Bem colado na parte inferior, em cima do botão de pulo
+    -- Começa fora da tela à direita para a animação de entrada funcionar perfeitamente
+    NotifBox.Position = UDim2.new(1, 320, 1, -20) 
     NotifBox.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
     NotifBox.BorderSizePixel = 0
     NotifBox.Visible = false
@@ -1077,45 +1081,45 @@ local function CriarNotificacao()
 end
 
 -- ==================================
--- ✅ ANIMAÇÃO: ENTRA DA DIREITA → FICA → SAI PELA DIREITA
+-- ✅ ANIMAÇÃO COM TWEEN (Fluida e Limpa)
 -- ==================================
 local function MostrarNotificacaoMurderer(NomeMurderer)
-    -- Garante que se o toggle foi desligado no meio do processo, não exibe nada
-    if not MostrarNotificacao then return end
+    if not MostrarNotificacao or Animando then return end
     
     if not NotificacaoGui then CriarNotificacao() end
-    if Animando then return end
+    local NotifBox = NotificacaoGui:FindFirstChild("NotifBox")
+    if not NotifBox then return end
     
-    local NotifBox = NotificacaoGui.NotifBox
-    local Mensagem = NotifBox.Mensagem
-    
-    Mensagem.Text = NomeMurderer .. " is the Murderer"
-    NotifBox.Visible = true
     Animando = true
+    NotifBox.Mensagem.Text = NomeMurderer .. " is the Murderer"
+    NotifBox.Visible = true
     
-    task.spawn(function()
-        NotifBox.Position = UDim2.new(1, 300, 1, -20)
-        
-        for i = 1, 20 do
-            if not NotifBox or not MostrarNotificacao then break end
-            local currentX = 300 - (i * 16)
-            NotifBox.Position = UDim2.new(1, currentX, 1, -20)
-            task.wait(0.015)
-        end
-        NotifBox.Position = UDim2.new(1, -20, 1, -20)
-        
-        task.wait(4)
-        
-        for i = 1, 20 do
-            if not NotifBox then break end
-            local currentX = -20 + (i * 16)
-            NotifBox.Position = UDim2.new(1, currentX, 1, -20)
-            task.wait(0.015)
-        end
-        
+    -- Configurações da animação suave (Quint / Out)
+    local tweenInfoIn = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+    local tweenInfoOut = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+    
+    -- 1. Entra deslizando da direita para a posição final (UDim2.new(1, -20, 1, -20))
+    local tweenEntrada = TweenService:Create(NotifBox, tweenInfoIn, {Position = UDim2.new(1, -20, 1, -20)})
+    tweenEntrada:Play()
+    tweenEntrada.Completed:Wait()
+    
+    -- 2. Fica visível por 4 segundos
+    task.wait(4)
+    
+    -- Se o usuário desativar o toggle no meio do tempo, cancela a saída de forma segura
+    if not MostrarNotificacao then
         NotifBox.Visible = false
         Animando = false
-    end)
+        return
+    end
+    
+    -- 3. Sai deslizando de volta para a direita (fora da tela)
+    local tweenSaida = TweenService:Create(NotifBox, tweenInfoOut, {Position = UDim2.new(1, 320, 1, -20)})
+    tweenSaida:Play()
+    tweenSaida.Completed:Wait()
+    
+    NotifBox.Visible = false
+    Animando = false
 end
 
 -- ==================================
@@ -1126,12 +1130,8 @@ task.spawn(function()
     while true do
         task.wait(0.5)
         
-        -- Se o toggle estiver desligado, limpa o último e pula o loop
         if not MostrarNotificacao then
             UltimoMurdererNotificado = nil
-            if NotificacaoGui and NotificacaoGui.NotifBox then
-                NotificacaoGui.NotifBox.Visible = false
-            end
             continue
         end
         
