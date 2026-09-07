@@ -928,6 +928,164 @@ local AnimandoNotificacao = false
 DadosCargos = DadosCargos or {}
 
 -- ==================================
+-- 📊 WIDGET DE FPS E PING (HUD)
+-- ==================================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+local LocalPlayer = Players.LocalPlayer
+
+local MostrarFpsPing = false
+
+-- Criar a UI principal do FPS/Ping (vinculada ao PlayerGui)
+local FpsPingGui = Instance.new("ScreenGui")
+FpsPingGui.Name = "WalkNyx_FpsPing"
+FpsPingGui.ResetOnSpawn = false
+FpsPingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+FpsPingGui.DisplayOrder = 99998
+FpsPingGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local FpsPingFrame = Instance.new("Frame")
+FpsPingFrame.Name = "FpsPingFrame"
+FpsPingFrame.Size = UDim2.fromOffset(140, 44)
+FpsPingFrame.Position = UDim2.new(0, 20, 0, 20) -- Canto superior esquerdo
+FpsPingFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
+FpsPingFrame.BorderSizePixel = 0
+FpsPingFrame.Visible = false
+FpsPingFrame.Parent = FpsPingGui
+
+local FpsPingCorner = Instance.new("UICorner")
+FpsPingCorner.CornerRadius = UDim.new(0, 8)
+FpsPingCorner.Parent = FpsPingFrame
+
+local FpsPingStroke = Instance.new("UIStroke")
+FpsPingStroke.Color = Color3.fromRGB(225, 40, 56)
+FpsPingStroke.Thickness = 1
+FpsPingStroke.Parent = FpsPingFrame
+
+local FpsLabel = Instance.new("TextLabel")
+FpsLabel.Name = "FpsLabel"
+FpsLabel.Size = UDim2.new(1, -16, 0, 20)
+FpsLabel.Position = UDim2.fromOffset(8, 4)
+FpsLabel.BackgroundTransparency = 1
+FpsLabel.Text = "FPS: 0"
+FpsLabel.TextColor3 = Color3.fromRGB(245, 245, 248)
+FpsLabel.TextSize = 12
+FpsLabel.Font = Enum.Font.GothamSemibold
+FpsLabel.TextXAlignment = Enum.TextXAlignment.Left
+FpsLabel.Parent = FpsPingFrame
+
+local PingLabel = Instance.new("TextLabel")
+PingLabel.Name = "PingLabel"
+PingLabel.Size = UDim2.new(1, -16, 0, 20)
+PingLabel.Position = UDim2.fromOffset(8, 20)
+PingLabel.BackgroundTransparency = 1
+PingLabel.Text = "Ping: 0 ms"
+PingLabel.TextColor3 = Color3.fromRGB(160, 160, 170)
+PingLabel.TextSize = 12
+PingLabel.Font = Enum.Font.GothamSemibold
+PingLabel.TextXAlignment = Enum.TextXAlignment.Left
+PingLabel.Parent = FpsPingFrame
+
+-- Atualizador em tempo real de FPS e Ping
+local lastUpdate = 0
+RunService.RenderStepped:Connect(function(dt)
+    if not MostrarFpsPing then return end
+    
+    local agora = tick()
+    if agora - lastUpdate >= 0.5 then -- Atualiza a cada meio segundo para evitar travamentos visuais
+        lastUpdate = agora
+        
+        -- Calcular FPS
+        local fps = math.floor(1 / dt)
+        FpsLabel.Text = "FPS: " .. fps
+        
+        -- Calcular Ping
+        local ping = 0
+        pcall(function()
+            ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+        end)
+        PingLabel.Text = "Ping: " .. ping .. " ms"
+    end
+end)
+
+
+-- ==================================
+-- 🔘 BOTÃO — TOGGLE DE FPS/PING NO PAINEL
+-- ==================================
+local FpsPingCard = Instance.new("Frame")
+FpsPingCard.Name = "FpsPingCard"
+FpsPingCard.Size = UDim2.new(1, -6, 0, 50)
+FpsPingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+FpsPingCard.BorderSizePixel = 0
+FpsPingCard.Parent = PageFrame
+
+local FpsPingCardCorner = Instance.new("UICorner")
+FpsPingCardCorner.CornerRadius = UDim.new(0, 10)
+FpsPingCardCorner.Parent = FpsPingCard
+
+local FpsPingCardStroke = Instance.new("UIStroke")
+FpsPingCardStroke.Color = Color3.fromRGB(39, 40, 48)
+FpsPingCardStroke.Thickness = 1
+FpsPingCardStroke.Parent = FpsPingCard
+
+local FpsPingTitle = Instance.new("TextLabel")
+FpsPingTitle.Name = "Title"
+FpsPingTitle.Size = UDim2.new(1, -60, 1, 0)
+FpsPingTitle.Position = UDim2.fromOffset(12, 0)
+FpsPingTitle.BackgroundTransparency = 1
+FpsPingTitle.Text = "📊 Mostrar FPS e Ping"
+FpsPingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+FpsPingTitle.TextSize = 12
+FpsPingTitle.Font = Enum.Font.GothamSemibold
+FpsPingTitle.TextXAlignment = Enum.TextXAlignment.Left
+FpsPingTitle.Parent = FpsPingCard
+
+local FpsPingToggleButton = Instance.new("TextButton")
+FpsPingToggleButton.Name = "ToggleButton"
+FpsPingToggleButton.Size = UDim2.fromOffset(26, 26)
+FpsPingToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+FpsPingToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+FpsPingToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+FpsPingToggleButton.BorderSizePixel = 0
+FpsPingToggleButton.Text = ""
+FpsPingToggleButton.AutoButtonColor = false
+FpsPingToggleButton.Parent = FpsPingCard
+
+local FpsPingToggleCorner = Instance.new("UICorner")
+FpsPingToggleCorner.CornerRadius = UDim.new(0, 6)
+FpsPingToggleCorner.Parent = FpsPingToggleButton
+
+local FpsPingToggleStroke = Instance.new("UIStroke")
+FpsPingToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+FpsPingToggleStroke.Thickness = 1
+FpsPingToggleStroke.Parent = FpsPingToggleButton
+
+local FpsPingCheckMark = Instance.new("TextLabel")
+FpsPingCheckMark.Name = "CheckMark"
+FpsPingCheckMark.Size = UDim2.fromScale(1, 1)
+FpsPingCheckMark.BackgroundTransparency = 1
+FpsPingCheckMark.Text = "✔"
+FpsPingCheckMark.TextColor3 = Color3.new(1, 1, 1)
+FpsPingCheckMark.TextSize = 14
+FpsPingCheckMark.Font = Enum.Font.GothamBold
+FpsPingCheckMark.TextTransparency = 1 
+FpsPingCheckMark.Parent = FpsPingToggleButton
+
+FpsPingToggleButton.Activated:Connect(function()
+    MostrarFpsPing = not MostrarFpsPing
+    FpsPingFrame.Visible = MostrarFpsPing
+    
+    local targetBgColor = MostrarFpsPing and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = MostrarFpsPing and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = MostrarFpsPing and 0 or 1
+
+    TweenService:Create(FpsPingToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(FpsPingToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(FpsPingCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
+
+-- ==================================
 -- 🔘 BOTÃO — NOTIFICAÇÃO MURDERER
 -- ==================================
 local NotifMurdererCard = Instance.new("Frame")
@@ -1083,7 +1241,6 @@ NotifSheriffToggleButton.Activated:Connect(function()
         UltimoSheriffNotificado = nil
     end
 end)
-
 
 -- ==================================
 -- 🔘 BOTÃO — NOTIFICAÇÃO HERÓI
