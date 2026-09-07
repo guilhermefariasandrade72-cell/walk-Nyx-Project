@@ -393,26 +393,6 @@ for Index, TabData in ipairs(TabsData) do
     if TabData.Name == "Main" then
 -- ================================================
 
--- =====================================
--- TÍTULO 
--- =====================================
-
-
--- ==================================
--- 🔴 KILL ALL LOOP — INTERFACE
--- ==================================
-
-
-local KillAuraLabel = Instance.new("TextLabel")
-KillAuraLabel.Size = UDim2.new(1, -6, 0, 30)
-KillAuraLabel.BackgroundTransparency = 1
-KillAuraLabel.Text = "KILL AURA"
-KillAuraLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
-KillAuraLabel.TextSize = 10
-KillAuraLabel.Font = Enum.Font.GothamBold
-KillAuraLabel.TextXAlignment = Enum.TextXAlignment.Left
-KillAuraLabel.Parent = PageFrame
-
 -- CARD PRINCIPAL
 local KillAuraCard = Instance.new("Frame")
 KillAuraCard.Name = "KillAuraCard"
