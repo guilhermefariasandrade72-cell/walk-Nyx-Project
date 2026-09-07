@@ -393,25 +393,20 @@ for Index, TabData in ipairs(TabsData) do
     if TabData.Name == "Main" then
 -- ================================================
 
--- ==================================
--- 🔴 VARIÁVEIS DO KILL AURA
--- ==================================
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer
-
-local KillAuraAtivo = false
-local RaioKillAura = 15
-local MostrarCirculoAura = false
-
-local CirculoAdornment = nil
 
 
--- ==================================
--- 🔴 BOTÕES DO KILL AURA
--- ==================================
 
--- 🔴 TÍTULO DA SESSÃO
+
+
+
+
+
+
+
+
+-- =====================================
+-- TÍTULO 
+-- =====================================
 local KillAuraLabel = Instance.new("TextLabel")
 KillAuraLabel.Size = UDim2.new(1, -6, 0, 30)
 KillAuraLabel.BackgroundTransparency = 1
@@ -422,8 +417,9 @@ KillAuraLabel.Font = Enum.Font.GothamBold
 KillAuraLabel.TextXAlignment = Enum.TextXAlignment.Left
 KillAuraLabel.Parent = PageFrame
 
+
 -- ==================================
--- 🔴 KILL ALL LOOP
+-- 🔴 KILL ALL LOOP (COM O SEU LOOP EXATO)
 -- ==================================
 
 local KillAllLoop = false
@@ -559,20 +555,58 @@ KillAllLoopToggleButton.Activated:Connect(function()
 end)
 
 -- ==================================
--- 🔄 LOGICA DO LOOP (SOMENTE SE FOR MURDERER)
+-- ⚔️ FUNÇÕES DE ATAQUE E SEU LOOP EXATO
 -- ==================================
 
+local function ExecutarAtaque(Alvo)
+    local Char = player.Character
+    if not Char then return end
+    
+    local Faca = Char:FindFirstChild("Knife") or (player.Backpack and player.Backpack:FindFirstChild("Knife"))
+    if not Faca then return end
+    
+    if Faca.Parent ~= Char then 
+        Faca.Parent = Char 
+        task.wait(0.02) 
+    end
+    
+    local Eventos = Faca:FindFirstChild("Events")
+    if not Eventos then return end
+
+    if Alvo and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
+        pcall(function()
+            Eventos.KnifeStabbed:FireServer()
+            Eventos.HandleTouched:FireServer(Alvo.Character.Head)
+        end)
+    end
+end
+
+-- Função para o Botão de Clique Instantâneo (mantida caso precise)
+local function KillAllInstantaneo()
+    for _, Alvo in ipairs(Players:GetPlayers()) do
+        if Alvo ~= player and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
+            ExecutarAtaque(Alvo)
+        end
+    end
+end
+
+-- Função para o Toggle (Mata 1 por 1 com pequeno intervalo)
+local function KillAuraLoop()
+    for _, Alvo in ipairs(Players:GetPlayers()) do
+        if not KillAllLoop then break end
+        if Alvo ~= player and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
+            ExecutarAtaque(Alvo)
+            task.wait(0.15)
+        end
+    end
+end
+
+-- Loop de execução do Toggle adaptado para a variável do seu botão
 task.spawn(function()
     while true do
-        task.wait(0.4)
+        task.wait(0.3)
         if KillAllLoop and EhMurderer() then
-            for _, Alvo in ipairs(Players:GetPlayers()) do
-                if not KillAllLoop or not EhMurderer() then break end
-                if Alvo ~= player and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
-                    ExecutarAtaque(Alvo)
-                    task.wait(0.1)
-                end
-            end
+            KillAuraLoop()
         end
     end
 end)
