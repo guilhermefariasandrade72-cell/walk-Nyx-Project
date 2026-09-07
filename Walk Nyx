@@ -903,6 +903,189 @@ local player = Players.LocalPlayer
 local XRayAtivo = false
 local ValoresOriginais = {}
 
+-- ==================================
+-- 🔔 VARIÁVEIS DA NOTIFICAÇÃO
+-- ==================================
+local NotificacaoGui = nil
+local UltimoMurdererNotificado = nil
+local MostrarNotificacao = true
+
+-- ==================================
+-- 🔘 BOTÃO — NOTIFICAÇÃO DO MURDERER
+-- ==================================
+
+local NotifToggle = Instance.new("TextButton")
+NotifToggle.Size = UDim2.fromOffset(26, 26)
+NotifToggle.Position = UDim2.new(1, -38, 0, 10)
+NotifToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+NotifToggle.BorderSizePixel = 0
+NotifToggle.Text = ""
+NotifToggle.AutoButtonColor = false
+NotifToggle.Parent = PageFrame  -- ← Coloca na aba que quiser
+
+local NotifToggleCorner = Instance.new("UICorner")
+NotifToggleCorner.CornerRadius = UDim.new(0, 6)
+NotifToggleCorner.Parent = NotifToggle
+
+local NotifToggleStroke = Instance.new("UIStroke")
+NotifToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+NotifToggleStroke.Thickness = 1
+NotifToggleStroke.Parent = NotifToggle
+
+local NotifCheck = Instance.new("TextLabel")
+NotifCheck.Size = UDim2.fromScale(1, 1)
+NotifCheck.BackgroundTransparency = 1
+NotifCheck.Text = "✔"
+NotifCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
+NotifCheck.TextSize = 14
+NotifCheck.Font = Enum.Font.GothamBold
+NotifCheck.TextTransparency = 0  -- ← LIGADO POR PADRÃO
+NotifCheck.Parent = NotifToggle
+
+local NotifTitle = Instance.new("TextLabel")
+NotifTitle.Size = UDim2.new(1, -55, 0, 25)
+NotifTitle.Position = UDim2.fromOffset(12, 10)
+NotifTitle.BackgroundTransparency = 1
+NotifTitle.Text = "🔔 Notificação Murderer"
+NotifTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+NotifTitle.TextSize = 12
+NotifTitle.Font = Enum.Font.GothamSemibold
+NotifTitle.TextXAlignment = Enum.TextXAlignment.Left
+NotifTitle.Parent = PageFrame
+
+NotifToggle.Activated:Connect(function()
+    MostrarNotificacao = not MostrarNotificacao
+    if MostrarNotificacao then
+        NotifToggle.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+        NotifToggleStroke.Color = Color3.fromRGB(255, 65, 80)
+        NotifCheck.TextTransparency = 0
+    else
+        NotifToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+        NotifToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+        NotifCheck.TextTransparency = 1
+        EsconderNotificacao()
+    end
+end)
+
+-- ==================================
+-- 🔔 SISTEMA DE NOTIFICAÇÃO DO MURDERER
+-- ==================================
+
+-- 🔍 DETECTA QUEM É O MURDERER
+local function ObterMurderer()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and p.Character then
+            local eMurder = p:GetAttribute("Role") == "Murderer"
+            local temFaca = p.Character:FindFirstChild("Knife") 
+                or (p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Knife"))
+            if eMurder or temFaca then
+                return p
+            end
+        end
+    end
+    return nil
+end
+
+-- 📬 MOSTRAR NOTIFICAÇÃO
+local function MostrarNotificacaoMurderer(JogadorMurderer)
+    if not MostrarNotificacao then return end
+    
+    -- Cria a GUI se não existir
+    if not NotificacaoGui then
+        NotificacaoGui = Instance.new("ScreenGui")
+        NotificacaoGui.Name = "WalkNyx_Notificacao"
+        NotificacaoGui.ResetOnSpawn = false
+        NotificacaoGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        NotificacaoGui.Parent = player:WaitForChild("PlayerGui")
+        
+        -- FUNDO RETANGULAR DA NOTIFICAÇÃO
+        local NotifBox = Instance.new("Frame")
+        NotifBox.Name = "NotifBox"
+        NotifBox.Size = UDim2.new(0, 220, 0, 60)
+        NotifBox.Position = UDim2.new(0.5, -110, 0.82, -30)  -- ↑ EM CIMA DO BOTÃO DE PULO
+        NotifBox.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+        NotifBox.BorderSizePixel = 0
+        NotifBox.Parent = NotificacaoGui
+        
+        local NotifCorner = Instance.new("UICorner")
+        NotifCorner.CornerRadius = UDim.new(0, 8)
+        NotifCorner.Parent = NotifBox
+        
+        local NotifStroke = Instance.new("UIStroke")
+        NotifStroke.Color = Color3.fromRGB(220, 40, 60)
+        NotifStroke.Thickness = 2
+        NotifStroke.Parent = NotifBox
+        
+        -- TÍTULO: WALK NYX
+        local Titulo = Instance.new("TextLabel")
+        Titulo.Name = "Titulo"
+        Titulo.Size = UDim2.new(1, -16, 0, 18)
+        Titulo.Position = UDim2.fromOffset(8, 6)
+        Titulo.BackgroundTransparency = 1
+        Titulo.Text = "Walk Nyx"
+        Titulo.TextColor3 = Color3.fromRGB(180, 180, 195)
+        Titulo.TextSize = 11
+        Titulo.Font = Enum.Font.GothamBold
+        Titulo.TextXAlignment = Enum.TextXAlignment.Left
+        Titulo.Parent = NotifBox
+        
+        -- TEXTO PRINCIPAL
+        local Mensagem = Instance.new("TextLabel")
+        Mensagem.Name = "Mensagem"
+        Mensagem.Size = UDim2.new(1, -16, 0, 24)
+        Mensagem.Position = UDim2.fromOffset(8, 26)
+        Mensagem.BackgroundTransparency = 1
+        Mensagem.Text = "Carregando..."
+        Mensagem.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Mensagem.TextSize = 13
+        Mensagem.Font = Enum.Font.GothamBold
+        Mensagem.TextXAlignment = Enum.TextXAlignment.Center
+        Mensagem.Parent = NotifBox
+    end
+    
+    -- Atualiza o texto com o nome do Murderer
+    local Mensagem = NotificacaoGui.NotifBox.Mensagem
+    Mensagem.Text = JogadorMurderer.Name .. " is the Murderer"
+    
+    -- Mostra com animaçãozinha
+    NotificacaoGui.NotifBox.Visible = true
+    NotificacaoGui.NotifBox.BackgroundTransparency = 0
+    NotificacaoGui.NotifBox.NotifStroke.Transparency = 0
+    Mensagem.TextTransparency = 0
+end
+
+-- ❌ ESCONDER NOTIFICAÇÃO
+local function EsconderNotificacao()
+    if NotificacaoGui and NotificacaoGui.NotifBox then
+        NotificacaoGui.NotifBox.Visible = false
+    end
+end
+
+-- 🔄 LOOP DE DETECÇÃO DO MURDERER
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        if not MostrarNotificacao then 
+            EsconderNotificacao()
+            continue 
+        end
+        
+        local MurdererAtual = ObterMurderer()
+        
+        -- Se achou um Murderer e é diferente do último notificado
+        if MurdererAtual and MurdererAtual ~= UltimoMurdererNotificado then
+            UltimoMurdererNotificado = MurdererAtual
+            MostrarNotificacaoMurderer(MurdererAtual)
+        end
+        
+        -- Se não tem mais Murderer ou ele mudou
+        if not MurdererAtual then
+            UltimoMurdererNotificado = nil
+            EsconderNotificacao()
+        end
+    end
+end)
+
 -- ===============================
 -- TITULO ESP
 -- ===============================
