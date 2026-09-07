@@ -417,6 +417,25 @@ KillAuraLabel.Font = Enum.Font.GothamBold
 KillAuraLabel.TextXAlignment = Enum.TextXAlignment.Left
 KillAuraLabel.Parent = PageFrame
 
+-- ==================================
+-- 🔍 VERIFICA SE É MURDERER
+-- ==================================
+local function EhMurderer()
+    local char = player.Character
+    if not char then return false end
+    
+    if player:GetAttribute("Role") == "Murderer" then
+        return true
+    end
+    
+    local temFaca = char:FindFirstChild("Knife") 
+        or (player.Backpack and player.Backpack:FindFirstChild("Knife"))
+    if temFaca then
+        return true
+    end
+    
+    return false
+end
 
 -- ==================================
 -- 🔴 KILL ALL LOOP (COM O SEU LOOP EXATO)
