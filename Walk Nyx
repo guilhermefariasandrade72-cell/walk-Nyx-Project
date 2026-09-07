@@ -904,21 +904,29 @@ local XRayAtivo = false
 local ValoresOriginais = {}
 
 -- ==================================
--- 🔔 VARIÁVEIS DA NOTIFICAÇÃO
+-- 🔔 VARIÁVEIS DAS NOTIFICAÇÕES
 -- ==================================
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 local NotificacaoGui = nil
+
+-- Estados e Cache de Notificação para cada cargo
+local MostrarNotifMurderer = false 
 local UltimoMurdererNotificado = nil
-local MostrarNotificacao = false 
-local Animando = false
+
+local MostrarNotifSheriff = false 
+local UltimoSheriffNotificado = nil
+
+local MostrarNotifHero = false 
+local UltimoHeroNotificado = nil
+
+local AnimandoNotificacao = false
 
 -- ==================================
 -- 🔘 BOTÃO — NOTIFICAÇÃO MURDERER
 -- ==================================
-
 local NotifMurdererCard = Instance.new("Frame")
 NotifMurdererCard.Name = "NotifMurdererCard"
 NotifMurdererCard.Size = UDim2.new(1, -6, 0, 50)
@@ -979,33 +987,186 @@ NotifMurdererCheckMark.TextTransparency = 1
 NotifMurdererCheckMark.Parent = NotifMurdererToggleButton
 
 NotifMurdererToggleButton.Activated:Connect(function()
-    MostrarNotificacao = not MostrarNotificacao
+    MostrarNotifMurderer = not MostrarNotifMurderer
     
-    local targetBgColor = MostrarNotificacao and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-    local targetStrokeColor = MostrarNotificacao and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-    local targetTextTrans = MostrarNotificacao and 0 or 1
+    local targetBgColor = MostrarNotifMurderer and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = MostrarNotifMurderer and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = MostrarNotifMurderer and 0 or 1
 
     TweenService:Create(NotifMurdererToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
     TweenService:Create(NotifMurdererToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
     TweenService:Create(NotifMurdererCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
     
-    if not MostrarNotificacao then
+    if not MostrarNotifMurderer then
         UltimoMurdererNotificado = nil
-        if NotificacaoGui and NotificacaoGui:FindFirstChild("NotifBox") then
-            NotificacaoGui.NotifBox.Visible = false
-        end
     end
 end)
 
 
 -- ==================================
--- 🔍 DETECÇÃO DO MURDERER (CORRIGIDA)
+-- 🔘 BOTÃO — NOTIFICAÇÃO SHERIFF
+-- ==================================
+local NotifSheriffCard = Instance.new("Frame")
+NotifSheriffCard.Name = "NotifSheriffCard"
+NotifSheriffCard.Size = UDim2.new(1, -6, 0, 50)
+NotifSheriffCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+NotifSheriffCard.BorderSizePixel = 0
+NotifSheriffCard.Parent = PageFrame
+
+local NotifSheriffCardCorner = Instance.new("UICorner")
+NotifSheriffCardCorner.CornerRadius = UDim.new(0, 10)
+NotifSheriffCardCorner.Parent = NotifSheriffCard
+
+local NotifSheriffCardStroke = Instance.new("UIStroke")
+NotifSheriffCardStroke.Color = Color3.fromRGB(39, 40, 48)
+NotifSheriffCardStroke.Thickness = 1
+NotifSheriffCardStroke.Parent = NotifSheriffCard
+
+local NotifSheriffTitle = Instance.new("TextLabel")
+NotifSheriffTitle.Name = "Title"
+NotifSheriffTitle.Size = UDim2.new(1, -60, 1, 0)
+NotifSheriffTitle.Position = UDim2.fromOffset(12, 0)
+NotifSheriffTitle.BackgroundTransparency = 1
+NotifSheriffTitle.Text = "🔔 Notificação Sheriff"
+NotifSheriffTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+NotifSheriffTitle.TextSize = 12
+NotifSheriffTitle.Font = Enum.Font.GothamSemibold
+NotifSheriffTitle.TextXAlignment = Enum.TextXAlignment.Left
+NotifSheriffTitle.Parent = NotifSheriffCard
+
+local NotifSheriffToggleButton = Instance.new("TextButton")
+NotifSheriffToggleButton.Name = "ToggleButton"
+NotifSheriffToggleButton.Size = UDim2.fromOffset(26, 26)
+NotifSheriffToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+NotifSheriffToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+NotifSheriffToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+NotifSheriffToggleButton.BorderSizePixel = 0
+NotifSheriffToggleButton.Text = ""
+NotifSheriffToggleButton.AutoButtonColor = false
+NotifSheriffToggleButton.Parent = NotifSheriffCard
+
+local NotifSheriffToggleCorner = Instance.new("UICorner")
+NotifSheriffToggleCorner.CornerRadius = UDim.new(0, 6)
+NotifSheriffToggleCorner.Parent = NotifSheriffToggleButton
+
+local NotifSheriffToggleStroke = Instance.new("UIStroke")
+NotifSheriffToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+NotifSheriffToggleStroke.Thickness = 1
+NotifSheriffToggleStroke.Parent = NotifSheriffToggleButton
+
+local NotifSheriffCheckMark = Instance.new("TextLabel")
+NotifSheriffCheckMark.Name = "CheckMark"
+NotifSheriffCheckMark.Size = UDim2.fromScale(1, 1)
+NotifSheriffCheckMark.BackgroundTransparency = 1
+NotifSheriffCheckMark.Text = "✔"
+NotifSheriffCheckMark.TextColor3 = Color3.new(1, 1, 1)
+NotifSheriffCheckMark.TextSize = 14
+NotifSheriffCheckMark.Font = Enum.Font.GothamBold
+NotifSheriffCheckMark.TextTransparency = 1 
+NotifSheriffCheckMark.Parent = NotifSheriffToggleButton
+
+NotifSheriffToggleButton.Activated:Connect(function()
+    MostrarNotifSheriff = not MostrarNotifSheriff
+    
+    local targetBgColor = MostrarNotifSheriff and Color3.fromRGB(40, 120, 225) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = MostrarNotifSheriff and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = MostrarNotifSheriff and 0 or 1
+
+    TweenService:Create(NotifSheriffToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(NotifSheriffToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(NotifSheriffCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+    
+    if not MostrarNotifSheriff then
+        UltimoSheriffNotificado = nil
+    end
+end)
+
+
+-- ==================================
+-- 🔘 BOTÃO — NOTIFICAÇÃO HERÓI
+-- ==================================
+local NotifHeroCard = Instance.new("Frame")
+NotifHeroCard.Name = "NotifHeroCard"
+NotifHeroCard.Size = UDim2.new(1, -6, 0, 50)
+NotifHeroCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+NotifHeroCard.BorderSizePixel = 0
+NotifHeroCard.Parent = PageFrame
+
+local NotifHeroCardCorner = Instance.new("UICorner")
+NotifHeroCardCorner.CornerRadius = UDim.new(0, 10)
+NotifHeroCardCorner.Parent = NotifHeroCard
+
+local NotifHeroCardStroke = Instance.new("UIStroke")
+NotifHeroCardStroke.Color = Color3.fromRGB(39, 40, 48)
+NotifHeroCardStroke.Thickness = 1
+NotifHeroCardStroke.Parent = NotifHeroCard
+
+local NotifHeroTitle = Instance.new("TextLabel")
+NotifHeroTitle.Name = "Title"
+NotifHeroTitle.Size = UDim2.new(1, -60, 1, 0)
+NotifHeroTitle.Position = UDim2.fromOffset(12, 0)
+NotifHeroTitle.BackgroundTransparency = 1
+NotifHeroTitle.Text = "🔔 Notificação Herói"
+NotifHeroTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+NotifHeroTitle.TextSize = 12
+NotifHeroTitle.Font = Enum.Font.GothamSemibold
+NotifHeroTitle.TextXAlignment = Enum.TextXAlignment.Left
+NotifHeroTitle.Parent = NotifHeroCard
+
+local NotifHeroToggleButton = Instance.new("TextButton")
+NotifHeroToggleButton.Name = "ToggleButton"
+NotifHeroToggleButton.Size = UDim2.fromOffset(26, 26)
+NotifHeroToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+NotifHeroToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+NotifHeroToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+NotifHeroToggleButton.BorderSizePixel = 0
+NotifHeroToggleButton.Text = ""
+NotifHeroToggleButton.AutoButtonColor = false
+NotifHeroToggleButton.Parent = NotifHeroCard
+
+local NotifHeroToggleCorner = Instance.new("UICorner")
+NotifHeroToggleCorner.CornerRadius = UDim.new(0, 6)
+NotifHeroToggleCorner.Parent = NotifHeroToggleButton
+
+local NotifHeroToggleStroke = Instance.new("UIStroke")
+NotifHeroToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+NotifHeroToggleStroke.Thickness = 1
+NotifHeroToggleStroke.Parent = NotifHeroToggleButton
+
+local NotifHeroCheckMark = Instance.new("TextLabel")
+NotifHeroCheckMark.Name = "CheckMark"
+NotifHeroCheckMark.Size = UDim2.fromScale(1, 1)
+NotifHeroCheckMark.BackgroundTransparency = 1
+NotifHeroCheckMark.Text = "✔"
+NotifHeroCheckMark.TextColor3 = Color3.new(1, 1, 1)
+NotifHeroCheckMark.TextSize = 14
+NotifHeroCheckMark.Font = Enum.Font.GothamBold
+NotifHeroCheckMark.TextTransparency = 1 
+NotifHeroCheckMark.Parent = NotifHeroToggleButton
+
+NotifHeroToggleButton.Activated:Connect(function()
+    MostrarNotifHero = not MostrarNotifHero
+    
+    local targetBgColor = MostrarNotifHero and Color3.fromRGB(210, 170, 30) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = MostrarNotifHero and Color3.fromRGB(255, 205, 50) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = MostrarNotifHero and 0 or 1
+
+    TweenService:Create(NotifHeroToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(NotifHeroToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(NotifHeroCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+    
+    if not MostrarNotifHero then
+        UltimoHeroNotificado = nil
+    end
+end)
+
+
+-- ==================================
+-- 🔍 DETECÇÃO DOS CARGOS PELO ESP DO SCRIPT
 -- ==================================
 local function getMurderer()
     for _, player in ipairs(Players:GetPlayers()) do
-        -- Ignora explicitamente o próprio jogador local
         if player ~= LocalPlayer and player.Character then
-            -- Método 1: Verificação de arma na mochila ou personagem
             local backpack = player:FindFirstChild("Backpack")
             local character = player.Character
             
@@ -1013,7 +1174,6 @@ local function getMurderer()
                 return player
             end
             
-            -- Método 2: Verificação por atributos/dados de equipe comuns no jogo
             if player:GetAttribute("Role") == "Murderer" or player.TeamColor == BrickColor.new("Really red") then
                 return player
             end
@@ -1022,8 +1182,48 @@ local function getMurderer()
     return nil
 end
 
+local function getSheriff()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local backpack = player:FindFirstChild("Backpack")
+            local character = player.Character
+            
+            -- Sheriff costuma carregar "Gun" ou "Revolver"
+            if (backpack and (backpack:FindFirstChild("Gun") or backpack:FindFirstChild("Revolver"))) or 
+               (character and (character:FindFirstChild("Gun") or character:FindFirstChild("Revolver"))) then
+                return player
+            end
+            
+            if player:GetAttribute("Role") == "Sheriff" or player.TeamColor == BrickColor.new("Blue") then
+                return player
+            end
+        end
+    end
+    return nil
+end
+
+local function getHero()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local backpack = player:FindFirstChild("Backpack")
+            local character = player.Character
+            
+            -- O Herói é quem pega a arma (Gun/Revolver) após o Sheriff morrer
+            if (backpack and (backpack:FindFirstChild("Gun") or backpack:FindFirstChild("Revolver"))) or 
+               (character and (character:FindFirstChild("Gun") or character:FindFirstChild("Revolver"))) then
+                -- Se não for o Sheriff tradicional, tratamos como Herói se necessário, ou checamos atributo específico
+                if player:GetAttribute("Role") == "Hero" then
+                    return player
+                end
+            end
+        end
+    end
+    return nil
+end
+
+
 -- ==================================
--- 📬 CRIAR NOTIFICAÇÃO (Z-INDEX ALTO E CLICKS PASSANTES)
+-- 📬 CRIAR NOTIFICAÇÃO (UI SCREEN)
 -- ==================================
 local function CriarNotificacao()
     if NotificacaoGui then return end
@@ -1032,7 +1232,7 @@ local function CriarNotificacao()
     NotificacaoGui.Name = "WalkNyx_Notificacao"
     NotificacaoGui.ResetOnSpawn = false
     NotificacaoGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    NotificacaoGui.DisplayOrder = 999999 -- Fica estritamente por cima de qualquer outra UI do jogo
+    NotificacaoGui.DisplayOrder = 999999 
     NotificacaoGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
     
     local NotifBox = Instance.new("Frame")
@@ -1043,7 +1243,7 @@ local function CriarNotificacao()
     NotifBox.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
     NotifBox.BorderSizePixel = 0
     NotifBox.Visible = false
-    NotifBox.Active = false -- CRUCIAL: Impede que o frame bloqueie os cliques do mouse
+    NotifBox.Active = false 
     NotifBox.Parent = NotificacaoGui
     
     local NotifCorner = Instance.new("UICorner")
@@ -1051,6 +1251,7 @@ local function CriarNotificacao()
     NotifCorner.Parent = NotifBox
     
     local NotifStroke = Instance.new("UIStroke")
+    NotifStroke.Name = "Stroke"
     NotifStroke.Color = Color3.fromRGB(220, 40, 60)
     NotifStroke.Thickness = 1.5
     NotifStroke.Parent = NotifBox
@@ -1082,18 +1283,20 @@ local function CriarNotificacao()
     Mensagem.Parent = NotifBox
 end
 
+
 -- ==================================
--- ✅ ANIMAÇÃO COM TWEEN
+-- ✅ DISPARADOR DE ANIMAÇÃO CENTRALIZADO
 -- ==================================
-local function MostrarNotificacaoMurderer(NomeMurderer)
-    if not MostrarNotificacao or Animando then return end
-    
+local function DispararAlerta(textoMensagem, corBorda)
+    if AnimandoNotificacao then return end
     if not NotificacaoGui then CriarNotificacao() end
+    
     local NotifBox = NotificacaoGui:FindFirstChild("NotifBox")
     if not NotifBox then return end
     
-    Animando = true
-    NotifBox.Mensagem.Text = NomeMurderer .. " is the Murderer"
+    AnimandoNotificacao = true
+    NotifBox.Mensagem.Text = textoMensagem
+    NotifBox.Stroke.Color = corBorda
     NotifBox.Visible = true
     
     local tweenInfoIn = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
@@ -1105,49 +1308,58 @@ local function MostrarNotificacaoMurderer(NomeMurderer)
     
     task.wait(4)
     
-    if not MostrarNotificacao then
-        NotifBox.Visible = false
-        Animando = false
-        return
-    end
-    
     local tweenSaida = TweenService:Create(NotifBox, tweenInfoOut, {Position = UDim2.new(1, 320, 1, -20)})
     tweenSaida:Play()
     tweenSaida.Completed:Wait()
     
     NotifBox.Visible = false
-    Animando = false
+    AnimandoNotificacao = false
 end
 
+
 -- ==================================
--- 🔄 LOOP PRINCIPAL
+-- 🔄 LOOP PRINCIPAL DE MONITORAMENTO
 -- ==================================
 task.spawn(function()
     CriarNotificacao()
     while true do
         task.wait(0.5)
         
-        if not MostrarNotificacao then
-            UltimoMurdererNotificado = nil
-            continue
+        -- 1. Checagem Murderer
+        if MostrarNotifMurderer then
+            local MurdererAtual = getMurderer()
+            if MurdererAtual and MurdererAtual ~= UltimoMurdererNotificado then
+                UltimoMurdererNotificado = MurdererAtual
+                DispararAlerta(MurdererAtual.Name .. " is the Murderer", Color3.fromRGB(225, 40, 56))
+            elseif not MurdererAtual then
+                UltimoMurdererNotificado = nil
+            end
         end
         
-        local MurdererAtual = getMurderer()
-        
-        if MurdererAtual and MurdererAtual ~= UltimoMurdererNotificado then
-            UltimoMurdererNotificado = MurdererAtual
-            MostrarNotificacaoMurderer(MurdererAtual.Name)
+        -- 2. Checagem Sheriff
+        if MostrarNotifSheriff then
+            local SheriffAtual = getSheriff()
+            if SheriffAtual and SheriffAtual ~= UltimoSheriffNotificado then
+                UltimoSheriffNotificado = SheriffAtual
+                DispararAlerta(SheriffAtual.Name .. " is the Sheriff", Color3.fromRGB(40, 120, 225))
+            elseif not SheriffAtual then
+                UltimoSheriffNotificado = nil
+            end
         end
         
-        if not MurdererAtual and UltimoMurdererNotificado then
-            UltimoMurdererNotificado = nil
+        -- 3. Checagem Herói
+        if MostrarNotifHero then
+            local HeroAtual = getHero()
+            if HeroAtual and HeroAtual ~= UltimoHeroNotificado then
+                UltimoHeroNotificado = HeroAtual
+                DispararAlerta(HeroAtual.Name .. " is the Hero", Color3.fromRGB(210, 170, 30))
+            elseif not HeroAtual then
+                UltimoHeroNotificado = nil
+            end
         end
+        
     end
 end)
-
-
-
-
 
 -- ===============================
 -- TITULO ESP
