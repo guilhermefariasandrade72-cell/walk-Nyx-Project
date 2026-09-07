@@ -1021,7 +1021,7 @@ local function ObterMurderer()
 end
 
 -- ==================================
--- 📬 CRIAR NOTIFICAÇÃO (POSICIONADA ACIMA DO BOTÃO DE PULO)
+-- 📬 CRIAR NOTIFICAÇÃO (CANTO INFERIOR DIREITO FIXO)
 -- ==================================
 local function CriarNotificacao()
     if NotificacaoGui then return end
@@ -1032,12 +1032,12 @@ local function CriarNotificacao()
     NotificacaoGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     NotificacaoGui.Parent = player:WaitForChild("PlayerGui")
     
-    -- FUNDO RETANGULAR (Posicionado acima do botão de pulo padrão do mobile: AnchorPoint Y = 1, e posição no canto inferior direito)
+    -- FUNDO RETANGULAR (Fixado no canto direito inferior, bem em cima do botão de pulo)
     local NotifBox = Instance.new("Frame")
     NotifBox.Name = "NotifBox"
     NotifBox.Size = UDim2.new(0, 280, 0, 75)
     NotifBox.AnchorPoint = Vector2.new(1, 1)
-    NotifBox.Position = UDim2.new(1, 10, 1, -150) -- Fica bem acima da área do botão de pulo
+    NotifBox.Position = UDim2.new(1, -20, 1, -140)
     NotifBox.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
     NotifBox.BorderSizePixel = 0
     NotifBox.Visible = false
@@ -1052,10 +1052,10 @@ local function CriarNotificacao()
     NotifStroke.Thickness = 2
     NotifStroke.Parent = NotifBox
     
-    -- TÍTULO MAIOR E MAIS DESTACADO
+    -- TÍTULO "Walk Nyx"
     local Titulo = Instance.new("TextLabel")
     Titulo.Name = "Titulo"
-    Titulo.Size = UDim2.new(1, -20, 0, 25)
+    Titulo.Size = UDim2.new(1, -24, 0, 24)
     Titulo.Position = UDim2.fromOffset(12, 10)
     Titulo.BackgroundTransparency = 1
     Titulo.Text = "Walk Nyx"
@@ -1065,7 +1065,7 @@ local function CriarNotificacao()
     Titulo.TextXAlignment = Enum.TextXAlignment.Left
     Titulo.Parent = NotifBox
     
-    -- MENSAGEM (Sem a linha divisória abaixo do título)
+    -- MENSAGEM (Sem linhas extras abaixo)
     local Mensagem = Instance.new("TextLabel")
     Mensagem.Name = "Mensagem"
     Mensagem.Size = UDim2.new(1, -24, 0, 30)
@@ -1094,21 +1094,25 @@ local function MostrarNotificacaoMurderer(NomeMurderer)
     Animando = true
     
     task.spawn(function()
-        -- 📥 ENTRADA: desliza da direita para a posição fixa
-        for i = 1, 25 do
+        -- Começa fora da tela à direita e desliza para a posição fixa (1, -20)
+        NotifBox.Position = UDim2.new(1, 300, 1, -140)
+        
+        for i = 1, 20 do
             if not NotifBox then break end
-            NotifBox.Position = UDim2.new(1, 10 - (i * 12), 1, -150)
+            local currentX = 300 - (i * 16)
+            NotifBox.Position = UDim2.new(1, currentX, 1, -140)
             task.wait(0.015)
         end
-        NotifBox.Position = UDim2.new(1, -290, 1, -150)
+        NotifBox.Position = UDim2.new(1, -20, 1, -140)
         
-        -- ⏸️ FICA VISÍVEL POR 4 SEGUNDOS
+        -- Fica visível por 4 segundos
         task.wait(4)
         
-        -- 📤 SAÍDA: desliza de volta para a direita
-        for i = 1, 25 do
+        -- Sai deslizando de volta para a direita
+        for i = 1, 20 do
             if not NotifBox then break end
-            NotifBox.Position = UDim2.new(1, -290 + (i * 12), 1, -150)
+            local currentX = -20 + (i * 16)
+            NotifBox.Position = UDim2.new(1, currentX, 1, -140)
             task.wait(0.015)
         end
         
