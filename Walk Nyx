@@ -394,34 +394,33 @@ for Index, TabData in ipairs(TabsData) do
 -- ================================================
 
 -- ==================================
--- 🔴 VARIÁVEIS
+-- 🔴 KILL ALL LOOP — APENAS INTERFACE
 -- ==================================
-local KillAura = false
+
 local KillAllLoop = false
 
--- ==================================
--- 🟥 CARD KILL AURA
--- ==================================
-local KillAuraCard = Instance.new("Frame")
-KillAuraCard.Name = "KillAuraCard"
-KillAuraCard.Size = UDim2.new(1, -6, 0, 85)
-KillAuraCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-KillAuraCard.BorderSizePixel = 0
-KillAuraCard.Parent = PageFrame
+local KillAllLoopCard = Instance.new("Frame")
+KillAllLoopCard.Name = "KillAllLoopCard"
+KillAllLoopCard.Size = UDim2.new(1, -6, 0, 85)
+KillAllLoopCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+KillAllLoopCard.BorderSizePixel = 0
+KillAllLoopCard.Parent = PageFrame
 
-local KillAuraCorner = Instance.new("UICorner")
-KillAuraCorner.CornerRadius = UDim.new(0, 10)
-KillAuraCorner.Parent = KillAuraCard
+local KillAllLoopCorner = Instance.new("UICorner")
+KillAllLoopCorner.CornerRadius = UDim.new(0, 10)
+KillAllLoopCorner.Parent = KillAllLoopCard
 
-local KillAuraStroke = Instance.new("UIStroke")
-KillAuraStroke.Color = Color3.fromRGB(39, 40, 48)
-KillAuraStroke.Thickness = 1
-KillAuraStroke.Parent = KillAuraCard
+local KillAllLoopStroke = Instance.new("UIStroke")
+KillAllLoopStroke.Color = Color3.fromRGB(39, 40, 48)
+KillAllLoopStroke.Thickness = 1
+KillAllLoopStroke.Parent = KillAllLoopCard
 
 -- ==================================
 -- 🔁 TÍTULO
 -- ==================================
+
 local KillAllLoopTitle = Instance.new("TextLabel")
+KillAllLoopTitle.Name = "KillAllLoopTitle"
 KillAllLoopTitle.Size = UDim2.new(1, -55, 0, 25)
 KillAllLoopTitle.Position = UDim2.fromOffset(12, 12)
 KillAllLoopTitle.BackgroundTransparency = 1
@@ -430,19 +429,21 @@ KillAllLoopTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
 KillAllLoopTitle.TextSize = 12
 KillAllLoopTitle.Font = Enum.Font.GothamSemibold
 KillAllLoopTitle.TextXAlignment = Enum.TextXAlignment.Left
-KillAllLoopTitle.Parent = KillAuraCard
+KillAllLoopTitle.Parent = KillAllLoopCard
 
 -- ==================================
--- 🔘 TOGGLE
+-- 🔘 BOTÃO
 -- ==================================
+
 local KillAllLoopToggle = Instance.new("TextButton")
+KillAllLoopToggle.Name = "KillAllLoopToggle"
 KillAllLoopToggle.Size = UDim2.fromOffset(26, 26)
 KillAllLoopToggle.Position = UDim2.new(1, -38, 0, 12)
 KillAllLoopToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
 KillAllLoopToggle.BorderSizePixel = 0
 KillAllLoopToggle.Text = ""
 KillAllLoopToggle.AutoButtonColor = false
-KillAllLoopToggle.Parent = KillAuraCard
+KillAllLoopToggle.Parent = KillAllLoopCard
 
 local KillAllLoopToggleCorner = Instance.new("UICorner")
 KillAllLoopToggleCorner.CornerRadius = UDim.new(0, 6)
@@ -453,7 +454,12 @@ KillAllLoopToggleStroke.Color = Color3.fromRGB(39, 40, 48)
 KillAllLoopToggleStroke.Thickness = 1
 KillAllLoopToggleStroke.Parent = KillAllLoopToggle
 
+-- ==================================
+-- ✔ CHECK
+-- ==================================
+
 local KillAllLoopCheck = Instance.new("TextLabel")
+KillAllLoopCheck.Name = "KillAllLoopCheck"
 KillAllLoopCheck.Size = UDim2.fromScale(1, 1)
 KillAllLoopCheck.BackgroundTransparency = 1
 KillAllLoopCheck.Text = "✔"
@@ -464,20 +470,35 @@ KillAllLoopCheck.TextTransparency = 1
 KillAllLoopCheck.Parent = KillAllLoopToggle
 
 -- ==================================
--- 🖱️ TOGGLE
+-- 🖱️ CLIQUE
 -- ==================================
+
 KillAllLoopToggle.Activated:Connect(function()
+
     KillAllLoop = not KillAllLoop
 
     if KillAllLoop then
-        KillAllLoopToggle.BackgroundColor3 = Color3.fromRGB(190, 30, 45)
-        KillAllLoopToggleStroke.Color = Color3.fromRGB(230, 50, 65)
+
+        KillAllLoopToggle.BackgroundColor3 =
+            Color3.fromRGB(190, 30, 45)
+
+        KillAllLoopToggleStroke.Color =
+            Color3.fromRGB(230, 50, 65)
+
         KillAllLoopCheck.TextTransparency = 0
+
     else
-        KillAllLoopToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-        KillAllLoopToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+
+        KillAllLoopToggle.BackgroundColor3 =
+            Color3.fromRGB(11, 12, 16)
+
+        KillAllLoopToggleStroke.Color =
+            Color3.fromRGB(39, 40, 48)
+
         KillAllLoopCheck.TextTransparency = 1
+
     end
+
 end)
 
 -- ==================================
