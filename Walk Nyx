@@ -423,10 +423,6 @@ KillAuraLabel.TextXAlignment = Enum.TextXAlignment.Left
 KillAuraLabel.Parent = PageFrame
 
 -- ==================================
--- 🔴 KILL ALL LOOP — BOTÃO ÚNICO
--- ==================================
-
--- ==================================
 -- 🔴 KILL ALL LOOP
 -- ==================================
 
@@ -562,6 +558,25 @@ KillAllLoopToggleButton.Activated:Connect(function()
 
 end)
 
+-- ==================================
+-- 🔄 LOGICA DO LOOP (SOMENTE SE FOR MURDERER)
+-- ==================================
+
+task.spawn(function()
+    while true do
+        task.wait(0.4)
+        if KillAllLoop and EhMurderer() then
+            for _, Alvo in ipairs(Players:GetPlayers()) do
+                if not KillAllLoop or not EhMurderer() then break end
+                if Alvo ~= player and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
+                    ExecutarAtaque(Alvo)
+                    task.wait(0.1)
+                end
+            end
+        end
+    end
+end)
+
 local KillAuraLabel = Instance.new("TextLabel")
 KillAuraLabel.Size = UDim2.new(1, -6, 0, 30)
 KillAuraLabel.BackgroundTransparency = 1
@@ -675,7 +690,7 @@ local CirculoTitle = Instance.new("TextLabel")
 CirculoTitle.Size = UDim2.new(1, -55, 0, 25)
 CirculoTitle.Position = UDim2.fromOffset(12, 58)
 CirculoTitle.BackgroundTransparency = 1
-CirculoTitle.Text = "Mostrar Círculo"
+CirculoTitle.Text = "Cicle Aura"
 CirculoTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
 CirculoTitle.TextSize = 12
 CirculoTitle.Font = Enum.Font.GothamSemibold
