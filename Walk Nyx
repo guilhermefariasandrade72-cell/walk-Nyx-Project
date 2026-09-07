@@ -912,7 +912,7 @@ local player = Players.LocalPlayer
 
 local NotificacaoGui = nil
 local UltimoMurdererNotificado = nil
-local MostrarNotificacao = false -- Começa desligado por padrão
+local MostrarNotificacao = false 
 local Animando = false
 
 -- ==================================
@@ -952,7 +952,7 @@ NotifMurdererToggleButton.Name = "ToggleButton"
 NotifMurdererToggleButton.Size = UDim2.fromOffset(26, 26)
 NotifMurdererToggleButton.AnchorPoint = Vector2.new(1, 0.5)
 NotifMurdererToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
-NotifMurdererToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16) -- Inicia desligado
+NotifMurdererToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
 NotifMurdererToggleButton.BorderSizePixel = 0
 NotifMurdererToggleButton.Text = ""
 NotifMurdererToggleButton.AutoButtonColor = false
@@ -975,7 +975,7 @@ NotifMurdererCheckMark.Text = "✔"
 NotifMurdererCheckMark.TextColor3 = Color3.new(1, 1, 1)
 NotifMurdererCheckMark.TextSize = 14
 NotifMurdererCheckMark.Font = Enum.Font.GothamBold
-NotifMurdererCheckMark.TextTransparency = 1 -- Inicia invisível (desligado)
+NotifMurdererCheckMark.TextTransparency = 1 
 NotifMurdererCheckMark.Parent = NotifMurdererToggleButton
 
 NotifMurdererToggleButton.Activated:Connect(function()
@@ -999,22 +999,20 @@ end)
 
 
 -- ==================================
--- 🔍 DETECTA QUEM É O MURDERER
+-- 🔍 DETECÇÃO DO MURDERER (MESMO SISTEMA DO SEU SCRIPT)
 -- ==================================
-local function ObterMurderer()
+local function ObterMurdererNotif()
     for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+        if p ~= player and p.Character then
             local char = p.Character
-            local hum = char:FindFirstChild("Humanoid")
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local hrp = char:FindFirstChild("HumanoidRootPart")
             
-            if hum and hum.Health > 0 then
-                if p:GetAttribute("Role") == "Murderer" then
-                    return p
-                end
+            if hum and hum.Health > 0 and hrp then
+                local temFaca = char:FindFirstChild("Knife") or (p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Knife"))
+                local eMurder = (p:GetAttribute("Role") == "Murderer") or (temFaca ~= nil)
                 
-                local temFaca = char:FindFirstChild("Knife") 
-                    or (p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Knife"))
-                if temFaca then
+                if eMurder then
                     return p
                 end
             end
@@ -1024,7 +1022,7 @@ local function ObterMurderer()
 end
 
 -- ==================================
--- 📬 CRIAR NOTIFICAÇÃO (BEM ESCURA)
+-- 📬 CRIAR NOTIFICAÇÃO (Z-INDEX ALTO E CLICKS PASSANTES)
 -- ==================================
 local function CriarNotificacao()
     if NotificacaoGui then return end
@@ -1033,6 +1031,7 @@ local function CriarNotificacao()
     NotificacaoGui.Name = "WalkNyx_Notificacao"
     NotificacaoGui.ResetOnSpawn = false
     NotificacaoGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    NotificacaoGui.DisplayOrder = 999999 -- Fica estritamente por cima de qualquer outra UI do jogo
     NotificacaoGui.Parent = player:WaitForChild("PlayerGui")
     
     local NotifBox = Instance.new("Frame")
@@ -1040,10 +1039,10 @@ local function CriarNotificacao()
     NotifBox.Size = UDim2.new(0, 280, 0, 75)
     NotifBox.AnchorPoint = Vector2.new(1, 1)
     NotifBox.Position = UDim2.new(1, 320, 1, -20) 
-    -- Fundo bem mais escuro como você pediu (#0C0C10)
     NotifBox.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
     NotifBox.BorderSizePixel = 0
     NotifBox.Visible = false
+    NotifBox.Active = false -- CRUCIAL: Impede que o frame bloqueie os cliques do mouse
     NotifBox.Parent = NotificacaoGui
     
     local NotifCorner = Instance.new("UICorner")
@@ -1065,6 +1064,7 @@ local function CriarNotificacao()
     Titulo.TextSize = 15
     Titulo.Font = Enum.Font.GothamBold
     Titulo.TextXAlignment = Enum.TextXAlignment.Left
+    Titulo.Active = false
     Titulo.Parent = NotifBox
     
     local Mensagem = Instance.new("TextLabel")
@@ -1077,6 +1077,7 @@ local function CriarNotificacao()
     Mensagem.TextSize = 13
     Mensagem.Font = Enum.Font.GothamSemibold
     Mensagem.TextXAlignment = Enum.TextXAlignment.Left
+    Mensagem.Active = false
     Mensagem.Parent = NotifBox
 end
 
@@ -1084,7 +1085,6 @@ end
 -- ✅ ANIMAÇÃO COM TWEEN
 -- ==================================
 local function MostrarNotificacaoMurderer(NomeMurderer)
-    -- Trava estritamente caso o toggle esteja desligado
     if not MostrarNotificacao or Animando then return end
     
     if not NotificacaoGui then CriarNotificacao() end
@@ -1126,13 +1126,12 @@ task.spawn(function()
     while true do
         task.wait(0.5)
         
-        -- Se estiver desligado, nem processa a checagem do murderer
         if not MostrarNotificacao then
             UltimoMurdererNotificado = nil
             continue
         end
         
-        local MurdererAtual = ObterMurderer()
+        local MurdererAtual = ObterMurdererNotif()
         
         if MurdererAtual and MurdererAtual ~= UltimoMurdererNotificado then
             UltimoMurdererNotificado = MurdererAtual
