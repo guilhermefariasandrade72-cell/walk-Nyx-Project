@@ -397,6 +397,7 @@ for Index, TabData in ipairs(TabsData) do
 -- 🔴 VARIÁVEIS DO KILL AURA
 -- ==================================
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
 local KillAuraAtivo = false
@@ -404,6 +405,7 @@ local RaioKillAura = 15
 local MostrarCirculoAura = false
 
 local CirculoAdornment = nil
+
 
 -- ==================================
 -- 🔴 BOTÕES DO KILL AURA
@@ -600,25 +602,54 @@ RaioSliderButton.BackgroundTransparency = 1
 RaioSliderButton.Text = ""
 RaioSliderButton.Parent = RaioSliderBg
 
+-- 📏 CRIAR / ATUALIZAR O CÍRCULO VERMELHO VISUAL (DECLARADA ANTES)
+local AtualizarCirculoAura -- Declaração prévia para evitar erro de escopo
+
+AtualizarCirculoAura = function()
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+    if not MostrarCirculoAura or not hrp then
+        if CirculoAdornment then
+            CirculoAdornment:Destroy()
+            CirculoAdornment = nil
+        end
+        return
+    end
+
+    if not CirculoAdornment or not CirculoAdornment.Parent then
+        CirculoAdornment = Instance.new("CylinderHandleAdornment")
+        CirculoAdornment.Name = "KillAuraRangeVisual"
+        CirculoAdornment.Color3 = Color3.fromRGB(255, 0, 0)
+        CirculoAdornment.Transparency = 0.6
+        CirculoAdornment.AlwaysOnTop = true
+        CirculoAdornment.ZIndex = 5
+        CirculoAdornment.CFrame = CFrame.Angles(math.rad(90), 0, 0)
+    end
+
+    CirculoAdornment.Adornee = hrp
+    CirculoAdornment.Parent = hrp
+    CirculoAdornment.Height = 0.2
+    CirculoAdornment.Radius = RaioKillAura
+end
+
 -- LÓGICA DO SLIDER
 local RaioSliding = false
 local RaioActiveInput = nil
 local RaioMin = 5
 local RaioMax = 40
-local RaioValue = 15
 
 local function AtualizarRaioSlider(valor)
     valor = math.clamp(valor, RaioMin, RaioMax)
-    RaioValue = math.floor(valor + 0.5)
-    local porcentagem = (RaioValue - RaioMin) / (RaioMax - RaioMin)
+    RaioKillAura = math.floor(valor + 0.5)
+    local porcentagem = (RaioKillAura - RaioMin) / (RaioMax - RaioMin)
     RaioSliderFill.Size = UDim2.new(porcentagem, 0, 1, 0)
     RaioSliderButton.Position = UDim2.new(porcentagem, 0, 0.5, 0)
-    RaioSliderValue.Text = tostring(RaioValue)
-    RaioKillAura = RaioValue
+    RaioSliderValue.Text = tostring(RaioKillAura)
     AtualizarCirculoAura()
 end
 
-AtualizarRaioSlider(RaioValue)
+AtualizarRaioSlider(RaioKillAura)
 
 RaioSliderButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
@@ -653,38 +684,10 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
+
 -- ==================================
 -- 🔴 SISTEMA DO KILL AURA
 -- ==================================
-
--- 📏 CRIAR / ATUALIZAR O CÍRCULO VERMELHO VISUAL
-local function AtualizarCirculoAura()
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
-    if not MostrarCirculoAura or not hrp then
-        if CirculoAdornment then
-            CirculoAdornment:Destroy()
-            CirculoAdornment = nil
-        end
-        return
-    end
-
-    if not CirculoAdornment or not CirculoAdornment.Parent then
-        CirculoAdornment = Instance.new("CylinderHandleAdornment")
-        CirculoAdornment.Name = "KillAuraRangeVisual"
-        CirculoAdornment.Color3 = Color3.fromRGB(255, 0, 0)
-        CirculoAdornment.Transparency = 0.6
-        CirculoAdornment.AlwaysOnTop = true
-        CirculoAdornment.ZIndex = 5
-        CirculoAdornment.CFrame = CFrame.Angles(math.rad(90), 0, 0)
-    end
-
-    CirculoAdornment.Adornee = hrp
-    CirculoAdornment.Parent = hrp
-    CirculoAdornment.Height = 0.2
-    CirculoAdornment.Radius = RaioKillAura
-end
 
 -- ⚔️ EXECUTAR ATAQUE DE FACA
 local function ExecutarAtaque(Alvo)
@@ -754,6 +757,8 @@ player.CharacterAdded:Connect(function()
     task.wait(1)
     AtualizarCirculoAura()
 end)
+
+
 
 -- ================================================
 --              ABA AUTO FARM
