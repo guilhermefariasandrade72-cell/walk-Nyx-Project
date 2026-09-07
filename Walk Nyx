@@ -912,6 +912,7 @@ local UltimoMurdererNotificado = nil
 local MostrarNotificacao = true
 local Animando = false
 
+
 -- ==================================
 -- 🔘 BOTÃO — NOTIFICAÇÃO MURDERER
 -- ==================================
@@ -993,8 +994,9 @@ NotifMurdererToggleButton.Activated:Connect(function()
     end
 end)
 
+
 -- ==================================
--- 🔍 DETECTA QUEM É O MURDERER — MESMO SISTEMA DO SEU ESP
+-- 🔍 DETECTA QUEM É O MURDERER
 -- ==================================
 local function ObterMurderer()
     for _, p in ipairs(Players:GetPlayers()) do
@@ -1003,12 +1005,10 @@ local function ObterMurderer()
             local hum = char:FindFirstChild("Humanoid")
             
             if hum and hum.Health > 0 then
-                -- ✅ MÉTODO 1: Atributo do jogador
                 if p:GetAttribute("Role") == "Murderer" then
                     return p
                 end
                 
-                -- ✅ MÉTODO 2: Está segurando a faca
                 local temFaca = char:FindFirstChild("Knife") 
                     or (p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Knife"))
                 if temFaca then
@@ -1021,7 +1021,7 @@ local function ObterMurderer()
 end
 
 -- ==================================
--- 📬 CRIAR NOTIFICAÇÃO
+-- 📬 CRIAR NOTIFICAÇÃO (POSICIONADA ACIMA DO BOTÃO DE PULO)
 -- ==================================
 local function CriarNotificacao()
     if NotificacaoGui then return end
@@ -1032,11 +1032,12 @@ local function CriarNotificacao()
     NotificacaoGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     NotificacaoGui.Parent = player:WaitForChild("PlayerGui")
     
-    -- FUNDO RETANGULAR
+    -- FUNDO RETANGULAR (Posicionado acima do botão de pulo padrão do mobile: AnchorPoint Y = 1, e posição no canto inferior direito)
     local NotifBox = Instance.new("Frame")
     NotifBox.Name = "NotifBox"
-    NotifBox.Size = UDim2.new(0, 260, 0, 65)
-    NotifBox.Position = UDim2.new(1, 10, 0.88, -32)
+    NotifBox.Size = UDim2.new(0, 280, 0, 75)
+    NotifBox.AnchorPoint = Vector2.new(1, 1)
+    NotifBox.Position = UDim2.new(1, 10, 1, -150) -- Fica bem acima da área do botão de pulo
     NotifBox.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
     NotifBox.BorderSizePixel = 0
     NotifBox.Visible = false
@@ -1051,37 +1052,30 @@ local function CriarNotificacao()
     NotifStroke.Thickness = 2
     NotifStroke.Parent = NotifBox
     
-    -- TÍTULO
+    -- TÍTULO MAIOR E MAIS DESTACADO
     local Titulo = Instance.new("TextLabel")
     Titulo.Name = "Titulo"
-    Titulo.Size = UDim2.new(1, -20, 0, 20)
-    Titulo.Position = UDim2.fromOffset(10, 8)
+    Titulo.Size = UDim2.new(1, -20, 0, 25)
+    Titulo.Position = UDim2.fromOffset(12, 10)
     Titulo.BackgroundTransparency = 1
     Titulo.Text = "Walk Nyx"
-    Titulo.TextColor3 = Color3.fromRGB(180, 180, 195)
-    Titulo.TextSize = 12
+    Titulo.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Titulo.TextSize = 15
     Titulo.Font = Enum.Font.GothamBold
     Titulo.TextXAlignment = Enum.TextXAlignment.Left
     Titulo.Parent = NotifBox
     
-    -- LINHA DIVISÓRIA
-    local Linha = Instance.new("Frame")
-    Linha.Size = UDim2.new(1, -20, 0, 1)
-    Linha.Position = UDim2.fromOffset(10, 30)
-    Linha.BackgroundColor3 = Color3.fromRGB(60, 60, 75)
-    Linha.Parent = NotifBox
-    
-    -- MENSAGEM
+    -- MENSAGEM (Sem a linha divisória abaixo do título)
     local Mensagem = Instance.new("TextLabel")
     Mensagem.Name = "Mensagem"
-    Mensagem.Size = UDim2.new(1, -20, 0, 24)
-    Mensagem.Position = UDim2.fromOffset(10, 36)
+    Mensagem.Size = UDim2.new(1, -24, 0, 30)
+    Mensagem.Position = UDim2.fromOffset(12, 36)
     Mensagem.BackgroundTransparency = 1
     Mensagem.Text = "Carregando..."
-    Mensagem.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Mensagem.TextSize = 14
-    Mensagem.Font = Enum.Font.GothamBold
-    Mensagem.TextXAlignment = Enum.TextXAlignment.Center
+    Mensagem.TextColor3 = Color3.fromRGB(200, 200, 215)
+    Mensagem.TextSize = 13
+    Mensagem.Font = Enum.Font.GothamSemibold
+    Mensagem.TextXAlignment = Enum.TextXAlignment.Left
     Mensagem.Parent = NotifBox
 end
 
@@ -1099,22 +1093,22 @@ local function MostrarNotificacaoMurderer(NomeMurderer)
     NotifBox.Visible = true
     Animando = true
     
-    -- 📥 ENTRADA: vem da direita
     task.spawn(function()
+        -- 📥 ENTRADA: desliza da direita para a posição fixa
         for i = 1, 25 do
             if not NotifBox then break end
-            NotifBox.Position = UDim2.new(1, 10 - (i * 11), 0.88, -32)
+            NotifBox.Position = UDim2.new(1, 10 - (i * 12), 1, -150)
             task.wait(0.015)
         end
-        NotifBox.Position = UDim2.new(0.5, -130, 0.88, -32)
+        NotifBox.Position = UDim2.new(1, -290, 1, -150)
         
         -- ⏸️ FICA VISÍVEL POR 4 SEGUNDOS
         task.wait(4)
         
-        -- 📤 SAÍDA: vai para a direita
+        -- 📤 SAÍDA: desliza de volta para a direita
         for i = 1, 25 do
             if not NotifBox then break end
-            NotifBox.Position = UDim2.new(0.5, -130 + (i * 11), 0.88, -32)
+            NotifBox.Position = UDim2.new(1, -290 + (i * 12), 1, -150)
             task.wait(0.015)
         end
         
@@ -1138,19 +1132,16 @@ task.spawn(function()
         
         local MurdererAtual = ObterMurderer()
         
-        -- ✅ NOVO MURDERER DETECTADO
         if MurdererAtual and MurdererAtual ~= UltimoMurdererNotificado then
             UltimoMurdererNotificado = MurdererAtual
             MostrarNotificacaoMurderer(MurdererAtual.Name)
         end
         
-        -- ✅ MURDERER MORREU/SAIU
         if not MurdererAtual and UltimoMurdererNotificado then
             UltimoMurdererNotificado = nil
         end
     end
 end)
-
 
 -- ===============================
 -- TITULO ESP
