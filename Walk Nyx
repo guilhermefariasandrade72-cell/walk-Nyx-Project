@@ -644,6 +644,26 @@ task.spawn(function()
     end
 end)
 
+-- ===============================
+-- TITULO AUTO FARM
+-- ===============================
+
+local SectionLabel_AutoFarm = Instance.new("TextLabel")
+SectionLabel_AutoFarm.Name = "AutoFarmLabel"
+SectionLabel_AutoFarm.Size = UDim2.new(1, -24, 0, 30)
+SectionLabel_AutoFarm.Position = UDim2.fromOffset(12, 8)
+SectionLabel_AutoFarm.BackgroundTransparency = 1
+SectionLabel_AutoFarm.Text = "AUTO FARM"
+SectionLabel_AutoFarm.TextColor3 = Color3.fromRGB(180, 180, 195)
+SectionLabel_AutoFarm.TextSize = 20
+SectionLabel_AutoFarm.Font = Enum.Font.GothamBold
+SectionLabel_AutoFarm.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel_AutoFarm.TextYAlignment = Enum.TextYAlignment.Center
+SectionLabel_AutoFarm.TextTransparency = 0
+SectionLabel_AutoFarm.Visible = true
+SectionLabel_AutoFarm.ZIndex = 10
+SectionLabel_AutoFarm.Parent = PageFrame
+
 -- ====================================================
 -- 🚜 BOTÕES DO AUTO FARM — SEU ESTILO
 -- ====================================================
@@ -831,42 +851,28 @@ end)
 -- ===============================
 -- TITULO AUTO FARM
 -- ===============================
+
 local SectionLabel_AutoFarm = Instance.new("TextLabel")
 SectionLabel_AutoFarm.Name = "AutoFarmLabel"
-SectionLabel_AutoFarm.Size = UDim2.new(1, -6, 0, 30)
+SectionLabel_AutoFarm.Size = UDim2.new(1, -24, 0, 30)
+SectionLabel_AutoFarm.Position = UDim2.fromOffset(12, 8)
 SectionLabel_AutoFarm.BackgroundTransparency = 1
 SectionLabel_AutoFarm.Text = "SETTINGS FARM"
 SectionLabel_AutoFarm.TextColor3 = Color3.fromRGB(180, 180, 195)
 SectionLabel_AutoFarm.TextSize = 20
 SectionLabel_AutoFarm.Font = Enum.Font.GothamBold
 SectionLabel_AutoFarm.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel_AutoFarm.TextYAlignment = Enum.TextYAlignment.Center
 SectionLabel_AutoFarm.TextTransparency = 0
-SectionLabel_AutoFarm.Parent = PageFrame_AutoFarm
+SectionLabel_AutoFarm.Visible = true
+SectionLabel_AutoFarm.ZIndex = 10
+SectionLabel_AutoFarm.Parent = PageFrame
 
 
 -- ============================================
 --               ABA ESP
     elseif TabData.Name == "ESP" then
 -- ============================================
-
--- ===============================
--- TITULO ESP
--- ===============================
-
-local SectionLabel_ESP = Instance.new("TextLabel")
-SectionLabel_ESP.Name = "ESPLabel"
-SectionLabel_ESP.Size = UDim2.new(1, -24, 0, 30)
-SectionLabel_ESP.Position = UDim2.fromOffset(12, 8)
-SectionLabel_ESP.BackgroundTransparency = 1
-SectionLabel_ESP.Text = "ESP"
-SectionLabel_ESP.TextColor3 = Color3.fromRGB(180, 180, 195)
-SectionLabel_ESP.TextSize = 20
-SectionLabel_ESP.Font = Enum.Font.GothamBold
-SectionLabel_ESP.TextXAlignment = Enum.TextXAlignment.Left
-SectionLabel_ESP.TextYAlignment = Enum.TextYAlignment.Center
-SectionLabel_ESP.Visible = true
-SectionLabel_ESP.ZIndex = 10
-SectionLabel_ESP.Parent = PageFrame
 
 -- ==================================
 -- 👁️ VARIÁVEIS DO ESP
@@ -894,6 +900,25 @@ local player = Players.LocalPlayer
 -- ==================================
 local XRayAtivo = false
 local ValoresOriginais = {}
+
+-- ===============================
+-- TITULO ESP
+-- ===============================
+
+local SectionLabel_ESP = Instance.new("TextLabel")
+SectionLabel_ESP.Name = "ESPLabel"
+SectionLabel_ESP.Size = UDim2.new(1, -24, 0, 30)
+SectionLabel_ESP.Position = UDim2.fromOffset(12, 8)
+SectionLabel_ESP.BackgroundTransparency = 1
+SectionLabel_ESP.Text = "ESP PLAYER"
+SectionLabel_ESP.TextColor3 = Color3.fromRGB(180, 180, 195)
+SectionLabel_ESP.TextSize = 20
+SectionLabel_ESP.Font = Enum.Font.GothamBold
+SectionLabel_ESP.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel_ESP.TextYAlignment = Enum.TextYAlignment.Center
+SectionLabel_ESP.Visible = true
+SectionLabel_ESP.ZIndex = 10
+SectionLabel_ESP.Parent = PageFrame
 
 -- ==================================
 -- ✨ 1. HIGHLIGHT ESP
@@ -1279,6 +1304,25 @@ XRayToggleButton.Activated:Connect(function()
     TweenService:Create(XRayToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
     TweenService:Create(XRayCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
 end)
+
+-- ===============================
+-- TITULO ESP
+-- ===============================
+
+local SectionLabel_ESP = Instance.new("TextLabel")
+SectionLabel_ESP.Name = "ESPLabel"
+SectionLabel_ESP.Size = UDim2.new(1, -24, 0, 30)
+SectionLabel_ESP.Position = UDim2.fromOffset(12, 8)
+SectionLabel_ESP.BackgroundTransparency = 1
+SectionLabel_ESP.Text = "ESP OBJETO"
+SectionLabel_ESP.TextColor3 = Color3.fromRGB(180, 180, 195)
+SectionLabel_ESP.TextSize = 20
+SectionLabel_ESP.Font = Enum.Font.GothamBold
+SectionLabel_ESP.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel_ESP.TextYAlignment = Enum.TextYAlignment.Center
+SectionLabel_ESP.Visible = true
+SectionLabel_ESP.ZIndex = 10
+SectionLabel_ESP.Parent = PageFrame
 
 -- ==================================
 -- 🧱 SISTEMA DO X-RAY
