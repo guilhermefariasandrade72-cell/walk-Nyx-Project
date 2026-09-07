@@ -396,6 +396,21 @@ for Index, TabData in ipairs(TabsData) do
     elseif TabData.Name == "Auto Farm" then
 -- ================================================
 
+-- ===============================
+-- TITULO AUTO FARM
+-- ===============================
+local SectionLabel_AutoFarm = Instance.new("TextLabel")
+SectionLabel_AutoFarm.Name = "AutoFarmLabel"
+SectionLabel_AutoFarm.Size = UDim2.new(1, -6, 0, 30)
+SectionLabel_AutoFarm.BackgroundTransparency = 1
+SectionLabel_AutoFarm.Text = "AUTO FARM"
+SectionLabel_AutoFarm.TextColor3 = Color3.fromRGB(180, 180, 195)
+SectionLabel_AutoFarm.TextSize = 20
+SectionLabel_AutoFarm.Font = Enum.Font.GothamBold
+SectionLabel_AutoFarm.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel_AutoFarm.TextTransparency = 0
+SectionLabel_AutoFarm.Parent = PageFrame_AutoFarm
+
 -- ====================================================
 -- 🚜 VARIÁVEIS DO AUTO FARM — IGUALZINHO AO SEU
 -- ====================================================
@@ -813,6 +828,21 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
+-- ===============================
+-- TITULO AUTO FARM
+-- ===============================
+local SectionLabel_AutoFarm = Instance.new("TextLabel")
+SectionLabel_AutoFarm.Name = "AutoFarmLabel"
+SectionLabel_AutoFarm.Size = UDim2.new(1, -6, 0, 30)
+SectionLabel_AutoFarm.BackgroundTransparency = 1
+SectionLabel_AutoFarm.Text = "SETTINGS FARM"
+SectionLabel_AutoFarm.TextColor3 = Color3.fromRGB(180, 180, 195)
+SectionLabel_AutoFarm.TextSize = 20
+SectionLabel_AutoFarm.Font = Enum.Font.GothamBold
+SectionLabel_AutoFarm.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel_AutoFarm.TextTransparency = 0
+SectionLabel_AutoFarm.Parent = PageFrame_AutoFarm
+
 
 -- ============================================
 --               ABA ESP
@@ -822,6 +852,7 @@ end)
 -- ==================================
 -- 👁️ VARIÁVEIS DO ESP
 -- ==================================
+
 local ESPHighlightAtivo = false
 local ESPNomeAtivo = false
 local ESPDistanciaAtiva = false
@@ -844,6 +875,21 @@ local player = Players.LocalPlayer
 -- ==================================
 local XRayAtivo = false
 local ValoresOriginais = {}
+
+-- ===============================
+-- TITULO ESP
+-- ===============================
+local SectionLabel_ESP = Instance.new("TextLabel")
+SectionLabel_ESP.Name = "ESPLabel"
+SectionLabel_ESP.Size = UDim2.new(1, -6, 0, 30)
+SectionLabel_ESP.BackgroundTransparency = 1
+SectionLabel_ESP.Text = "ESP PLAYER"
+SectionLabel_ESP.TextColor3 = Color3.fromRGB(180, 180, 195)
+SectionLabel_ESP.TextSize = 20
+SectionLabel_ESP.Font = Enum.Font.GothamBold
+SectionLabel_ESP.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel_ESP.TextTransparency = 0
+SectionLabel_ESP.Parent = PageFrame_ESP
 
 -- ==================================
 -- ✨ 1. HIGHLIGHT ESP
@@ -1140,6 +1186,21 @@ ESPLineToggleButton.Activated:Connect(function()
     TweenService:Create(ESPLineToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
     TweenService:Create(ESPLineCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
 end)
+
+-- ===============================
+-- TITULO ESP
+-- ===============================
+local SectionLabel_ESP = Instance.new("TextLabel")
+SectionLabel_ESP.Name = "ESPLabel"
+SectionLabel_ESP.Size = UDim2.new(1, -6, 0, 30)
+SectionLabel_ESP.BackgroundTransparency = 1
+SectionLabel_ESP.Text = "ESP OBJETO"
+SectionLabel_ESP.TextColor3 = Color3.fromRGB(180, 180, 195)
+SectionLabel_ESP.TextSize = 20
+SectionLabel_ESP.Font = Enum.Font.GothamBold
+SectionLabel_ESP.TextXAlignment = Enum.TextXAlignment.Left
+SectionLabel_ESP.TextTransparency = 0
+SectionLabel_ESP.Parent = PageFrame_ESP
 
 -- ==================================
 -- 🧱 BOTÃO X-RAY
