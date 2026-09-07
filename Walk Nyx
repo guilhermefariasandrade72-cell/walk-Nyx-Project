@@ -418,27 +418,7 @@ KillAuraLabel.TextXAlignment = Enum.TextXAlignment.Left
 KillAuraLabel.Parent = PageFrame
 
 -- ==================================
--- 🔍 VERIFICA SE É MURDERER
--- ==================================
-local function EhMurderer()
-    local char = player.Character
-    if not char then return false end
-    
-    if player:GetAttribute("Role") == "Murderer" then
-        return true
-    end
-    
-    local temFaca = char:FindFirstChild("Knife") 
-        or (player.Backpack and player.Backpack:FindFirstChild("Knife"))
-    if temFaca then
-        return true
-    end
-    
-    return false
-end
-
--- ==================================
--- 🔴 KILL ALL LOOP (COM O SEU LOOP EXATO)
+-- 🔴 KILL ALL LOOP — INTERFACE
 -- ==================================
 
 local KillAllLoop = false
@@ -459,10 +439,6 @@ KillAllLoopCardStroke.Color = Color3.fromRGB(39, 40, 48)
 KillAllLoopCardStroke.Thickness = 1
 KillAllLoopCardStroke.Parent = KillAllLoopCard
 
--- ==================================
--- 📝 TÍTULO
--- ==================================
-
 local KillAllLoopTitle = Instance.new("TextLabel")
 KillAllLoopTitle.Name = "Title"
 KillAllLoopTitle.Size = UDim2.new(1, -60, 1, 0)
@@ -474,10 +450,6 @@ KillAllLoopTitle.TextSize = 12
 KillAllLoopTitle.Font = Enum.Font.GothamSemibold
 KillAllLoopTitle.TextXAlignment = Enum.TextXAlignment.Left
 KillAllLoopTitle.Parent = KillAllLoopCard
-
--- ==================================
--- 🔘 TOGGLE
--- ==================================
 
 local KillAllLoopToggleButton = Instance.new("TextButton")
 KillAllLoopToggleButton.Name = "ToggleButton"
@@ -499,10 +471,6 @@ KillAllLoopToggleStroke.Color = Color3.fromRGB(39, 40, 48)
 KillAllLoopToggleStroke.Thickness = 1
 KillAllLoopToggleStroke.Parent = KillAllLoopToggleButton
 
--- ==================================
--- ✔ CHECK
--- ==================================
-
 local KillAllLoopCheckMark = Instance.new("TextLabel")
 KillAllLoopCheckMark.Name = "CheckMark"
 KillAllLoopCheckMark.Size = UDim2.fromScale(1, 1)
@@ -514,120 +482,38 @@ KillAllLoopCheckMark.Font = Enum.Font.GothamBold
 KillAllLoopCheckMark.TextTransparency = 1
 KillAllLoopCheckMark.Parent = KillAllLoopToggleButton
 
--- ==================================
--- 🖱️ CLIQUE
--- ==================================
-
 KillAllLoopToggleButton.Activated:Connect(function()
 
     KillAllLoop = not KillAllLoop
 
-    local targetBgColor =
-        KillAllLoop
+    local bg = KillAllLoop
         and Color3.fromRGB(225, 40, 56)
         or Color3.fromRGB(11, 12, 16)
 
-    local targetStrokeColor =
-        KillAllLoop
+    local stroke = KillAllLoop
         and Color3.fromRGB(255, 65, 80)
         or Color3.fromRGB(39, 40, 48)
 
-    local targetTextTransparency =
-        KillAllLoop and 0 or 1
+    local check = KillAllLoop and 0 or 1
 
     TweenService:Create(
         KillAllLoopToggleButton,
-        TweenInfo.new(
-            0.2,
-            Enum.EasingStyle.Quint,
-            Enum.EasingDirection.Out
-        ),
-        {
-            BackgroundColor3 = targetBgColor
-        }
+        TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+        {BackgroundColor3 = bg}
     ):Play()
 
     TweenService:Create(
         KillAllLoopToggleStroke,
-        TweenInfo.new(
-            0.2,
-            Enum.EasingStyle.Quint,
-            Enum.EasingDirection.Out
-        ),
-        {
-            Color = targetStrokeColor
-        }
+        TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+        {Color = stroke}
     ):Play()
 
     TweenService:Create(
         KillAllLoopCheckMark,
-        TweenInfo.new(
-            0.2,
-            Enum.EasingStyle.Quint,
-            Enum.EasingDirection.Out
-        ),
-        {
-            TextTransparency = targetTextTransparency
-        }
+        TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+        {TextTransparency = check}
     ):Play()
 
-end)
-
--- ==================================
--- ⚔️ FUNÇÕES DE ATAQUE E SEU LOOP EXATO
--- ==================================
-
-local function ExecutarAtaque(Alvo)
-    local Char = player.Character
-    if not Char then return end
-    
-    local Faca = Char:FindFirstChild("Knife") or (player.Backpack and player.Backpack:FindFirstChild("Knife"))
-    if not Faca then return end
-    
-    if Faca.Parent ~= Char then 
-        Faca.Parent = Char 
-        task.wait(0.02) 
-    end
-    
-    local Eventos = Faca:FindFirstChild("Events")
-    if not Eventos then return end
-
-    if Alvo and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
-        pcall(function()
-            Eventos.KnifeStabbed:FireServer()
-            Eventos.HandleTouched:FireServer(Alvo.Character.Head)
-        end)
-    end
-end
-
--- Função para o Botão de Clique Instantâneo (mantida caso precise)
-local function KillAllInstantaneo()
-    for _, Alvo in ipairs(Players:GetPlayers()) do
-        if Alvo ~= player and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
-            ExecutarAtaque(Alvo)
-        end
-    end
-end
-
--- Função para o Toggle (Mata 1 por 1 com pequeno intervalo)
-local function KillAuraLoop()
-    for _, Alvo in ipairs(Players:GetPlayers()) do
-        if not KillAllLoop then break end
-        if Alvo ~= player and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
-            ExecutarAtaque(Alvo)
-            task.wait(0.15)
-        end
-    end
-end
-
--- Loop de execução do Toggle adaptado para a variável do seu botão
-task.spawn(function()
-    while true do
-        task.wait(0.3)
-        if KillAllLoop and EhMurderer() then
-            KillAuraLoop()
-        end
-    end
 end)
 
 local KillAuraLabel = Instance.new("TextLabel")
