@@ -397,7 +397,8 @@ for Index, TabData in ipairs(TabsData) do
 -- 🔴 VARIÁVEIS
 -- ==================================
 local KillAura = false
-local KillAllLoop = false  -- ← NOVO
+local KillAllLoop = false
+
 
 -- ==================================
 -- 🔘 BOTÃO — KILL ALL LOOP
@@ -405,7 +406,7 @@ local KillAllLoop = false  -- ← NOVO
 
 local KillAllLoopToggle = Instance.new("TextButton")
 KillAllLoopToggle.Size = UDim2.fromOffset(26, 26)
-KillAllLoopToggle.Position = UDim2.new(1, -38, 0, 10)
+KillAllLoopToggle.Position = UDim2.new(1, -38, 0, 12)
 KillAllLoopToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
 KillAllLoopToggle.BorderSizePixel = 0
 KillAllLoopToggle.Text = ""
@@ -433,9 +434,9 @@ KillAllLoopCheck.Parent = KillAllLoopToggle
 
 local KillAllLoopTitle = Instance.new("TextLabel")
 KillAllLoopTitle.Size = UDim2.new(1, -55, 0, 25)
-KillAllLoopTitle.Position = UDim2.fromOffset(12, 10)
+KillAllLoopTitle.Position = UDim2.fromOffset(12, 12)
 KillAllLoopTitle.BackgroundTransparency = 1
-KillAllLoopTitle.Text = "🔁 Kill All Loop"
+KillAllLoopTitle.Text = "Kill All Loop"
 KillAllLoopTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
 KillAllLoopTitle.TextSize = 12
 KillAllLoopTitle.Font = Enum.Font.GothamSemibold
@@ -454,6 +455,7 @@ KillAllLoopToggle.Activated:Connect(function()
         KillAllLoopCheck.TextTransparency = 1
     end
 end)
+
 
 -- ==================================
 -- 🔍 VERIFICA SE É MURDERER
