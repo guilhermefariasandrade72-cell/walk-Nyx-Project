@@ -924,6 +924,10 @@ local UltimoHeroNotificado = nil
 
 local AnimandoNotificacao = false
 
+-- Variável global de dados de cargos (compartilhada com o ESP)
+-- Certifique-se de que o seu script principal já define e atualiza essa tabela via GetPlayerData
+DadosCargos = DadosCargos or {}
+
 -- ==================================
 -- 🔘 BOTÃO — NOTIFICAÇÃO MURDERER
 -- ==================================
@@ -1162,57 +1166,16 @@ end)
 
 
 -- ==================================
--- 🔍 DETECÇÃO DOS CARGOS PELO ESP DO SCRIPT
+-- 🔍 DETECÇÃO DE CARGOS VIA DADOS DO ESP (DadosCargos)
 -- ==================================
-local function getMurderer()
+local function getPlayerByRole(roleName)
+    if not DadosCargos then return nil end
+    
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local backpack = player:FindFirstChild("Backpack")
-            local character = player.Character
-            
-            if (backpack and backpack:FindFirstChild("Knife")) or (character and character:FindFirstChild("Knife")) then
-                return player
-            end
-            
-            if player:GetAttribute("Role") == "Murderer" or player.TeamColor == BrickColor.new("Really red") then
-                return player
-            end
-        end
-    end
-    return nil
-end
-
-local function getSheriff()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local backpack = player:FindFirstChild("Backpack")
-            local character = player.Character
-            
-            -- Sheriff costuma carregar "Gun" ou "Revolver"
-            if (backpack and (backpack:FindFirstChild("Gun") or backpack:FindFirstChild("Revolver"))) or 
-               (character and (character:FindFirstChild("Gun") or character:FindFirstChild("Revolver"))) then
-                return player
-            end
-            
-            if player:GetAttribute("Role") == "Sheriff" or player.TeamColor == BrickColor.new("Blue") then
-                return player
-            end
-        end
-    end
-    return nil
-end
-
-local function getHero()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local backpack = player:FindFirstChild("Backpack")
-            local character = player.Character
-            
-            -- O Herói é quem pega a arma (Gun/Revolver) após o Sheriff morrer
-            if (backpack and (backpack:FindFirstChild("Gun") or backpack:FindFirstChild("Revolver"))) or 
-               (character and (character:FindFirstChild("Gun") or character:FindFirstChild("Revolver"))) then
-                -- Se não for o Sheriff tradicional, tratamos como Herói se necessário, ou checamos atributo específico
-                if player:GetAttribute("Role") == "Hero" then
+        if player ~= LocalPlayer then
+            local info = DadosCargos[player.Name]
+            if info and not info.Killed and not info.Dead then
+                if info.Role == roleName then
                     return player
                 end
             end
@@ -1327,7 +1290,7 @@ task.spawn(function()
         
         -- 1. Checagem Murderer
         if MostrarNotifMurderer then
-            local MurdererAtual = getMurderer()
+            local MurdererAtual = getPlayerByRole("Murderer")
             if MurdererAtual and MurdererAtual ~= UltimoMurdererNotificado then
                 UltimoMurdererNotificado = MurdererAtual
                 DispararAlerta(MurdererAtual.Name .. " is the Murderer", Color3.fromRGB(225, 40, 56))
@@ -1338,7 +1301,7 @@ task.spawn(function()
         
         -- 2. Checagem Sheriff
         if MostrarNotifSheriff then
-            local SheriffAtual = getSheriff()
+            local SheriffAtual = getPlayerByRole("Sheriff")
             if SheriffAtual and SheriffAtual ~= UltimoSheriffNotificado then
                 UltimoSheriffNotificado = SheriffAtual
                 DispararAlerta(SheriffAtual.Name .. " is the Sheriff", Color3.fromRGB(40, 120, 225))
@@ -1349,7 +1312,7 @@ task.spawn(function()
         
         -- 3. Checagem Herói
         if MostrarNotifHero then
-            local HeroAtual = getHero()
+            local HeroAtual = getPlayerByRole("Hero")
             if HeroAtual and HeroAtual ~= UltimoHeroNotificado then
                 UltimoHeroNotificado = HeroAtual
                 DispararAlerta(HeroAtual.Name .. " is the Hero", Color3.fromRGB(210, 170, 30))
