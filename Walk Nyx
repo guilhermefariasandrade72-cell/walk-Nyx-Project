@@ -870,7 +870,140 @@ SectionLabel_AutoFarm.Visible = true
 SectionLabel_AutoFarm.ZIndex = 10
 SectionLabel_AutoFarm.Parent = PageFrame
 
+-- ==================================
+-- 🛡️ VARIÁVEIS — TELEPORTE SAFE
+-- ==================================
+local TPSafeAoEncher = false
+local SafePlatform = nil
+local SafePosition = Vector3.new(38013.93, 1101.06, -26257.38)
 
+-- ==================================
+-- 🛡️ FUNÇÃO TELEPORTE SAFE
+-- ==================================
+local function TeleportarParaSafe()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    -- Cria a plataforma se não existir
+    if not SafePlatform or not SafePlatform.Parent then
+        SafePlatform = Instance.new("Part")
+        SafePlatform.Name = "AstralX_SafePlatform"
+        SafePlatform.Size = Vector3.new(20, 2, 20)
+        SafePlatform.Position = SafePosition
+        SafePlatform.Anchored = true
+        SafePlatform.Color = Color3.fromRGB(0, 0, 0)
+        SafePlatform.Transparency = 0.5
+        SafePlatform.Material = Enum.Material.SmoothPlastic
+        SafePlatform.CanCollide = true
+        SafePlatform.Parent = workspace
+    end
+
+    -- Teleporta o jogador para cima da plataforma
+    hrp.CFrame = CFrame.new(SafePosition + Vector3.new(0, 3, 0))
+end
+
+-- ==================================
+-- 🛡️ MONITOR DE BOLSA CHEIA → TP SAFE
+-- ==================================
+task.spawn(function()
+    while true do
+        if TPSafeAoEncher then
+            -- Verifica se a função EmPartida existe para evitar erro
+            local emPartidaValido = (typeof(EmPartida) == "function" and EmPartida()) or true
+            
+            if (BolsaCheia or (VerificarTextoBolsaCheia and VerificarTextoBolsaCheia())) and emPartidaValido then
+                print("⏳ Bolsa cheia! Teleportando para Safe...")
+                
+                task.wait(0.2)
+                
+                if TPSafeAoEncher then
+                    TeleportarParaSafe()
+                    print("📍 Teleportado para plataforma segura!")
+                end
+                
+                repeat
+                    RunService.Heartbeat:Wait()
+                until not TPSafeAoEncher or not (BolsaCheia or (VerificarTextoBolsaCheia and VerificarTextoBolsaCheia())) or LocalPlayer:GetAttribute("Alive") == false
+            end
+        end
+        RunService.Heartbeat:Wait()
+    end
+end)
+
+-- ==================================
+-- 🔘 BOTÃO — TELEPORTE SAFE AO ENCHER
+-- ==================================
+local TPSafeCard = Instance.new("Frame")
+TPSafeCard.Name = "TPSafeCard"
+TPSafeCard.Size = UDim2.new(1, -6, 0, 50)
+TPSafeCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+TPSafeCard.BorderSizePixel = 0
+TPSafeCard.Parent = PageFrame
+
+local TPSafeCardCorner = Instance.new("UICorner")
+TPSafeCardCorner.CornerRadius = UDim.new(0, 10)
+TPSafeCardCorner.Parent = TPSafeCard
+
+local TPSafeCardStroke = Instance.new("UIStroke")
+TPSafeCardStroke.Color = Color3.fromRGB(39, 40, 48)
+TPSafeCardStroke.Thickness = 1
+TPSafeCardStroke.Parent = TPSafeCard
+
+local TPSafeTitle = Instance.new("TextLabel")
+TPSafeTitle.Name = "Title"
+TPSafeTitle.Size = UDim2.new(1, -60, 1, 0)
+TPSafeTitle.Position = UDim2.fromOffset(12, 0)
+TPSafeTitle.BackgroundTransparency = 1
+TPSafeTitle.Text = "🛡️ TP Safe ao Encher Bolsa"
+TPSafeTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+TPSafeTitle.TextSize = 12
+TPSafeTitle.Font = Enum.Font.GothamSemibold
+TPSafeTitle.TextXAlignment = Enum.TextXAlignment.Left
+TPSafeTitle.Parent = TPSafeCard
+
+local TPSafeToggleButton = Instance.new("TextButton")
+TPSafeToggleButton.Name = "ToggleButton"
+TPSafeToggleButton.Size = UDim2.fromOffset(26, 26)
+TPSafeToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+TPSafeToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+TPSafeToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+TPSafeToggleButton.BorderSizePixel = 0
+TPSafeToggleButton.Text = ""
+TPSafeToggleButton.AutoButtonColor = false
+TPSafeToggleButton.Parent = TPSafeCard
+
+local TPSafeToggleCorner = Instance.new("UICorner")
+TPSafeToggleCorner.CornerRadius = UDim.new(0, 6)
+TPSafeToggleCorner.Parent = TPSafeToggleButton
+
+local TPSafeToggleStroke = Instance.new("UIStroke")
+TPSafeToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+TPSafeToggleStroke.Thickness = 1
+TPSafeToggleStroke.Parent = TPSafeToggleButton
+
+local TPSafeCheckMark = Instance.new("TextLabel")
+TPSafeCheckMark.Name = "CheckMark"
+TPSafeCheckMark.Size = UDim2.fromScale(1, 1)
+TPSafeCheckMark.BackgroundTransparency = 1
+TPSafeCheckMark.Text = "✔"
+TPSafeCheckMark.TextColor3 = Color3.new(1, 1, 1)
+TPSafeCheckMark.TextSize = 14
+TPSafeCheckMark.Font = Enum.Font.GothamBold
+TPSafeCheckMark.TextTransparency = 1
+TPSafeCheckMark.Parent = TPSafeToggleButton
+
+TPSafeToggleButton.Activated:Connect(function()
+    TPSafeAoEncher = not TPSafeAoEncher
+    
+    local targetBgColor = TPSafeAoEncher and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local targetStrokeColor = TPSafeAoEncher and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local targetTextTrans = TPSafeAoEncher and 0 or 1
+
+    TweenService:Create(TPSafeToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = targetBgColor}):Play()
+    TweenService:Create(TPSafeToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
+    TweenService:Create(TPSafeCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
+end)
 
 -- ============================================
 --               ABA ESP
