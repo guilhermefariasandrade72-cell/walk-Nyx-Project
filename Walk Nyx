@@ -908,7 +908,7 @@ local ValoresOriginais = {}
 -- ==================================
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
 
 local NotificacaoGui = nil
 local UltimoMurdererNotificado = nil
@@ -999,22 +999,23 @@ end)
 
 
 -- ==================================
--- 🔍 DETECÇÃO DO MURDERER (MESMO SISTEMA DO SEU SCRIPT)
+-- 🔍 DETECÇÃO DO MURDERER (CORRIGIDA)
 -- ==================================
-local function ObterMurdererNotif()
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= player and p.Character then
-            local char = p.Character
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            local hrp = char:FindFirstChild("HumanoidRootPart")
+local function getMurderer()
+    for _, player in ipairs(Players:GetPlayers()) do
+        -- Ignora explicitamente o próprio jogador local
+        if player ~= LocalPlayer and player.Character then
+            -- Método 1: Verificação de arma na mochila ou personagem
+            local backpack = player:FindFirstChild("Backpack")
+            local character = player.Character
             
-            if hum and hum.Health > 0 and hrp then
-                local temFaca = char:FindFirstChild("Knife") or (p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Knife"))
-                local eMurder = (p:GetAttribute("Role") == "Murderer") or (temFaca ~= nil)
-                
-                if eMurder then
-                    return p
-                end
+            if (backpack and backpack:FindFirstChild("Knife")) or (character and character:FindFirstChild("Knife")) then
+                return player
+            end
+            
+            -- Método 2: Verificação por atributos/dados de equipe comuns no jogo
+            if player:GetAttribute("Role") == "Murderer" or player.TeamColor == BrickColor.new("Really red") then
+                return player
             end
         end
     end
@@ -1032,7 +1033,7 @@ local function CriarNotificacao()
     NotificacaoGui.ResetOnSpawn = false
     NotificacaoGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     NotificacaoGui.DisplayOrder = 999999 -- Fica estritamente por cima de qualquer outra UI do jogo
-    NotificacaoGui.Parent = player:WaitForChild("PlayerGui")
+    NotificacaoGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
     
     local NotifBox = Instance.new("Frame")
     NotifBox.Name = "NotifBox"
@@ -1131,7 +1132,7 @@ task.spawn(function()
             continue
         end
         
-        local MurdererAtual = ObterMurdererNotif()
+        local MurdererAtual = getMurderer()
         
         if MurdererAtual and MurdererAtual ~= UltimoMurdererNotificado then
             UltimoMurdererNotificado = MurdererAtual
@@ -1143,6 +1144,10 @@ task.spawn(function()
         end
     end
 end)
+
+
+
+
 
 -- ===============================
 -- TITULO ESP
