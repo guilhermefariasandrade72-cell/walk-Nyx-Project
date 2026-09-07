@@ -1219,17 +1219,21 @@ end)
 -- ===============================
 -- TITULO ESP
 -- ===============================
+
 local SectionLabel_ESP = Instance.new("TextLabel")
 SectionLabel_ESP.Name = "ESPLabel"
-SectionLabel_ESP.Size = UDim2.new(1, -6, 0, 30)
+SectionLabel_ESP.Size = UDim2.new(1, -24, 0, 30)
+SectionLabel_ESP.Position = UDim2.fromOffset(12, 8)
 SectionLabel_ESP.BackgroundTransparency = 1
-SectionLabel_ESP.Text = "ESP OBJETO"
+SectionLabel_ESP.Text = "ESP"
 SectionLabel_ESP.TextColor3 = Color3.fromRGB(180, 180, 195)
 SectionLabel_ESP.TextSize = 20
 SectionLabel_ESP.Font = Enum.Font.GothamBold
 SectionLabel_ESP.TextXAlignment = Enum.TextXAlignment.Left
-SectionLabel_ESP.TextTransparency = 0
-SectionLabel_ESP.Parent = PageFrame_ESP
+SectionLabel_ESP.TextYAlignment = Enum.TextYAlignment.Center
+SectionLabel_ESP.Visible = true
+SectionLabel_ESP.ZIndex = 10
+SectionLabel_ESP.Parent = PageFrame
 
 -- ==================================
 -- 🧱 BOTÃO X-RAY
@@ -1304,25 +1308,6 @@ XRayToggleButton.Activated:Connect(function()
     TweenService:Create(XRayToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = targetStrokeColor}):Play()
     TweenService:Create(XRayCheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = targetTextTrans}):Play()
 end)
-
--- ===============================
--- TITULO ESP
--- ===============================
-
-local SectionLabel_ESP = Instance.new("TextLabel")
-SectionLabel_ESP.Name = "ESPLabel"
-SectionLabel_ESP.Size = UDim2.new(1, -24, 0, 30)
-SectionLabel_ESP.Position = UDim2.fromOffset(12, 8)
-SectionLabel_ESP.BackgroundTransparency = 1
-SectionLabel_ESP.Text = "ESP OBJETO"
-SectionLabel_ESP.TextColor3 = Color3.fromRGB(180, 180, 195)
-SectionLabel_ESP.TextSize = 20
-SectionLabel_ESP.Font = Enum.Font.GothamBold
-SectionLabel_ESP.TextXAlignment = Enum.TextXAlignment.Left
-SectionLabel_ESP.TextYAlignment = Enum.TextYAlignment.Center
-SectionLabel_ESP.Visible = true
-SectionLabel_ESP.ZIndex = 10
-SectionLabel_ESP.Parent = PageFrame
 
 -- ==================================
 -- 🧱 SISTEMA DO X-RAY
