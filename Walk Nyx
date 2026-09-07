@@ -393,6 +393,7 @@ for Index, TabData in ipairs(TabsData) do
     if TabData.Name == "Main" then
 -- ================================================
 
+
 -- CARD PRINCIPAL
 local KillAuraCard = Instance.new("Frame")
 KillAuraCard.Name = "KillAuraCard"
