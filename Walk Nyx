@@ -426,61 +426,139 @@ KillAuraLabel.Parent = PageFrame
 -- 🔴 KILL ALL LOOP — BOTÃO ÚNICO
 -- ==================================
 
+-- ==================================
+-- 🔴 KILL ALL LOOP
+-- ==================================
+
 local KillAllLoop = false
 
-local KillAllButton = Instance.new("TextButton")
-KillAllButton.Name = "KillAllButton"
-KillAllButton.Size = UDim2.fromOffset(130, 38)
-KillAllButton.Position = UDim2.fromOffset(12, 8)
-KillAllButton.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-KillAllButton.BorderSizePixel = 0
-KillAllButton.Text = "🔁 Kill All"
-KillAllButton.TextColor3 = Color3.fromRGB(245, 245, 248)
-KillAllButton.TextSize = 12
-KillAllButton.Font = Enum.Font.GothamSemibold
-KillAllButton.AutoButtonColor = false
-KillAllButton.Parent = PageFrame
+local KillAllLoopCard = Instance.new("Frame")
+KillAllLoopCard.Name = "KillAllLoopCard"
+KillAllLoopCard.Size = UDim2.new(1, -6, 0, 50)
+KillAllLoopCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+KillAllLoopCard.BorderSizePixel = 0
+KillAllLoopCard.Parent = PageFrame
 
-local KillAllCorner = Instance.new("UICorner")
-KillAllCorner.CornerRadius = UDim.new(0, 8)
-KillAllCorner.Parent = KillAllButton
+local KillAllLoopCardCorner = Instance.new("UICorner")
+KillAllLoopCardCorner.CornerRadius = UDim.new(0, 10)
+KillAllLoopCardCorner.Parent = KillAllLoopCard
 
-local KillAllStroke = Instance.new("UIStroke")
-KillAllStroke.Color = Color3.fromRGB(39, 40, 48)
-KillAllStroke.Thickness = 1
-KillAllStroke.Parent = KillAllButton
+local KillAllLoopCardStroke = Instance.new("UIStroke")
+KillAllLoopCardStroke.Color = Color3.fromRGB(39, 40, 48)
+KillAllLoopCardStroke.Thickness = 1
+KillAllLoopCardStroke.Parent = KillAllLoopCard
+
+-- ==================================
+-- 📝 TÍTULO
+-- ==================================
+
+local KillAllLoopTitle = Instance.new("TextLabel")
+KillAllLoopTitle.Name = "Title"
+KillAllLoopTitle.Size = UDim2.new(1, -60, 1, 0)
+KillAllLoopTitle.Position = UDim2.fromOffset(12, 0)
+KillAllLoopTitle.BackgroundTransparency = 1
+KillAllLoopTitle.Text = "Kill All Loop"
+KillAllLoopTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+KillAllLoopTitle.TextSize = 12
+KillAllLoopTitle.Font = Enum.Font.GothamSemibold
+KillAllLoopTitle.TextXAlignment = Enum.TextXAlignment.Left
+KillAllLoopTitle.Parent = KillAllLoopCard
+
+-- ==================================
+-- 🔘 TOGGLE
+-- ==================================
+
+local KillAllLoopToggleButton = Instance.new("TextButton")
+KillAllLoopToggleButton.Name = "ToggleButton"
+KillAllLoopToggleButton.Size = UDim2.fromOffset(26, 26)
+KillAllLoopToggleButton.AnchorPoint = Vector2.new(1, 0.5)
+KillAllLoopToggleButton.Position = UDim2.new(1, -12, 0.5, 0)
+KillAllLoopToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+KillAllLoopToggleButton.BorderSizePixel = 0
+KillAllLoopToggleButton.Text = ""
+KillAllLoopToggleButton.AutoButtonColor = false
+KillAllLoopToggleButton.Parent = KillAllLoopCard
+
+local KillAllLoopToggleCorner = Instance.new("UICorner")
+KillAllLoopToggleCorner.CornerRadius = UDim.new(0, 6)
+KillAllLoopToggleCorner.Parent = KillAllLoopToggleButton
+
+local KillAllLoopToggleStroke = Instance.new("UIStroke")
+KillAllLoopToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+KillAllLoopToggleStroke.Thickness = 1
+KillAllLoopToggleStroke.Parent = KillAllLoopToggleButton
+
+-- ==================================
+-- ✔ CHECK
+-- ==================================
+
+local KillAllLoopCheckMark = Instance.new("TextLabel")
+KillAllLoopCheckMark.Name = "CheckMark"
+KillAllLoopCheckMark.Size = UDim2.fromScale(1, 1)
+KillAllLoopCheckMark.BackgroundTransparency = 1
+KillAllLoopCheckMark.Text = "✔"
+KillAllLoopCheckMark.TextColor3 = Color3.new(1, 1, 1)
+KillAllLoopCheckMark.TextSize = 14
+KillAllLoopCheckMark.Font = Enum.Font.GothamBold
+KillAllLoopCheckMark.TextTransparency = 1
+KillAllLoopCheckMark.Parent = KillAllLoopToggleButton
 
 -- ==================================
 -- 🖱️ CLIQUE
 -- ==================================
 
-KillAllButton.Activated:Connect(function()
+KillAllLoopToggleButton.Activated:Connect(function()
 
     KillAllLoop = not KillAllLoop
 
-    if KillAllLoop then
+    local targetBgColor =
+        KillAllLoop
+        and Color3.fromRGB(225, 40, 56)
+        or Color3.fromRGB(11, 12, 16)
 
-        -- ATIVADO
-        KillAllButton.BackgroundColor3 =
-            Color3.fromRGB(190, 30, 45)
+    local targetStrokeColor =
+        KillAllLoop
+        and Color3.fromRGB(255, 65, 80)
+        or Color3.fromRGB(39, 40, 48)
 
-        KillAllStroke.Color =
-            Color3.fromRGB(230, 50, 65)
+    local targetTextTransparency =
+        KillAllLoop and 0 or 1
 
-        KillAllButton.Text = "✔ Kill All"
+    TweenService:Create(
+        KillAllLoopToggleButton,
+        TweenInfo.new(
+            0.2,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.Out
+        ),
+        {
+            BackgroundColor3 = targetBgColor
+        }
+    ):Play()
 
-    else
+    TweenService:Create(
+        KillAllLoopToggleStroke,
+        TweenInfo.new(
+            0.2,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.Out
+        ),
+        {
+            Color = targetStrokeColor
+        }
+    ):Play()
 
-        -- DESATIVADO
-        KillAllButton.BackgroundColor3 =
-            Color3.fromRGB(16, 17, 22)
-
-        KillAllStroke.Color =
-            Color3.fromRGB(39, 40, 48)
-
-        KillAllButton.Text = "🔁 Kill All"
-
-    end
+    TweenService:Create(
+        KillAllLoopCheckMark,
+        TweenInfo.new(
+            0.2,
+            Enum.EasingStyle.Quint,
+            Enum.EasingDirection.Out
+        ),
+        {
+            TextTransparency = targetTextTransparency
+        }
+    ):Play()
 
 end)
 
