@@ -1021,7 +1021,7 @@ local function ObterMurderer()
 end
 
 -- ==================================
--- 📬 CRIAR NOTIFICAÇÃO (CANTO INFERIOR DIREITO - ACIMA DO PULO)
+-- 📬 CRIAR NOTIFICAÇÃO (BEM MAIS ABAIXO)
 -- ==================================
 local function CriarNotificacao()
     if NotificacaoGui then return end
@@ -1036,7 +1036,7 @@ local function CriarNotificacao()
     NotifBox.Name = "NotifBox"
     NotifBox.Size = UDim2.new(0, 280, 0, 75)
     NotifBox.AnchorPoint = Vector2.new(1, 1)
-    NotifBox.Position = UDim2.new(1, -20, 1, -70) -- Ajustado para ficar bem em cima do botão de pulo
+    NotifBox.Position = UDim2.new(1, -20, 1, -20) -- Bem colado na parte inferior, em cima do botão de pulo
     NotifBox.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
     NotifBox.BorderSizePixel = 0
     NotifBox.Visible = false
@@ -1080,6 +1080,9 @@ end
 -- ✅ ANIMAÇÃO: ENTRA DA DIREITA → FICA → SAI PELA DIREITA
 -- ==================================
 local function MostrarNotificacaoMurderer(NomeMurderer)
+    -- Garante que se o toggle foi desligado no meio do processo, não exibe nada
+    if not MostrarNotificacao then return end
+    
     if not NotificacaoGui then CriarNotificacao() end
     if Animando then return end
     
@@ -1091,22 +1094,22 @@ local function MostrarNotificacaoMurderer(NomeMurderer)
     Animando = true
     
     task.spawn(function()
-        NotifBox.Position = UDim2.new(1, 300, 1, -70)
+        NotifBox.Position = UDim2.new(1, 300, 1, -20)
         
         for i = 1, 20 do
-            if not NotifBox then break end
+            if not NotifBox or not MostrarNotificacao then break end
             local currentX = 300 - (i * 16)
-            NotifBox.Position = UDim2.new(1, currentX, 1, -70)
+            NotifBox.Position = UDim2.new(1, currentX, 1, -20)
             task.wait(0.015)
         end
-        NotifBox.Position = UDim2.new(1, -20, 1, -70)
+        NotifBox.Position = UDim2.new(1, -20, 1, -20)
         
         task.wait(4)
         
         for i = 1, 20 do
             if not NotifBox then break end
             local currentX = -20 + (i * 16)
-            NotifBox.Position = UDim2.new(1, currentX, 1, -70)
+            NotifBox.Position = UDim2.new(1, currentX, 1, -20)
             task.wait(0.015)
         end
         
@@ -1123,8 +1126,12 @@ task.spawn(function()
     while true do
         task.wait(0.5)
         
+        -- Se o toggle estiver desligado, limpa o último e pula o loop
         if not MostrarNotificacao then
             UltimoMurdererNotificado = nil
+            if NotificacaoGui and NotificacaoGui.NotifBox then
+                NotificacaoGui.NotifBox.Visible = false
+            end
             continue
         end
         
