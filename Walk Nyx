@@ -507,55 +507,48 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- --- CARD VISUAL DA ABA MAIN (COM BUSCA SEGURA DE CONTAINER) ---
-local targetParent = nil
+-- --- CARD VISUAL DA ABA MAIN (CORRIGIDO E OTIMIZADO) ---
+-- Certifique-se de que 'MainTabPage' está definida no seu script principal da UI.
+-- Caso contrário, defina aqui o caminho direto para a ScrollingFrame da sua Aba Main.
+local targetParent = (typeof(MainTabPage) == "Instance" and MainTabPage) or nil
 
--- Tenta usar a variável global se existir e for válida
-if (typeof(MainTabPage) == "Instance") then
-    targetParent = MainTabPage
-else
-    -- Se não existir, varre a CoreGui/PlayerGui procurando a página principal da interface
-    for _, gui in ipairs(game:GetService("CoreGui"):GetDescendants()) do
-        if gui.Name == "MainPage" or (gui:IsA("ScrollingFrame") and (gui.Name:match("Main") or gui.Name:match("Page"))) then
+if not targetParent then
+    -- Tenta encontrar automaticamente qualquer ScrollingFrame ativa caso a variável global não exista
+    for _, gui in ipairs(LocalPlayer:GetDescendants()) do
+        if gui:IsA("ScrollingFrame") then
             targetParent = gui
             break
-        end
-    end
-    
-    if not targetParent and LocalPlayer:FindFirstChild("PlayerGui") then
-        for _, gui in ipairs(LocalPlayer.PlayerGui:GetDescendants()) do
-            if gui.Name == "MainPage" or (gui:IsA("ScrollingFrame") and (gui.Name:match("Main") or gui.Name:match("Page"))) then
-                targetParent = gui
-                break
-            end
         end
     end
 end
 
 if not targetParent then
-    warn("Walk Nyx: Container da Aba Main não localizado automaticamente. Crie uma variável MainTabPage antes do script.")
+    warn("Walk Nyx: Container da Aba Main não encontrado. Defina a variável MainTabPage antes de rodar.")
     return
 end
 
 local KillAuraCard = Instance.new("Frame")
 KillAuraCard.Name = "KillAuraCard"
 KillAuraCard.Size = UDim2.new(1, -12, 0, 135)
-KillAuraCard.Position = UDim2.fromOffset(6, 6)
 KillAuraCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
 KillAuraCard.BorderSizePixel = 0
 KillAuraCard.Visible = true
 KillAuraCard.ZIndex = 5
 KillAuraCard.Parent = targetParent
 
+-- Gerenciamento automático de Layout (Garante que se alinhe perfeitamente na lista)
+local layout = targetParent:FindFirstChildOfClass("UIListLayout")
+if not layout then
+    layout = Instance.new("UIListLayout")
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 8)
+    layout.Parent = targetParent
+else
+    -- Se já existe um layout, garante que ele fique na ordem correta (ex: acima do Sheriff)
+    KillAuraCard.LayoutOrder = 1 
+end
+
 if targetParent:IsA("ScrollingFrame") then
-    local layout = targetParent:FindFirstChildOfClass("UIListLayout")
-    if not layout then
-        layout = Instance.new("UIListLayout")
-        layout.SortOrder = Enum.SortOrder.LayoutOrder
-        layout.Padding = UDim.new(0, 8)
-        layout.Parent = targetParent
-    end
-    KillAuraCard.Position = UDim2.new(0, 0, 0, 0)
     targetParent.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 150)
 end
 
