@@ -1175,7 +1175,7 @@ end)
 -- 🎛️ UI CARDS (AIMLOCK + SLIDER IN ONE, SHOW FOV BELOW)
 -- ==================================
 if PageFrame then
-    -- 🎯 1. AIMLOCK & FOV SLIDER COMBINED CARD
+    -- 🎯 1. AIMLOCK & FOV SLIDER COMBINED CARD (SEM LINHA)
     local AimlockSliderCard = Instance.new("Frame")
     AimlockSliderCard.Name = "AimlockSliderCard"
     AimlockSliderCard.Size = UDim2.new(1, -6, 0, 95)
@@ -1198,7 +1198,7 @@ if PageFrame then
     AimlockTitle.Size = UDim2.new(1, -60, 0, 40)
     AimlockTitle.Position = UDim2.fromOffset(12, 0)
     AimlockTitle.BackgroundTransparency = 1
-    AimlockTitle.Text = "Aimbot"
+    AimlockTitle.Text = "🎯 Aimlock"
     AimlockTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
     AimlockTitle.TextSize = 12
     AimlockTitle.Font = Enum.Font.GothamSemibold
@@ -1247,15 +1247,6 @@ if PageFrame then
         TweenService:Create(AimlockToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = strokeColor}):Play()
         TweenService:Create(AimlockCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
     end)
-
-    -- Separator line inside the card
-    local Divider = Instance.new("Frame")
-    Divider.Name = "Divider"
-    Divider.Size = UDim2.new(1, -24, 0, 1)
-    Divider.Position = UDim2.new(0, 12, 0, 40)
-    Divider.BackgroundColor3 = Color3.fromRGB(39, 40, 48)
-    Divider.BorderSizePixel = 0
-    Divider.Parent = AimlockSliderCard
 
     -- Slider inside the combined card
     local FOVSliderTitle = Instance.new("TextLabel")
@@ -1360,7 +1351,7 @@ if PageFrame then
     ShowFOVTitle.Size = UDim2.new(1, -60, 1, 0)
     ShowFOVTitle.Position = UDim2.fromOffset(12, 0)
     ShowFOVTitle.BackgroundTransparency = 1
-    ShowFOVTitle.Text = "Show FOV"
+    ShowFOVTitle.Text = "👁️ Show FOV"
     ShowFOVTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
     ShowFOVTitle.TextSize = 12
     ShowFOVTitle.Font = Enum.Font.GothamSemibold
