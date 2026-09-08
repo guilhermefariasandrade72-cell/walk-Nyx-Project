@@ -155,23 +155,6 @@ local function CreateDirectPlayerIcon(Parent, IconColor)
     return Container
 end
 
---==============================================================--
--- TABS
---==============================================================--
-
-local TabsData = {
-    { Name = "Main",      Icon = "house",              IsCustom = false },
-    { Name = "Auto Farm", Icon = "circle-dollar-sign", IsCustom = false, IsTextIcon = true, CustomSize = 32 },
-    { Name = "ESP",       Icon = "eye",                IsCustom = false },
-    { Name = "Player",    Icon = "user",               IsCustom = true  },
-    { Name = "Fling & Teleport", Icon = "emoji", IsCustom = true },
-    { Name = "Settings",  Icon = "settings",           IsCustom = false },
-}
-
---==============================================================--
--- SCREEN GUI
---==============================================================--
-
 -- Criação do ícone de emoji personalizado (Círculo, Olhos e Sorriso)
 local EmojiIcon = Instance.new("Frame")
 EmojiIcon.Name = "EmojiIcon"
@@ -217,21 +200,35 @@ local RightEyeCorner = Instance.new("UICorner")
 RightEyeCorner.CornerRadius = UDim.new(1, 0)
 RightEyeCorner.Parent = RightEye
 
--- Sorriso (utilizando um quadro arredondado cortado ou um pequeno traço simulando a boca)
+-- Sorriso (corrigido para evitar o erro de sintaxe do UDim.new)
 local Smile = Instance.new("Frame")
 Smile.Name = "Smile"
-Smile.Size = UDim2.fromOffset(10, 5)
+Smile.Size = UDim2.fromOffset(10, 4)
 Smile.Position = UDim2.new(0.5, -5, 0.6, 0)
 Smile.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Smile.BorderSizePixel = 0
 Smile.Parent = Head
 
 local SmileCorner = Instance.new("UICorner")
-SmileCorner.CornerRadius = UDim.new(0, 0, 1, 1) -- Arredonda apenas a parte de baixo para simular um sorriso
+SmileCorner.CornerRadius = UDim.new(1, 0)
 SmileCorner.Parent = Smile
 
+--==============================================================--
+-- TABS
+--==============================================================--
 
+local TabsData = {
+    { Name = "Main",      Icon = "house",              IsCustom = false },
+    { Name = "Auto Farm", Icon = "circle-dollar-sign", IsCustom = false, IsTextIcon = true, CustomSize = 32 },
+    { Name = "ESP",       Icon = "eye",                IsCustom = false },
+    { Name = "Player",    Icon = "user",               IsCustom = true  },
+    { Name = "Fling & Teleport", Icon = "emoji", IsCustom = true },
+    { Name = "Settings",  Icon = "settings",           IsCustom = false },
+}
 
+--==============================================================--
+-- SCREEN GUI
+--==============================================================--
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "WN_Premium"
