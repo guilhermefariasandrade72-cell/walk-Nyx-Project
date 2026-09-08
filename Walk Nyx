@@ -914,6 +914,119 @@ else
     warn("Error: PageFrame not found!")
 end
 
+-- ==================================
+-- 🎯 AUTO PULL GUN (AUTOMATIC PASSIVE)
+-- ==================================
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local AutoPullEnabled = false
+
+local function GetGunDrop()
+    local MapContainer = Workspace:FindFirstChild("CoinContainer", true) and Workspace:FindFirstChild("CoinContainer", true).Parent
+    local mapToSearch = MapContainer or Workspace
+    local gunDrop = mapToSearch:FindFirstChild("GunDrop", true) or Workspace:FindFirstChild("GunDrop", true)
+    if gunDrop and gunDrop:IsA("BasePart") then
+        return gunDrop
+    end
+    return nil
+end
+
+-- Loop que fica rodando no talo para puxar a arma automaticamente assim que o toggle estiver ligado
+task.spawn(function()
+    while true do
+        if AutoPullEnabled then
+            local Char = player.Character
+            if Char and Char:FindFirstChild("HumanoidRootPart") then
+                local gunDrop = GetGunDrop()
+                if gunDrop then
+                    gunDrop.CFrame = Char.HumanoidRootPart.CFrame
+                end
+            end
+        end
+        task.wait(0.05) -- Checagem super rápida para puxar instantaneamente
+    end
+end)
+
+-- ==================================
+-- 🔘 CARD DO TOGGLE NA SUA UI (PAGEFRAME)
+-- ==================================
+if PageFrame then
+    local AutoPullCard = Instance.new("Frame")
+    AutoPullCard.Name = "AutoPullCard"
+    AutoPullCard.Size = UDim2.new(1, -6, 0, 50)
+    AutoPullCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    AutoPullCard.BorderSizePixel = 0
+    AutoPullCard.Parent = PageFrame
+
+    local AutoPullCorner = Instance.new("UICorner")
+    AutoPullCorner.CornerRadius = UDim.new(0, 10)
+    AutoPullCorner.Parent = AutoPullCard
+
+    local AutoPullStroke = Instance.new("UIStroke")
+    AutoPullStroke.Color = Color3.fromRGB(39, 40, 48)
+    AutoPullStroke.Thickness = 1
+    AutoPullStroke.Parent = AutoPullCard
+
+    local AutoPullTitle = Instance.new("TextLabel")
+    AutoPullTitle.Name = "Title"
+    AutoPullTitle.Size = UDim2.new(1, -60, 1, 0)
+    AutoPullTitle.Position = UDim2.fromOffset(12, 0)
+    AutoPullTitle.BackgroundTransparency = 1
+    AutoPullTitle.Text = "🔫 Auto Pull Gun"
+    AutoPullTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    AutoPullTitle.TextSize = 12
+    AutoPullTitle.Font = Enum.Font.GothamSemibold
+    AutoPullTitle.TextXAlignment = Enum.TextXAlignment.Left
+    AutoPullTitle.Parent = AutoPullCard
+
+    local AutoPullToggle = Instance.new("TextButton")
+    AutoPullToggle.Name = "ToggleButton"
+    AutoPullToggle.Size = UDim2.fromOffset(26, 26)
+    AutoPullToggle.AnchorPoint = Vector2.new(1, 0.5)
+    AutoPullToggle.Position = UDim2.new(1, -12, 0.5, 0)
+    AutoPullToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    AutoPullToggle.BorderSizePixel = 0
+    AutoPullToggle.Text = ""
+    AutoPullToggle.AutoButtonColor = false
+    AutoPullToggle.Parent = AutoPullCard
+
+    local AutoPullToggleCorner = Instance.new("UICorner")
+    AutoPullToggleCorner.CornerRadius = UDim.new(0, 6)
+    AutoPullToggleCorner.Parent = AutoPullToggle
+
+    local AutoPullToggleStroke = Instance.new("UIStroke")
+    AutoPullToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+    AutoPullToggleStroke.Thickness = 1
+    AutoPullToggleStroke.Parent = AutoPullToggle
+
+    local AutoPullCheck = Instance.new("TextLabel")
+    AutoPullCheck.Name = "CheckMark"
+    AutoPullCheck.Size = UDim2.fromScale(1, 1)
+    AutoPullCheck.BackgroundTransparency = 1
+    AutoPullCheck.Text = "✔"
+    AutoPullCheck.TextColor3 = Color3.new(1, 1, 1)
+    AutoPullCheck.TextSize = 14
+    AutoPullCheck.Font = Enum.Font.GothamBold
+    AutoPullCheck.TextTransparency = 1
+    AutoPullCheck.Parent = AutoPullToggle
+
+    AutoPullToggle.Activated:Connect(function()
+        AutoPullEnabled = not AutoPullEnabled
+        
+        local bgColor = AutoPullEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+        local strokeColor = AutoPullEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+        local textTrans = AutoPullEnabled and 0 or 1
+
+        game:GetService("TweenService"):Create(AutoPullToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
+        game:GetService("TweenService"):Create(AutoPullToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = strokeColor}):Play()
+        game:GetService("TweenService"):Create(AutoPullCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
+    end)
+else
+    warn("Error: PageFrame not found!")
+end
+
 -- ================================================
 --              ABA AUTO FARM
     elseif TabData.Name == "Auto Farm" then
