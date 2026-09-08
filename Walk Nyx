@@ -165,6 +165,7 @@ local TabsData = {
     { Name = "Auto Farm", Icon = "circle-dollar-sign", IsCustom = false, IsTextIcon = true, CustomSize = 32 },
     { Name = "ESP",       Icon = "eye",                IsCustom = false },
     { Name = "Player",    Icon = "user",               IsCustom = true  },
+    { Name = "Teleport", Icon = "teleport", IsCustom = false },
     { Name = "Settings",  Icon = "settings",           IsCustom = false },
 }
 
