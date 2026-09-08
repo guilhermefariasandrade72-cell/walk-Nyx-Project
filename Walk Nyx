@@ -1027,6 +1027,390 @@ else
     warn("Error: PageFrame not found!")
 end
 
+-- ==================================
+-- 🎯 AIMLOCK & FOV SYSTEM (ENGLISH)
+-- ==================================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+
+local localPlayer = Players.LocalPlayer
+local AimlockEnabled = false
+local ShowFOV = false
+local FOVRadius = 150
+local FOVCircle = nil
+
+-- ==================================
+-- ⭕ FOV CIRCLE CREATION
+-- ==================================
+task.spawn(function()
+    local parentGui = localPlayer:WaitForChild("PlayerGui", 5) or CoreGui  
+
+    local FOVScreen = Instance.new("ScreenGui")  
+    FOVScreen.Name = "FOVCircleGui"  
+    FOVScreen.ResetOnSpawn = false  
+    FOVScreen.IgnoreGuiInset = true 
+    FOVScreen.Parent = parentGui  
+
+    FOVCircle = Instance.new("Frame")  
+    FOVCircle.Name = "Circle"  
+    FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)  
+    FOVCircle.Position = UDim2.new(0.5, 0, 0.5, 0)  
+    FOVCircle.Size = UDim2.new(0, FOVRadius, 0, FOVRadius)  
+    FOVCircle.BackgroundTransparency = 1  
+    FOVCircle.Visible = false  
+    FOVCircle.Parent = FOVScreen  
+
+    local UIStroke = Instance.new("UIStroke")  
+    UIStroke.Color = Color3.fromRGB(255, 255, 255) 
+    UIStroke.Thickness = 1.5  
+    UIStroke.Parent = FOVCircle  
+
+    local UICorner = Instance.new("UICorner")  
+    UICorner.CornerRadius = UDim.new(1, 0) 
+    UICorner.Parent = FOVCircle
+end)
+
+-- ==================================
+-- 🔍 DETECTION FUNCTIONS
+-- ==================================
+local function HasGun()
+    if not localPlayer then return false end
+    local char = localPlayer.Character
+    if not char then return false end
+
+    local gunChar = char:FindFirstChild("Gun")  
+    if not gunChar then  
+        for _, item in ipairs(char:GetChildren()) do  
+            if item:IsA("Tool") and item.Name:lower():find("gun") then  
+                gunChar = item  
+                break  
+            end  
+        end  
+    end  
+    if gunChar then return true end  
+
+    local backpack = localPlayer:FindFirstChild("Backpack")  
+    if backpack then  
+        local gunBackpack = backpack:FindFirstChild("Gun")  
+        if not gunBackpack then  
+            for _, item in ipairs(backpack:GetChildren()) do  
+                if item:IsA("Tool") and item.Name:lower():find("gun") then  
+                    gunBackpack = item  
+                    break  
+                end  
+            end  
+        end  
+        if gunBackpack then return true end  
+    end  
+
+    return false
+end
+
+local function GetMurderer()
+    if not localPlayer then return nil end
+
+    for _, p in ipairs(Players:GetPlayers()) do  
+        if p ~= localPlayer and p.Character then  
+            local char = p.Character  
+            local hum = char:FindFirstChildOfClass("Humanoid")  
+            local hrp = char:FindFirstChild("HumanoidRootPart")  
+              
+            if hum and hum.Health > 0 and hrp then  
+                local hasKnife = char:FindFirstChild("Knife") or (p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Knife"))  
+                local isMurder = (p:GetAttribute("Role") == "Murderer") or (hasKnife ~= nil)  
+                  
+                if isMurder then  
+                    return hrp  
+                end  
+            end  
+        end  
+    end  
+    return nil
+end
+
+local function IsWithinFOV(position3D)
+    local camera = workspace.CurrentCamera
+    if not camera then return false end
+
+    local screenPos, visible = camera:WorldToViewportPoint(position3D)  
+    if not visible then return false end  
+
+    local screenCenter = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)  
+    local target2D = Vector2.new(screenPos.X, screenPos.Y)  
+      
+    local pixelDist = (target2D - screenCenter).Magnitude  
+    return pixelDist <= (FOVRadius / 2)
+end
+
+-- ==================================
+-- 🎥 CAMERA AIMLOCK LOOP
+-- ==================================
+RunService.RenderStepped:Connect(function()
+    if not AimlockEnabled or not HasGun() then return end
+
+    local murdererHRP = GetMurderer()  
+    if murdererHRP and IsWithinFOV(murdererHRP.Position) then  
+        local camera = workspace.CurrentCamera  
+        if camera then  
+            local targetPos = murdererHRP.Position + Vector3.new(0, 0.5, 0)  
+            camera.CFrame = CFrame.new(camera.CFrame.Position, targetPos)  
+        end  
+    end
+end)
+
+-- ==================================
+-- 🎛️ UI CARDS (AIMLOCK, FOV SLIDER, SHOW FOV)
+-- ==================================
+if PageFrame then
+    -- 🎯 1. AIMLOCK TOGGLE CARD
+    local AimlockCard = Instance.new("Frame")
+    AimlockCard.Name = "AimlockCard"
+    AimlockCard.Size = UDim2.new(1, -6, 0, 50)
+    AimlockCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    AimlockCard.BorderSizePixel = 0
+    AimlockCard.Parent = PageFrame
+
+    local AimlockCorner = Instance.new("UICorner")
+    AimlockCorner.CornerRadius = UDim.new(0, 10)
+    AimlockCorner.Parent = AimlockCard
+
+    local AimlockStroke = Instance.new("UIStroke")
+    AimlockStroke.Color = Color3.fromRGB(39, 40, 48)
+    AimlockStroke.Thickness = 1
+    AimlockStroke.Parent = AimlockCard
+
+    local AimlockTitle = Instance.new("TextLabel")
+    AimlockTitle.Name = "Title"
+    AimlockTitle.Size = UDim2.new(1, -60, 1, 0)
+    AimlockTitle.Position = UDim2.fromOffset(12, 0)
+    AimlockTitle.BackgroundTransparency = 1
+    AimlockTitle.Text = "🎯 Aimlock"
+    AimlockTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    AimlockTitle.TextSize = 12
+    AimlockTitle.Font = Enum.Font.GothamSemibold
+    AimlockTitle.TextXAlignment = Enum.TextXAlignment.Left
+    AimlockTitle.Parent = AimlockCard
+
+    local AimlockToggle = Instance.new("TextButton")
+    AimlockToggle.Name = "ToggleButton"
+    AimlockToggle.Size = UDim2.fromOffset(26, 26)
+    AimlockToggle.AnchorPoint = Vector2.new(1, 0.5)
+    AimlockToggle.Position = UDim2.new(1, -12, 0.5, 0)
+    AimlockToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    AimlockToggle.BorderSizePixel = 0
+    AimlockToggle.Text = ""
+    AimlockToggle.AutoButtonColor = false
+    AimlockToggle.Parent = AimlockCard
+
+    local AimlockToggleCorner = Instance.new("UICorner")
+    AimlockToggleCorner.CornerRadius = UDim.new(0, 6)
+    AimlockToggleCorner.Parent = AimlockToggle
+
+    local AimlockToggleStroke = Instance.new("UIStroke")
+    AimlockToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+    AimlockToggleStroke.Thickness = 1
+    AimlockToggleStroke.Parent = AimlockToggle
+
+    local AimlockCheck = Instance.new("TextLabel")
+    AimlockCheck.Name = "CheckMark"
+    AimlockCheck.Size = UDim2.fromScale(1, 1)
+    AimlockCheck.BackgroundTransparency = 1
+    AimlockCheck.Text = "✔"
+    AimlockCheck.TextColor3 = Color3.new(1, 1, 1)
+    AimlockCheck.TextSize = 14
+    AimlockCheck.Font = Enum.Font.GothamBold
+    AimlockCheck.TextTransparency = 1
+    AimlockCheck.Parent = AimlockToggle
+
+    AimlockToggle.Activated:Connect(function()
+        AimlockEnabled = not AimlockEnabled
+        
+        local bgColor = AimlockEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+        local strokeColor = AimlockEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+        local textTrans = AimlockEnabled and 0 or 1
+
+        TweenService:Create(AimlockToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
+        TweenService:Create(AimlockToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = strokeColor}):Play()
+        TweenService:Create(AimlockCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
+    end)
+
+    -- 👁️ 2. SHOW FOV TOGGLE CARD
+    local ShowFOVCard = Instance.new("Frame")
+    ShowFOVCard.Name = "ShowFOVCard"
+    ShowFOVCard.Size = UDim2.new(1, -6, 0, 50)
+    ShowFOVCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    ShowFOVCard.BorderSizePixel = 0
+    ShowFOVCard.Parent = PageFrame
+
+    local ShowFOVCorner = Instance.new("UICorner")
+    ShowFOVCorner.CornerRadius = UDim.new(0, 10)
+    ShowFOVCorner.Parent = ShowFOVCard
+
+    local ShowFOVStroke = Instance.new("UIStroke")
+    ShowFOVStroke.Color = Color3.fromRGB(39, 40, 48)
+    ShowFOVStroke.Thickness = 1
+    ShowFOVStroke.Parent = ShowFOVCard
+
+    local ShowFOVTitle = Instance.new("TextLabel")
+    ShowFOVTitle.Name = "Title"
+    ShowFOVTitle.Size = UDim2.new(1, -60, 1, 0)
+    ShowFOVTitle.Position = UDim2.fromOffset(12, 0)
+    ShowFOVTitle.BackgroundTransparency = 1
+    ShowFOVTitle.Text = "👁️ Show FOV"
+    ShowFOVTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    ShowFOVTitle.TextSize = 12
+    ShowFOVTitle.Font = Enum.Font.GothamSemibold
+    ShowFOVTitle.TextXAlignment = Enum.TextXAlignment.Left
+    ShowFOVTitle.Parent = ShowFOVCard
+
+    local ShowFOVToggle = Instance.new("TextButton")
+    ShowFOVToggle.Name = "ToggleButton"
+    ShowFOVToggle.Size = UDim2.fromOffset(26, 26)
+    ShowFOVToggle.AnchorPoint = Vector2.new(1, 0.5)
+    ShowFOVToggle.Position = UDim2.new(1, -12, 0.5, 0)
+    ShowFOVToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    ShowFOVToggle.BorderSizePixel = 0
+    ShowFOVToggle.Text = ""
+    ShowFOVToggle.AutoButtonColor = false
+    ShowFOVToggle.Parent = ShowFOVCard
+
+    local ShowFOVToggleCorner = Instance.new("UICorner")
+    ShowFOVToggleCorner.CornerRadius = UDim.new(0, 6)
+    ShowFOVToggleCorner.Parent = ShowFOVToggle
+
+    local ShowFOVToggleStroke = Instance.new("UIStroke")
+    ShowFOVToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+    ShowFOVToggleStroke.Thickness = 1
+    ShowFOVToggleStroke.Parent = ShowFOVToggle
+
+    local ShowFOVCheck = Instance.new("TextLabel")
+    ShowFOVCheck.Name = "CheckMark"
+    ShowFOVCheck.Size = UDim2.fromScale(1, 1)
+    ShowFOVCheck.BackgroundTransparency = 1
+    ShowFOVCheck.Text = "✔"
+    ShowFOVCheck.TextColor3 = Color3.new(1, 1, 1)
+    ShowFOVCheck.TextSize = 14
+    ShowFOVCheck.Font = Enum.Font.GothamBold
+    ShowFOVCheck.TextTransparency = 1
+    ShowFOVCheck.Parent = ShowFOVToggle
+
+    ShowFOVToggle.Activated:Connect(function()
+        ShowFOV = not ShowFOV
+        if FOVCircle then
+            FOVCircle.Visible = ShowFOV
+        end
+        
+        local bgColor = ShowFOV and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+        local strokeColor = ShowFOV and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+        local textTrans = ShowFOV and 0 or 1
+
+        TweenService:Create(ShowFOVToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
+        TweenService:Create(ShowFOVToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = strokeColor}):Play()
+        TweenService:Create(ShowFOVCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
+    end)
+
+    -- 🎚️ 3. FOV SLIDER CARD
+    local FOVSliderCard = Instance.new("Frame")
+    FOVSliderCard.Name = "FOVSliderCard"
+    FOVSliderCard.Size = UDim2.new(1, -6, 0, 60)
+    FOVSliderCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    FOVSliderCard.BorderSizePixel = 0
+    FOVSliderCard.Parent = PageFrame
+
+    local FOVSliderCorner = Instance.new("UICorner")
+    FOVSliderCorner.CornerRadius = UDim.new(0, 10)
+    FOVSliderCorner.Parent = FOVSliderCard
+
+    local FOVSliderStroke = Instance.new("UIStroke")
+    FOVSliderStroke.Color = Color3.fromRGB(39, 40, 48)
+    FOVSliderStroke.Thickness = 1
+    FOVSliderStroke.Parent = FOVSliderCard
+
+    local FOVSliderTitle = Instance.new("TextLabel")
+    FOVSliderTitle.Name = "Title"
+    FOVSliderTitle.Size = UDim2.new(1, -20, 0, 25)
+    FOVSliderTitle.Position = UDim2.fromOffset(12, 8)
+    FOVSliderTitle.BackgroundTransparency = 1
+    FOVSliderTitle.Text = "FOV Radius"
+    FOVSliderTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    FOVSliderTitle.TextSize = 12
+    FOVSliderTitle.Font = Enum.Font.GothamSemibold
+    FOVSliderTitle.TextXAlignment = Enum.TextXAlignment.Left
+    FOVSliderTitle.Parent = FOVSliderCard
+
+    local FOVValueLabel = Instance.new("TextLabel")
+    FOVValueLabel.Name = "ValueLabel"
+    FOVValueLabel.Size = UDim2.new(0, 50, 0, 25)
+    FOVValueLabel.Position = UDim2.new(1, -62, 0, 8)
+    FOVValueLabel.BackgroundTransparency = 1
+    FOVValueLabel.Text = tostring(FOVRadius)
+    FOVValueLabel.TextColor3 = Color3.fromRGB(225, 40, 56)
+    FOVValueLabel.TextSize = 12
+    FOVValueLabel.Font = Enum.Font.GothamBold
+    FOVValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    FOVValueLabel.Parent = FOVSliderCard
+
+    local SliderBar = Instance.new("Frame")
+    SliderBar.Name = "SliderBar"
+    SliderBar.Size = UDim2.new(1, -24, 0, 6)
+    SliderBar.Position = UDim2.new(0, 12, 0, 40)
+    SliderBar.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    SliderBar.BorderSizePixel = 0
+    SliderBar.Parent = FOVSliderCard
+
+    local SliderBarCorner = Instance.new("UICorner")
+    SliderBarCorner.CornerRadius = UDim.new(1, 0)
+    SliderBarCorner.Parent = SliderBar
+
+    local SliderFill = Instance.new("Frame")
+    SliderFill.Name = "SliderFill"
+    -- Min FOV = 50, Max FOV = 500
+    SliderFill.Size = UDim2.new((FOVRadius - 50) / 450, 0, 1, 0)
+    SliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+    SliderFill.BorderSizePixel = 0
+    SliderFill.Parent = SliderBar
+
+    local SliderFillCorner = Instance.new("UICorner")
+    SliderFillCorner.CornerRadius = UDim.new(1, 0)
+    SliderFillCorner.Parent = SliderFill
+
+    local UserInputService = game:GetService("UserInputService")
+    local draggingSlider = false
+
+    SliderBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingSlider = true
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingSlider = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local pos = input.Position.X
+            local absPos = SliderBar.AbsolutePosition.X
+            local absSize = SliderBar.AbsoluteSize.X
+            local rel = math.clamp((pos - absPos) / absSize, 0, 1)
+            
+            FOVRadius = math.floor(50 + (rel * 450))
+            FOVValueLabel.Text = tostring(FOVRadius)
+            SliderFill.Size = UDim2.new(rel, 0, 1, 0)
+            
+            if FOVCircle then
+                FOVCircle.Size = UDim2.new(0, FOVRadius, 0, FOVRadius)
+            end
+        end
+    end)
+else
+    warn("Error: PageFrame not found!")
+end
+
 -- ================================================
 --              ABA AUTO FARM
     elseif TabData.Name == "Auto Farm" then
