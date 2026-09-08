@@ -405,127 +405,8 @@ SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
 SectionTitle.Parent = PageFrame
 
 -- ====================================================
--- ⚔️ KILL AURA (OTIMIZADO COM PROTEÇÕES E ANTI-LAG)
+-- ⚔️ ELEMENTOS VISUAIS E BOTÕES DO KILL AURA
 -- ====================================================
-
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local LocalPlayer = Players.LocalPlayer
-
--- Variáveis de Configuração
-local KillAuraAtivo = false
-local KillAuraDistancia = 15
-local MostrarCirculoAura = false
-local CirculoAuraPart = nil
-local UltimoAtaque = 0
-local CooldownAtaque = 0.1 -- Proteção contra spam excessivo de packets (Rate Limit)
-
--- Círculo visual de alcance (otimizado para evitar leaks e travamentos)
-local function AtualizarCirculoAura()
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
-    if MostrarCirculoAura and hrp and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
-        if not CirculoAuraPart or not CirculoAuraPart.Parent then
-            CirculoAuraPart = Instance.new("Part")
-            CirculoAuraPart.Name = "WalkNyx_KillAuraCircle"
-            CirculoAuraPart.Shape = Enum.PartType.Cylinder
-            CirculoAuraPart.Size = Vector3.new(0.2, KillAuraDistancia * 2, KillAuraDistancia * 2)
-            CirculoAuraPart.Anchored = false
-            CirculoAuraPart.CanCollide = false
-            CirculoAuraPart.Transparency = 0.6
-            CirculoAuraPart.Color = Color3.fromRGB(225, 40, 56)
-            CirculoAuraPart.Material = Enum.Material.Neon
-            CirculoAuraPart.Parent = Workspace
-
-            local weld = Instance.new("WeldConstraint")
-            weld.Part0 = hrp
-            weld.Part1 = CirculoAuraPart
-            weld.Parent = CirculoAuraPart
-            
-            CirculoAuraPart.CFrame = hrp.CFrame * CFrame.Angles(0, 0, math.rad(90))
-        else
-            CirculoAuraPart.Size = Vector3.new(0.2, KillAuraDistancia * 2, KillAuraDistancia * 2)
-        end
-    else
-        if CirculoAuraPart then
-            CirculoAuraPart:Destroy()
-            CirculoAuraPart = nil
-        end
-    end
-end
-
--- Lógica do Kill Aura com Checagens de Segurança
-RunService.Heartbeat:Connect(function()
-    AtualizarCirculoAura()
-
-    if not KillAuraAtivo then return end
-
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    local hum = char and char:FindFirstChild("Humanoid")
-    if not hrp or not hum or hum.Health <= 0 then return end
-
-    -- Validação segura da arma (Knife) evitando erros se o item não carregar
-    local knife = char:FindFirstChild("Knife") or (LocalPlayer.Backpack and LocalPlayer.Backpack:FindFirstChild("Knife"))
-    if not knife then return end
-
-    if knife.Parent ~= char then
-        pcall(function()
-            knife.Parent = char
-        end)
-    end
-
-    -- Controle de Cooldown interno para limpar o fluxo da interface/servidor
-    local tempoAtual = tick()
-    if tempoAtual - UltimoAtaque < CooldownAtaque then return end
-
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local enemyHRP = player.Character:FindFirstChild("HumanoidRootPart")
-            local enemyHum = player.Character:FindFirstChild("Humanoid")
-
-            if enemyHRP and enemyHum and enemyHum.Health > 0 then
-                local distancia = (hrp.Position - enemyHRP.Position).Magnitude
-                if distancia <= KillAuraDistancia then
-                    UltimoAtaque = tempoAtual
-                    pcall(function()
-                        local stabRemote = knife:FindFirstChild("Stab", true) or knife:FindFirstChild("Slash", true)
-                        if stabRemote and stabRemote:IsA("RemoteEvent") then
-                            stabRemote:FireServer()
-                        elseif knife:FindFirstChild("ToolActivate") then
-                            knife.Activated:Fire()
-                        end
-                    end)
-                    break 
-                end
-            end
-        end
-    end
-end)
-
--- --- CARD VISUAL DA ABA MAIN (CORRIGIDO E OTIMIZADO) ---
--- Certifique-se de que 'MainTabPage' está definida no seu script principal da UI.
--- Caso contrário, defina aqui o caminho direto para a ScrollingFrame da sua Aba Main.
-local targetParent = (typeof(MainTabPage) == "Instance" and MainTabPage) or nil
-
-if not targetParent then
-    -- Tenta encontrar automaticamente qualquer ScrollingFrame ativa caso a variável global não exista
-    for _, gui in ipairs(LocalPlayer:GetDescendants()) do
-        if gui:IsA("ScrollingFrame") then
-            targetParent = gui
-            break
-        end
-    end
-end
-
-if not targetParent then
-    warn("Walk Nyx: Container da Aba Main não encontrado. Defina a variável MainTabPage antes de rodar.")
-    return
-end
 
 local KillAuraCard = Instance.new("Frame")
 KillAuraCard.Name = "KillAuraCard"
@@ -536,7 +417,6 @@ KillAuraCard.Visible = true
 KillAuraCard.ZIndex = 5
 KillAuraCard.Parent = targetParent
 
--- Gerenciamento automático de Layout (Garante que se alinhe perfeitamente na lista)
 local layout = targetParent:FindFirstChildOfClass("UIListLayout")
 if not layout then
     layout = Instance.new("UIListLayout")
@@ -544,7 +424,6 @@ if not layout then
     layout.Padding = UDim.new(0, 8)
     layout.Parent = targetParent
 else
-    -- Se já existe um layout, garante que ele fique na ordem correta (ex: acima do Sheriff)
     KillAuraCard.LayoutOrder = 1 
 end
 
