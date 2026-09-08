@@ -4815,10 +4815,169 @@ task.spawn(function()
 end)
 
 -- ================================================
--- ABA SETTINGS
+--                 ABA TELEPORT
+    elseif TabData.Name == "Teleport" the 
 -- ================================================
-    elseif TabData.Name == "Settings" then
 
+-- ==================================
+-- 📍 VARIABLES — TELEPORT LOCATIONS
+-- ==================================
+local TweenService = game:GetService("TweenService")
+
+-- ==================================
+-- 📍 TELEPORT SYSTEM
+-- ==================================
+local function TeleportToLobby()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    -- ✅ Teleporta para o Lobby (posição padrão do MM2)
+    hrp.CFrame = CFrame.new(0, 100, 0)
+    print("📍 Teleported to Lobby!")
+end
+
+local function TeleportToMap()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    -- ✅ Teleporta para o centro do mapa (seguro)
+    hrp.CFrame = CFrame.new(0, 5, 0)
+    print("📍 Teleported to Map!")
+end
+
+-- ==================================
+-- 🔘 BUTTONS — TELEPORT LOCATIONS
+-- ==================================
+if PageFrame then
+    -- 📍 TELEPORT TO LOBBY
+    local TeleportLobbyCard = Instance.new("Frame")
+    TeleportLobbyCard.Name = "TeleportLobbyCard"
+    TeleportLobbyCard.Size = UDim2.new(1, -6, 0, 50)
+    TeleportLobbyCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    TeleportLobbyCard.BorderSizePixel = 0
+    TeleportLobbyCard.Parent = PageFrame
+
+    local TeleportLobbyCardCorner = Instance.new("UICorner")
+    TeleportLobbyCardCorner.CornerRadius = UDim.new(0, 10)
+    TeleportLobbyCardCorner.Parent = TeleportLobbyCard
+
+    local TeleportLobbyCardStroke = Instance.new("UIStroke")
+    TeleportLobbyCardStroke.Color = Color3.fromRGB(39, 40, 48)
+    TeleportLobbyCardStroke.Thickness = 1
+    TeleportLobbyCardStroke.Parent = TeleportLobbyCard
+
+    local TeleportLobbyTitle = Instance.new("TextLabel")
+    TeleportLobbyTitle.Name = "Title"
+    TeleportLobbyTitle.Size = UDim2.new(1, -70, 1, 0)
+    TeleportLobbyTitle.Position = UDim2.fromOffset(12, 0)
+    TeleportLobbyTitle.BackgroundTransparency = 1
+    TeleportLobbyTitle.Text = "🏠 Teleport to Lobby"
+    TeleportLobbyTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    TeleportLobbyTitle.TextSize = 12
+    TeleportLobbyTitle.Font = Enum.Font.GothamSemibold
+    TeleportLobbyTitle.TextXAlignment = Enum.TextXAlignment.Left
+    TeleportLobbyTitle.Parent = TeleportLobbyCard
+
+    local TeleportLobbyBtn = Instance.new("TextButton")
+    TeleportLobbyBtn.Name = "TeleportBtn"
+    TeleportLobbyBtn.Size = UDim2.fromOffset(40, 26)
+    TeleportLobbyBtn.AnchorPoint = Vector2.new(1, 0.5)
+    TeleportLobbyBtn.Position = UDim2.new(1, -12, 0.5, 0)
+    TeleportLobbyBtn.BackgroundColor3 = Color3.fromRGB(45, 120, 255)
+    TeleportLobbyBtn.BorderSizePixel = 0
+    TeleportLobbyBtn.Text = "GO"
+    TeleportLobbyBtn.TextColor3 = Color3.new(1, 1, 1)
+    TeleportLobbyBtn.TextSize = 11
+    TeleportLobbyBtn.Font = Enum.Font.GothamBold
+    TeleportLobbyBtn.AutoButtonColor = false
+    TeleportLobbyBtn.Parent = TeleportLobbyCard
+
+    local TeleportLobbyBtnCorner = Instance.new("UICorner")
+    TeleportLobbyBtnCorner.CornerRadius = UDim.new(0, 6)
+    TeleportLobbyBtnCorner.Parent = TeleportLobbyBtn
+
+    local TeleportLobbyBtnStroke = Instance.new("UIStroke")
+    TeleportLobbyBtnStroke.Color = Color3.fromRGB(75, 150, 255)
+    TeleportLobbyBtnStroke.Thickness = 1
+    TeleportLobbyBtnStroke.Parent = TeleportLobbyBtn
+
+    TeleportLobbyBtn.Activated:Connect(function()
+        TeleportToLobby()
+        -- Animação de clique
+        TweenService:Create(TeleportLobbyBtn, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {BackgroundColor3 = Color3.fromRGB(25, 90, 225)}):Play()
+        task.wait(0.1)
+        TweenService:Create(TeleportLobbyBtn, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {BackgroundColor3 = Color3.fromRGB(45, 120, 255)}):Play()
+    end)
+
+    -- 📍 TELEPORT TO MAP
+    local TeleportMapCard = Instance.new("Frame")
+    TeleportMapCard.Name = "TeleportMapCard"
+    TeleportMapCard.Size = UDim2.new(1, -6, 0, 50)
+    TeleportMapCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    TeleportMapCard.BorderSizePixel = 0
+    TeleportMapCard.Parent = PageFrame
+
+    local TeleportMapCardCorner = Instance.new("UICorner")
+    TeleportMapCardCorner.CornerRadius = UDim.new(0, 10)
+    TeleportMapCardCorner.Parent = TeleportMapCard
+
+    local TeleportMapCardStroke = Instance.new("UIStroke")
+    TeleportMapCardStroke.Color = Color3.fromRGB(39, 40, 48)
+    TeleportMapCardStroke.Thickness = 1
+    TeleportMapCardStroke.Parent = TeleportMapCard
+
+    local TeleportMapTitle = Instance.new("TextLabel")
+    TeleportMapTitle.Name = "Title"
+    TeleportMapTitle.Size = UDim2.new(1, -70, 1, 0)
+    TeleportMapTitle.Position = UDim2.fromOffset(12, 0)
+    TeleportMapTitle.BackgroundTransparency = 1
+    TeleportMapTitle.Text = "🗺️ Teleport to Map"
+    TeleportMapTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    TeleportMapTitle.TextSize = 12
+    TeleportMapTitle.Font = Enum.Font.GothamSemibold
+    TeleportMapTitle.TextXAlignment = Enum.TextXAlignment.Left
+    TeleportMapTitle.Parent = TeleportMapCard
+
+    local TeleportMapBtn = Instance.new("TextButton")
+    TeleportMapBtn.Name = "TeleportBtn"
+    TeleportMapBtn.Size = UDim2.fromOffset(40, 26)
+    TeleportMapBtn.AnchorPoint = Vector2.new(1, 0.5)
+    TeleportMapBtn.Position = UDim2.new(1, -12, 0.5, 0)
+    TeleportMapBtn.BackgroundColor3 = Color3.fromRGB(45, 120, 255)
+    TeleportMapBtn.BorderSizePixel = 0
+    TeleportMapBtn.Text = "GO"
+    TeleportMapBtn.TextColor3 = Color3.new(1, 1, 1)
+    TeleportMapBtn.TextSize = 11
+    TeleportMapBtn.Font = Enum.Font.GothamBold
+    TeleportMapBtn.AutoButtonColor = false
+    TeleportMapBtn.Parent = TeleportMapCard
+
+    local TeleportMapBtnCorner = Instance.new("UICorner")
+    TeleportMapBtnCorner.CornerRadius = UDim.new(0, 6)
+    TeleportMapBtnCorner.Parent = TeleportMapBtn
+
+    local TeleportMapBtnStroke = Instance.new("UIStroke")
+    TeleportMapBtnStroke.Color = Color3.fromRGB(75, 150, 255)
+    TeleportMapBtnStroke.Thickness = 1
+    TeleportMapBtnStroke.Parent = TeleportMapBtn
+
+    TeleportMapBtn.Activated:Connect(function()
+        TeleportToMap()
+        -- Animação de clique
+        TweenService:Create(TeleportMapBtn, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {BackgroundColor3 = Color3.fromRGB(25, 90, 225)}):Play()
+        task.wait(0.1)
+        TweenService:Create(TeleportMapBtn, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {BackgroundColor3 = Color3.fromRGB(45, 120, 255)}):Play()
+    end)
+else
+    warn("Error: PageFrame not found!")
+end
+
+-- ================================================
+-- ABA SETTINGS
+    elseif TabData.Name == "Settings" then
+-- ================================================
 
 
     end
