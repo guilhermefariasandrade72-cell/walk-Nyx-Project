@@ -155,6 +155,23 @@ local function CreateDirectPlayerIcon(Parent, IconColor)
     return Container
 end
 
+--==============================================================--
+-- TABS
+--==============================================================--
+
+local TabsData = {
+    { Name = "Main",      Icon = "house",              IsCustom = false },
+    { Name = "Auto Farm", Icon = "circle-dollar-sign", IsCustom = false, IsTextIcon = true, CustomSize = 32 },
+    { Name = "ESP",       Icon = "eye",                IsCustom = false },
+    { Name = "Player",    Icon = "user",               IsCustom = true  },
+    { Name = "Fling & Teleport", Icon = "emoji", IsCustom = true },
+    { Name = "Settings",  Icon = "settings",           IsCustom = false },
+}
+
+--==============================================================--
+-- SCREEN GUI
+--==============================================================--
+
 -- Criação do ícone de emoji personalizado (Círculo, Olhos e Sorriso)
 local EmojiIcon = Instance.new("Frame")
 EmojiIcon.Name = "EmojiIcon"
@@ -213,22 +230,8 @@ local SmileCorner = Instance.new("UICorner")
 SmileCorner.CornerRadius = UDim.new(0, 0, 1, 1) -- Arredonda apenas a parte de baixo para simular um sorriso
 SmileCorner.Parent = Smile
 
---==============================================================--
--- TABS
---==============================================================--
 
-local TabsData = {
-    { Name = "Main",      Icon = "house",              IsCustom = false },
-    { Name = "Auto Farm", Icon = "circle-dollar-sign", IsCustom = false, IsTextIcon = true, CustomSize = 32 },
-    { Name = "ESP",       Icon = "eye",                IsCustom = false },
-    { Name = "Player",    Icon = "user",               IsCustom = true  },
-    { Name = "Fling & Teleport", Icon = "emoji", IsCustom = true },
-    { Name = "Settings",  Icon = "settings",           IsCustom = false },
-}
 
---==============================================================--
--- SCREEN GUI
---==============================================================--
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "WN_Premium"
