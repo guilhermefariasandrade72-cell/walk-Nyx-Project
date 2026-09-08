@@ -404,200 +404,315 @@ SectionTitle.Font = Enum.Font.GothamBold
 SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
 SectionTitle.Parent = PageFrame
 
--- ==================================
--- ⚔️ KILL AURA — CARD + TOGGLE + SLIDER
--- ==================================
+-- ====================================================
+-- ⚔️ KILL AURA (DIRETO NA ABA MAIN)
+-- ====================================================
 
--- 🔹 VARIÁVEIS
-local KillAuraAtivo = false
-local KillAuraRange = 15 -- Distância padrão
-local MinRange = 5
-local MaxRange = 30
-
--- Serviços necessários
-local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
--- 🔹 SISTEMA DO KILL AURA
-local function ExecutarKillAura()
-    if not KillAuraAtivo then return end
-    
-    local character = LocalPlayer.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = character.HumanoidRootPart
+-- Variáveis de Configuração
+local KillAuraAtivo = false
+local KillAuraDistancia = 15
+local MostrarCirculoAura = false
+local CirculoAuraPart = nil
 
-    -- Procura o inimigo mais próximo dentro do range
+-- Círculo visual de alcance
+local function AtualizarCirculoAura()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+    if MostrarCirculoAura and hrp then
+        if not CirculoAuraPart or not CirculoAuraPart.Parent then
+            CirculoAuraPart = Instance.new("Part")
+            CirculoAuraPart.Name = "WalkNyx_KillAuraCircle"
+            CirculoAuraPart.Shape = Enum.PartType.Cylinder
+            CirculoAuraPart.Size = Vector3.new(0.2, KillAuraDistancia * 2, KillAuraDistancia * 2)
+            CirculoAuraPart.Anchored = false
+            CirculoAuraPart.CanCollide = false
+            CirculoAuraPart.Transparency = 0.6
+            CirculoAuraPart.Color = Color3.fromRGB(225, 40, 56)
+            CirculoAuraPart.Material = Enum.Material.Neon
+            CirculoAuraPart.Parent = Workspace
+
+            local weld = Instance.new("WeldConstraint")
+            weld.Part0 = hrp
+            weld.Part1 = CirculoAuraPart
+            weld.Parent = CirculoAuraPart
+            
+            CirculoAuraPart.CFrame = hrp.CFrame * CFrame.Angles(0, 0, math.rad(90))
+        else
+            CirculoAuraPart.Size = Vector3.new(0.2, KillAuraDistancia * 2, KillAuraDistancia * 2)
+        end
+    else
+        if CirculoAuraPart then
+            CirculoAuraPart:Destroy()
+            CirculoAuraPart = nil
+        end
+    end
+end
+
+-- Lógica do Kill Aura
+RunService.Heartbeat:Connect(function()
+    AtualizarCirculoAura()
+
+    if not KillAuraAtivo then return end
+
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local knife = char:FindFirstChild("Knife") or (LocalPlayer.Backpack and LocalPlayer.Backpack:FindFirstChild("Knife"))
+    if not knife then return end
+
+    if knife.Parent ~= char then
+        knife.Parent = char
+    end
+
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local enemyHRP = player.Character.HumanoidRootPart
-            local enemyHumanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            
-            if enemyHumanoid and enemyHumanoid.Health > 0 then
+            local enemyHum = player.Character:FindFirstChild("Humanoid")
+
+            if enemyHum and enemyHum.Health > 0 then
                 local distancia = (hrp.Position - enemyHRP.Position).Magnitude
-                if distancia <= KillAuraRange then
-                    -- Aqui entra a lógica de ataque do seu jogo/script (ex: causar dano, equipar tool, etc)
-                    -- Exemplo de print simulando o ataque:
-                    -- print("Atacando:", player.Name, "Distância:", distancia)
+                if distancia <= KillAuraDistancia then
+                    pcall(function()
+                        local stabRemote = knife:FindFirstChild("Stab", true) or knife:FindFirstChild("Slash", true)
+                        if stabRemote and stabRemote:IsA("RemoteEvent") then
+                            stabRemote:FireServer()
+                        elseif knife:FindFirstChild("ToolActivate") then
+                            knife.Activated:Fire()
+                        end
+                    end)
                 end
             end
         end
     end
+end)
+
+-- --- CARD VISUAL DA ABA MAIN ---
+local KillAuraCard = Instance.new("Frame")
+KillAuraCard.Name = "KillAuraCard"
+KillAuraCard.Size = UDim2.new(1, -6, 0, 135)
+KillAuraCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+KillAuraCard.BorderSizePixel = 0
+KillAuraCard.Parent = MainTabPage -- Substitua pelo nome da variável da sua Aba Main
+
+local KillAuraCorner = Instance.new("UICorner")
+KillAuraCorner.CornerRadius = UDim.new(0, 10)
+KillAuraCorner.Parent = KillAuraCard
+
+local KillAuraStroke = Instance.new("UIStroke")
+KillAuraStroke.Color = Color3.fromRGB(39, 40, 48)
+KillAuraStroke.Thickness = 1
+KillAuraStroke.Parent = KillAuraCard
+
+local KillAuraTitle = Instance.new("TextLabel")
+KillAuraTitle.Size = UDim2.new(1, -55, 0, 25)
+KillAuraTitle.Position = UDim2.fromOffset(12, 8)
+KillAuraTitle.BackgroundTransparency = 1
+KillAuraTitle.Text = "⚔️ Kill Aura (Main)"
+KillAuraTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+KillAuraTitle.TextSize = 12
+KillAuraTitle.Font = Enum.Font.GothamSemibold
+KillAuraTitle.TextXAlignment = Enum.TextXAlignment.Left
+KillAuraTitle.Parent = KillAuraCard
+
+-- Botão Toggle 1 (Ligar/Desligar)
+local AuraToggleBtn = Instance.new("TextButton")
+AuraToggleBtn.Size = UDim2.fromOffset(26, 26)
+AuraToggleBtn.Position = UDim2.new(1, -38, 0, 7)
+AuraToggleBtn.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+AuraToggleBtn.BorderSizePixel = 0
+AuraToggleBtn.Text = ""
+AuraToggleBtn.AutoButtonColor = false
+AuraToggleBtn.Parent = KillAuraCard
+
+local AuraToggleCorner = Instance.new("UICorner")
+AuraToggleCorner.CornerRadius = UDim.new(0, 6)
+AuraToggleCorner.Parent = AuraToggleBtn
+
+local AuraToggleStroke = Instance.new("UIStroke")
+AuraToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+AuraToggleStroke.Thickness = 1
+AuraToggleStroke.Parent = AuraToggleBtn
+
+local AuraCheck = Instance.new("TextLabel")
+AuraCheck.Size = UDim2.fromScale(1, 1)
+AuraCheck.BackgroundTransparency = 1
+AuraCheck.Text = "✔"
+AuraCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
+AuraCheck.TextSize = 14
+AuraCheck.Font = Enum.Font.GothamBold
+AuraCheck.TextTransparency = 1
+AuraCheck.Parent = AuraToggleBtn
+
+AuraToggleBtn.Activated:Connect(function()
+    KillAuraAtivo = not KillAuraAtivo
+    local bg = KillAuraAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local str = KillAuraAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local tr = KillAuraAtivo and 0 or 1
+    
+    TweenService:Create(AuraToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = bg}):Play()
+    TweenService:Create(AuraToggleStroke, TweenInfo.new(0.2), {Color = str}):Play()
+    TweenService:Create(AuraCheck, TweenInfo.new(0.2), {TextTransparency = tr}):Play()
+end)
+
+-- Botão Toggle 2 (Mostrar Círculo)
+local CircleToggleBtn = Instance.new("TextButton")
+CircleToggleBtn.Size = UDim2.fromOffset(26, 26)
+CircleToggleBtn.Position = UDim2.new(1, -38, 0, 42)
+CircleToggleBtn.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+CircleToggleBtn.BorderSizePixel = 0
+CircleToggleBtn.Text = ""
+CircleToggleBtn.AutoButtonColor = false
+CircleToggleBtn.Parent = KillAuraCard
+
+local CircleToggleCorner = Instance.new("UICorner")
+CircleToggleCorner.CornerRadius = UDim.new(0, 6)
+CircleToggleCorner.Parent = CircleToggleBtn
+
+local CircleToggleStroke = Instance.new("UIStroke")
+CircleToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+CircleToggleStroke.Thickness = 1
+CircleToggleStroke.Parent = CircleToggleBtn
+
+local CircleCheck = Instance.new("TextLabel")
+CircleCheck.Size = UDim2.fromScale(1, 1)
+CircleCheck.BackgroundTransparency = 1
+CircleCheck.Text = "✔"
+CircleCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
+CircleCheck.TextSize = 14
+CircleCheck.Font = Enum.Font.GothamBold
+CircleCheck.TextTransparency = 1
+CircleCheck.Parent = CircleToggleBtn
+
+local CircleLabel = Instance.new("TextLabel")
+CircleLabel.Size = UDim2.new(1, -55, 0, 25)
+CircleLabel.Position = UDim2.fromOffset(12, 42)
+CircleLabel.BackgroundTransparency = 1
+CircleLabel.Text = "Mostrar Círculo do Raio"
+CircleLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+CircleLabel.TextSize = 11
+CircleLabel.Font = Enum.Font.Gotham
+CircleLabel.TextXAlignment = Enum.TextXAlignment.Left
+CircleLabel.Parent = KillAuraCard
+
+CircleToggleBtn.Activated:Connect(function()
+    MostrarCirculoAura = not MostrarCirculoAura
+    local bg = MostrarCirculoAura and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+    local str = MostrarCirculoAura and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+    local tr = MostrarCirculoAura and 0 or 1
+    
+    TweenService:Create(CircleToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = bg}):Play()
+    TweenService:Create(CircleToggleStroke, TweenInfo.new(0.2), {Color = str}):Play()
+    TweenService:Create(CircleCheck, TweenInfo.new(0.2), {TextTransparency = tr}):Play()
+end)
+
+-- Slider de Distância
+local AuraSliderContainer = Instance.new("Frame")
+AuraSliderContainer.Size = UDim2.new(1, -24, 0, 30)
+AuraSliderContainer.Position = UDim2.fromOffset(12, 85)
+AuraSliderContainer.BackgroundTransparency = 1
+AuraSliderContainer.Parent = KillAuraCard
+
+local AuraSliderLabel = Instance.new("TextLabel")
+AuraSliderLabel.Size = UDim2.new(1, 0, 0, 14)
+AuraSliderLabel.BackgroundTransparency = 1
+AuraSliderLabel.Text = "Distância do Alcance"
+AuraSliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+AuraSliderLabel.TextSize = 10
+AuraSliderLabel.Font = Enum.Font.Gotham
+AuraSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+AuraSliderLabel.Parent = AuraSliderContainer
+
+local AuraSliderValue = Instance.new("TextLabel")
+AuraSliderValue.Size = UDim2.fromOffset(40, 14)
+AuraSliderValue.Position = UDim2.new(1, -40, 0, 0)
+AuraSliderValue.BackgroundTransparency = 1
+AuraSliderValue.Text = "15"
+AuraSliderValue.TextColor3 = Color3.fromRGB(165, 166, 177)
+AuraSliderValue.TextSize = 10
+AuraSliderValue.Font = Enum.Font.Gotham
+AuraSliderValue.TextXAlignment = Enum.TextXAlignment.Right
+AuraSliderValue.Parent = AuraSliderContainer
+
+local AuraSliderBg = Instance.new("Frame")
+AuraSliderBg.Size = UDim2.new(1, 0, 0, 6)
+AuraSliderBg.Position = UDim2.fromOffset(0, 20)
+AuraSliderBg.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+AuraSliderBg.BorderSizePixel = 0
+AuraSliderBg.Parent = AuraSliderContainer
+
+local AuraSliderBgCorner = Instance.new("UICorner")
+AuraSliderBgCorner.CornerRadius = UDim.new(0, 3)
+AuraSliderBgCorner.Parent = AuraSliderBg
+
+local AuraSliderFill = Instance.new("Frame")
+AuraSliderFill.Size = UDim2.new(0.25, 0, 1, 0)
+AuraSliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+AuraSliderFill.BorderSizePixel = 0
+AuraSliderFill.Parent = AuraSliderBg
+
+local AuraSliderFillCorner = Instance.new("UICorner")
+AuraSliderFillCorner.CornerRadius = UDim.new(0, 3)
+AuraSliderFillCorner.Parent = AuraSliderFill
+
+local AuraSliderButton = Instance.new("TextButton")
+AuraSliderButton.Size = UDim2.new(1, 10, 1, 10)
+AuraSliderButton.Position = UDim2.fromScale(0.25, 0.5)
+AuraSliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+AuraSliderButton.BackgroundTransparency = 1
+AuraSliderButton.Text = ""
+AuraSliderButton.Parent = AuraSliderBg
+
+local AuraSliding = false
+local AuraActiveInput = nil
+local AuraMin = 5
+local AuraMax = 50
+
+local function AtualizarAuraSlider(val)
+    val = math.clamp(val, AuraMin, AuraMax)
+    KillAuraDistancia = math.floor(val + 0.5)
+    local porcentagem = (KillAuraDistancia - AuraMin) / (AuraMax - AuraMin)
+    AuraSliderFill.Size = UDim2.new(porcentagem, 0, 1, 0)
+    AuraSliderButton.Position = UDim2.new(porcentagem, 0, 0.5, 0)
+    AuraSliderValue.Text = tostring(KillAuraDistancia)
 end
 
--- Conecta no loop do jogo
-RunService.Heartbeat:Connect(ExecutarKillAura)
-
--- ==================================
--- 🔹 INTERFACE (CARD + TOGGLE + SLIDER)
--- ==================================
-if PageFrame then
-    -- 📦 CARD PRINCIPAL
-    local KillAuraCard = Instance.new("Frame")
-    KillAuraCard.Name = "KillAuraCard"
-    KillAuraCard.Size = UDim2.new(1, -6, 0, 85)
-    KillAuraCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-    KillAuraCard.BorderSizePixel = 0
-    KillAuraCard.Parent = PageFrame
-
-    local CardCorner = Instance.new("UICorner")
-    CardCorner.CornerRadius = UDim.new(0, 10)
-    CardCorner.Parent = KillAuraCard
-
-    local CardStroke = Instance.new("UIStroke")
-    CardStroke.Color = Color3.fromRGB(39, 40, 48)
-    CardStroke.Thickness = 1
-    CardStroke.Parent = KillAuraCard
-
-    -- 📝 TÍTULO
-    local Title = Instance.new("TextLabel")
-    Title.Name = "Title"
-    Title.Size = UDim2.new(1, -60, 0, 25)
-    Title.Position = UDim2.fromOffset(12, 5)
-    Title.BackgroundTransparency = 1
-    Title.Text = "⚔️ Kill Aura"
-    Title.TextColor3 = Color3.fromRGB(245, 245, 248)
-    Title.TextSize = 12
-    Title.Font = Enum.Font.GothamSemibold
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.Parent = KillAuraCard
-
-    -- 🔘 TOGGLE
-    local ToggleButton = Instance.new("TextButton")
-    ToggleButton.Name = "ToggleButton"
-    ToggleButton.Size = UDim2.fromOffset(26, 26)
-    ToggleButton.AnchorPoint = Vector2.new(1, 0.5)
-    ToggleButton.Position = UDim2.new(1, -12, 0, 15)
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-    ToggleButton.BorderSizePixel = 0
-    ToggleButton.Text = ""
-    ToggleButton.AutoButtonColor = false
-    ToggleButton.Parent = KillAuraCard
-
-    local ToggleCorner = Instance.new("UICorner")
-    ToggleCorner.CornerRadius = UDim.new(0, 6)
-    ToggleCorner.Parent = ToggleButton
-
-    local ToggleStroke = Instance.new("UIStroke")
-    ToggleStroke.Color = Color3.fromRGB(39, 40, 48)
-    ToggleStroke.Thickness = 1
-    ToggleStroke.Parent = ToggleButton
-
-    local CheckMark = Instance.new("TextLabel")
-    CheckMark.Name = "CheckMark"
-    CheckMark.Size = UDim2.fromScale(1, 1)
-    CheckMark.BackgroundTransparency = 1
-    CheckMark.Text = "✔"
-    CheckMark.TextColor3 = Color3.new(1, 1, 1)
-    CheckMark.TextSize = 14
-    CheckMark.Font = Enum.Font.GothamBold
-    CheckMark.TextTransparency = 1
-    CheckMark.Parent = ToggleButton
-
-    -- 🎚️ SLIDER — TRILHO
-    local SliderTrack = Instance.new("Frame")
-    SliderTrack.Name = "SliderTrack"
-    SliderTrack.Size = UDim2.new(1, -24, 0, 6)
-    SliderTrack.Position = UDim2.fromOffset(12, 52)
-    SliderTrack.BackgroundColor3 = Color3.fromRGB(30, 32, 42)
-    SliderTrack.BorderSizePixel = 0
-    SliderTrack.Parent = KillAuraCard
-
-    local SliderTrackCorner = Instance.new("UICorner")
-    SliderTrackCorner.CornerRadius = UDim.new(0, 3)
-    SliderTrackCorner.Parent = SliderTrack
-
-    -- 🎚️ SLIDER — PREENCHIMENTO
-    local SliderFill = Instance.new("Frame")
-    SliderFill.Name = "SliderFill"
-    -- Calcula o tamanho inicial baseado no range padrão (15)
-    local initialPercentage = (KillAuraRange - MinRange) / (MaxRange - MinRange)
-    SliderFill.Size = UDim2.new(initialPercentage, 0, 1, 0)
-    SliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
-    SliderFill.BorderSizePixel = 0
-    SliderFill.Parent = SliderTrack
-
-    local SliderFillCorner = Instance.new("UICorner")
-    SliderFillCorner.CornerRadius = UDim.new(0, 3)
-    SliderFillCorner.Parent = SliderFill
-
-    -- 🎚️ SLIDER — TEXTO DE VALOR
-    local SliderLabel = Instance.new("TextLabel")
-    SliderLabel.Name = "SliderLabel"
-    SliderLabel.Size = UDim2.new(1, 0, 0, 18)
-    SliderLabel.Position = UDim2.fromOffset(0, -22)
-    SliderLabel.BackgroundTransparency = 1
-    SliderLabel.Text = "Range: " .. KillAuraRange .. " studs"
-    SliderLabel.TextColor3 = Color3.fromRGB(200, 200, 215)
-    SliderLabel.TextSize = 10
-    SliderLabel.Font = Enum.Font.GothamSemibold
-    SliderLabel.Parent = SliderTrack
-
-    -- 🎚️ SLIDER — SISTEMA DE ARRASTAR
-    local function UpdateSlider(InputPosition)
-        local TrackPos = SliderTrack.AbsolutePosition.X
-        local TrackSize = SliderTrack.AbsoluteSize.X
-        local ClampedX = math.clamp(InputPosition - TrackPos, 0, TrackSize)
-        local Percentage = ClampedX / TrackSize
-
-        KillAuraRange = math.floor(MinRange + (MaxRange - MinRange) * Percentage + 0.5)
-        SliderLabel.Text = "Range: " .. KillAuraRange .. " studs"
-
-        TweenService:Create(SliderFill, TweenInfo.new(0.08), {Size = UDim2.new(Percentage, 0, 1, 0)}):Play()
+AuraSliderButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        AuraSliding = true
+        AuraActiveInput = input
     end
+end)
 
-    local isDraggingSlider = false
-    SliderTrack.InputBegan:Connect(function(Input)
-        if Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDraggingSlider = true
-            UpdateSlider(Input.Position.X)
-        end
-    end)
+UserInputService.InputChanged:Connect(function(input)
+    if not AuraSliding then return end
+    if AuraActiveInput and AuraActiveInput.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType ~= Enum.UserInputType.Touch then return end
+    elseif input.UserInputType ~= Enum.UserInputType.MouseMovement then
+        return
+    end
+    local mouseX = input.Position.X
+    local startX = AuraSliderBg.AbsolutePosition.X
+    local width = AuraSliderBg.AbsoluteSize.X
+    local porcentagem = math.clamp((mouseX - startX) / width, 0, 1)
+    local valor = AuraMin + ((AuraMax - AuraMin) * porcentagem)
+    AtualizarAuraSlider(valor)
+end)
 
-    SliderTrack.InputChanged:Connect(function(Input)
-        if isDraggingSlider and (Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseMovement) then
-            UpdateSlider(Input.Position.X)
-        end
-    end)
-
-    SliderTrack.InputEnded:Connect(function()
-        isDraggingSlider = false
-    end)
-
-    -- 🔘 TOGGLE — AÇÃO AO CLICAR
-    ToggleButton.Activated:Connect(function()
-        KillAuraAtivo = not KillAuraAtivo
-        
-        local bgColor = KillAuraAtivo and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-        local strokeColor = KillAuraAtivo and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-        local textTrans = KillAuraAtivo and 0 or 1
-
-        TweenService:Create(ToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
-        TweenService:Create(ToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = strokeColor}):Play()
-        TweenService:Create(CheckMark, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
-    end)
-end
+UserInputService.InputEnded:Connect(function(input)
+    if input == AuraActiveInput or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        AuraSliding = false
+        AuraActiveInput = nil
+    end
+end)
 
 -- ===============================================
 -- SHERIFF
