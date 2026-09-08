@@ -1161,29 +1161,30 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ==================================
--- 🎛️ UI CARDS (AIMLOCK, FOV SLIDER, SHOW FOV)
+-- 🎛️ UI CARDS (AIMLOCK + SLIDER IN ONE, SHOW FOV BELOW)
 -- ==================================
 if PageFrame then
-    -- 🎯 1. AIMLOCK TOGGLE CARD
-    local AimlockCard = Instance.new("Frame")
-    AimlockCard.Name = "AimlockCard"
-    AimlockCard.Size = UDim2.new(1, -6, 0, 50)
-    AimlockCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-    AimlockCard.BorderSizePixel = 0
-    AimlockCard.Parent = PageFrame
+    -- 🎯 1. AIMLOCK & FOV SLIDER COMBINED CARD
+    local AimlockSliderCard = Instance.new("Frame")
+    AimlockSliderCard.Name = "AimlockSliderCard"
+    AimlockSliderCard.Size = UDim2.new(1, -6, 0, 95)
+    AimlockSliderCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    AimlockSliderCard.BorderSizePixel = 0
+    AimlockSliderCard.Parent = PageFrame
 
-    local AimlockCorner = Instance.new("UICorner")
-    AimlockCorner.CornerRadius = UDim.new(0, 10)
-    AimlockCorner.Parent = AimlockCard
+    local CardCorner = Instance.new("UICorner")
+    CardCorner.CornerRadius = UDim.new(0, 10)
+    CardCorner.Parent = AimlockSliderCard
 
-    local AimlockStroke = Instance.new("UIStroke")
-    AimlockStroke.Color = Color3.fromRGB(39, 40, 48)
-    AimlockStroke.Thickness = 1
-    AimlockStroke.Parent = AimlockCard
+    local CardStroke = Instance.new("UIStroke")
+    CardStroke.Color = Color3.fromRGB(39, 40, 48)
+    CardStroke.Thickness = 1
+    CardStroke.Parent = AimlockSliderCard
 
+    -- Aimlock Toggle inside the combined card
     local AimlockTitle = Instance.new("TextLabel")
     AimlockTitle.Name = "Title"
-    AimlockTitle.Size = UDim2.new(1, -60, 1, 0)
+    AimlockTitle.Size = UDim2.new(1, -60, 0, 40)
     AimlockTitle.Position = UDim2.fromOffset(12, 0)
     AimlockTitle.BackgroundTransparency = 1
     AimlockTitle.Text = "🎯 Aimlock"
@@ -1191,18 +1192,18 @@ if PageFrame then
     AimlockTitle.TextSize = 12
     AimlockTitle.Font = Enum.Font.GothamSemibold
     AimlockTitle.TextXAlignment = Enum.TextXAlignment.Left
-    AimlockTitle.Parent = AimlockCard
+    AimlockTitle.Parent = AimlockSliderCard
 
     local AimlockToggle = Instance.new("TextButton")
     AimlockToggle.Name = "ToggleButton"
     AimlockToggle.Size = UDim2.fromOffset(26, 26)
-    AimlockToggle.AnchorPoint = Vector2.new(1, 0.5)
-    AimlockToggle.Position = UDim2.new(1, -12, 0.5, 0)
+    AimlockToggle.AnchorPoint = Vector2.new(1, 0)
+    AimlockToggle.Position = UDim2.new(1, -12, 0, 7)
     AimlockToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
     AimlockToggle.BorderSizePixel = 0
     AimlockToggle.Text = ""
     AimlockToggle.AutoButtonColor = false
-    AimlockToggle.Parent = AimlockCard
+    AimlockToggle.Parent = AimlockSliderCard
 
     local AimlockToggleCorner = Instance.new("UICorner")
     AimlockToggleCorner.CornerRadius = UDim.new(0, 6)
@@ -1236,54 +1237,47 @@ if PageFrame then
         TweenService:Create(AimlockCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
     end)
 
-    -- 🎚️ 2. FOV SLIDER CARD (Logo abaixo do Aimlock)
-    local FOVSliderCard = Instance.new("Frame")
-    FOVSliderCard.Name = "FOVSliderCard"
-    FOVSliderCard.Size = UDim2.new(1, -6, 0, 60)
-    FOVSliderCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-    FOVSliderCard.BorderSizePixel = 0
-    FOVSliderCard.Parent = PageFrame
+    -- Separator line inside the card
+    local Divider = Instance.new("Frame")
+    Divider.Name = "Divider"
+    Divider.Size = UDim2.new(1, -24, 0, 1)
+    Divider.Position = UDim2.new(0, 12, 0, 40)
+    Divider.BackgroundColor3 = Color3.fromRGB(39, 40, 48)
+    Divider.BorderSizePixel = 0
+    Divider.Parent = AimlockSliderCard
 
-    local FOVSliderCorner = Instance.new("UICorner")
-    FOVSliderCorner.CornerRadius = UDim.new(0, 10)
-    FOVSliderCorner.Parent = FOVSliderCard
-
-    local FOVSliderStroke = Instance.new("UIStroke")
-    FOVSliderStroke.Color = Color3.fromRGB(39, 40, 48)
-    FOVSliderStroke.Thickness = 1
-    FOVSliderStroke.Parent = FOVSliderCard
-
+    -- Slider inside the combined card
     local FOVSliderTitle = Instance.new("TextLabel")
-    FOVSliderTitle.Name = "Title"
-    FOVSliderTitle.Size = UDim2.new(1, -20, 0, 25)
-    FOVSliderTitle.Position = UDim2.fromOffset(12, 8)
+    FOVSliderTitle.Name = "SliderTitle"
+    FOVSliderTitle.Size = UDim2.new(1, -20, 0, 20)
+    FOVSliderTitle.Position = UDim2.fromOffset(12, 45)
     FOVSliderTitle.BackgroundTransparency = 1
     FOVSliderTitle.Text = "FOV Radius"
     FOVSliderTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
     FOVSliderTitle.TextSize = 12
     FOVSliderTitle.Font = Enum.Font.GothamSemibold
     FOVSliderTitle.TextXAlignment = Enum.TextXAlignment.Left
-    FOVSliderTitle.Parent = FOVSliderCard
+    FOVSliderTitle.Parent = AimlockSliderCard
 
     local FOVValueLabel = Instance.new("TextLabel")
     FOVValueLabel.Name = "ValueLabel"
-    FOVValueLabel.Size = UDim2.new(0, 50, 0, 25)
-    FOVValueLabel.Position = UDim2.new(1, -62, 0, 8)
+    FOVValueLabel.Size = UDim2.new(0, 50, 0, 20)
+    FOVValueLabel.Position = UDim2.new(1, -62, 0, 45)
     FOVValueLabel.BackgroundTransparency = 1
     FOVValueLabel.Text = tostring(FOVRadius)
     FOVValueLabel.TextColor3 = Color3.fromRGB(225, 40, 56)
     FOVValueLabel.TextSize = 12
     FOVValueLabel.Font = Enum.Font.GothamBold
     FOVValueLabel.TextXAlignment = Enum.TextXAlignment.Right
-    FOVValueLabel.Parent = FOVSliderCard
+    FOVValueLabel.Parent = AimlockSliderCard
 
     local SliderBar = Instance.new("Frame")
     SliderBar.Name = "SliderBar"
     SliderBar.Size = UDim2.new(1, -24, 0, 6)
-    SliderBar.Position = UDim2.new(0, 12, 0, 40)
+    SliderBar.Position = UDim2.new(0, 12, 0, 75)
     SliderBar.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
     SliderBar.BorderSizePixel = 0
-    SliderBar.Parent = FOVSliderCard
+    SliderBar.Parent = AimlockSliderCard
 
     local SliderBarCorner = Instance.new("UICorner")
     SliderBarCorner.CornerRadius = UDim.new(1, 0)
@@ -1333,7 +1327,7 @@ if PageFrame then
         end
     end)
 
-    -- 👁️ 3. SHOW FOV TOGGLE CARD (Logo abaixo do Slider)
+    -- 👁️ 2. SHOW FOV TOGGLE CARD (Separate card below the slider)
     local ShowFOVCard = Instance.new("Frame")
     ShowFOVCard.Name = "ShowFOVCard"
     ShowFOVCard.Size = UDim2.new(1, -6, 0, 50)
