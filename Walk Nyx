@@ -393,14 +393,261 @@ for Index, TabData in ipairs(TabsData) do
 --                ABA MAIN
     if TabData.Name == "Main" then
 -- ================================================
+local SectionTitle = Instance.new("TextLabel")
+SectionTitle.Name = "SectionTitle"
+SectionTitle.Size = UDim2.new(1, -12, 0, 24)
+SectionTitle.BackgroundTransparency = 1
+SectionTitle.Text = "MURDER"
+SectionTitle.TextColor3 = Color3.fromRGB(140, 142, 153)
+SectionTitle.TextSize = 20
+SectionTitle.Font = Enum.Font.GothamBold
+SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+SectionTitle.Parent = PageFrame
 
+-- ==================================
+-- 🔴 UI — KILL AURA CONTROLS
+-- ==================================
+if PageFrame then
+    -- Garante que os cards fiquem empilhados em lista
+    if not PageFrame:FindFirstChildOfClass("UIListLayout") then
+        local ListLayout = Instance.new("UIListLayout")
+        ListLayout.SortOrder = Enum.SortOrder.LayoutIndex
+        ListLayout.Padding = UDim.new(0, 8)
+        ListLayout.Parent = PageFrame
+    end
+
+    -- ==================================
+    -- 📦 CARD 1: TOGGLE + SLIDER (KILL AURA)
+    -- ==================================
+    local KillAuraCard = Instance.new("Frame")
+    KillAuraCard.Name = "KillAuraCard"
+    KillAuraCard.Size = UDim2.new(1, -6, 0, 95) -- Altura maior para caber o toggle e o slider
+    KillAuraCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    KillAuraCard.BorderSizePixel = 0
+    KillAuraCard.Parent = PageFrame
+
+    local KillAuraCardCorner = Instance.new("UICorner")
+    KillAuraCardCorner.CornerRadius = UDim.new(0, 10)
+    KillAuraCardCorner.Parent = KillAuraCard
+
+    local KillAuraCardStroke = Instance.new("UIStroke")
+    KillAuraCardStroke.Color = Color3.fromRGB(39, 40, 48)
+    KillAuraCardStroke.Thickness = 1
+    KillAuraCardStroke.Parent = KillAuraCard
+
+    -- Título do Card 1
+    local KillAuraTitle = Instance.new("TextLabel")
+    KillAuraTitle.Name = "Title"
+    KillAuraTitle.Size = UDim2.new(1, -70, 0, 40)
+    KillAuraTitle.Position = UDim2.fromOffset(12, 0)
+    KillAuraTitle.BackgroundTransparency = 1
+    KillAuraTitle.Text = "⚔️ Kill Aura"
+    KillAuraTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    KillAuraTitle.TextSize = 12
+    KillAuraTitle.Font = Enum.Font.GothamSemibold
+    KillAuraTitle.TextXAlignment = Enum.TextXAlignment.Left
+    KillAuraTitle.Parent = KillAuraCard
+
+    -- Botão Toggle do Kill Aura
+    local KillAuraToggleBtn = Instance.new("TextButton")
+    KillAuraToggleBtn.Name = "ToggleBtn"
+    KillAuraToggleBtn.Size = UDim2.fromOffset(40, 22)
+    KillAuraToggleBtn.AnchorPoint = Vector2.new(1, 0)
+    KillAuraToggleBtn.Position = UDim2.new(1, -12, 0, 9)
+    KillAuraToggleBtn.BackgroundColor3 = Color3.fromRGB(35, 37, 48)
+    KillAuraToggleBtn.BorderSizePixel = 0
+    KillAuraToggleBtn.Text = ""
+    KillAuraToggleBtn.AutoButtonColor = false
+    KillAuraToggleBtn.Parent = KillAuraCard
+
+    local ToggleCorner = Instance.new("UICorner")
+    ToggleCorner.CornerRadius = UDim.new(1, 0)
+    ToggleCorner.Parent = KillAuraToggleBtn
+
+    local ToggleCircle = Instance.new("Frame")
+    ToggleCircle.Name = "Circle"
+    ToggleCircle.Size = UDim2.fromOffset(16, 16)
+    ToggleCircle.Position = UDim2.new(0, 3, 0.5, -8)
+    ToggleCircle.BackgroundColor3 = Color3.fromRGB(150, 150, 160)
+    ToggleCircle.BorderSizePixel = 0
+    ToggleCircle.Parent = KillAuraToggleBtn
+
+    local CircleCorner = Instance.new("UICorner")
+    CircleCorner.CornerRadius = UDim.new(1, 0)
+    CircleCorner.Parent = ToggleCircle
+
+    -- Lógica do Toggle
+    KillAuraToggleBtn.Activated:Connect(function()
+        KillAuraAtivo = not KillAuraAtivo
+        if KillAuraAtivo then
+            TweenService:Create(KillAuraToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 120, 255)}):Play()
+            TweenService:Create(ToggleCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -19, 0.5, -8), BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+        else
+            TweenService:Create(KillAuraToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 37, 48)}):Play()
+            TweenService:Create(ToggleCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -8), BackgroundColor3 = Color3.fromRGB(150, 150, 160)}):Play()
+        end
+    end)
+
+    -- Slider de Distância (Dentro do mesmo card)
+    local SliderBar = Instance.new("Frame")
+    SliderBar.Name = "SliderBar"
+    SliderBar.Size = UDim2.new(1, -24, 0, 6)
+    SliderBar.Position = UDim2.new(0, 12, 0, 65)
+    SliderBar.BackgroundColor3 = Color3.fromRGB(35, 37, 48)
+    SliderBar.BorderSizePixel = 0
+    SliderBar.Parent = KillAuraCard
+
+    local SliderBarCorner = Instance.new("UICorner")
+    SliderBarCorner.CornerRadius = UDim.new(1, 0)
+    SliderBarCorner.Parent = SliderBar
+
+    local SliderFill = Instance.new("Frame")
+    SliderFill.Name = "Fill"
+    -- Valor inicial: Raio 15 de 50 max -> 15/50 = 0.3
+    SliderFill.Size = UDim2.new(RaioKillAura / 50, 0, 1, 0)
+    SliderFill.BackgroundColor3 = Color3.fromRGB(45, 120, 255)
+    SliderFill.BorderSizePixel = 0
+    SliderFill.Parent = SliderBar
+
+    local SliderFillCorner = Instance.new("UICorner")
+    SliderFillCorner.CornerRadius = UDim.new(1, 0)
+    SliderFillCorner.Parent = SliderFill
+
+    local SliderValueLabel = Instance.new("TextLabel")
+    SliderValueLabel.Name = "ValueLabel"
+    SliderValueLabel.Size = UDim2.new(0, 100, 0, 20)
+    SliderValueLabel.Position = UDim2.new(1, -100, 0, 42)
+    SliderValueLabel.BackgroundTransparency = 1
+    SliderValueLabel.Text = "Range: " .. tostring(RaioKillAura)
+    SliderValueLabel.TextColor3 = Color3.fromRGB(170, 170, 185)
+    SliderValueLabel.TextSize = 11
+    SliderValueLabel.Font = Enum.Font.Gotham
+    SliderValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    SliderValueLabel.Parent = KillAuraCard
+
+    -- Função para arrastar o Slider (funciona no celular e PC)
+    local SliderBtn = Instance.new("TextButton")
+    SliderBtn.Name = "SliderBtn"
+    SliderBtn.Size = UDim2.new(1, 0, 0, 30)
+    SliderBtn.Position = UDim2.new(0, 0, 0, -12)
+    SliderBtn.BackgroundTransparency = 1
+    SliderBtn.Text = ""
+    SliderBtn.Parent = SliderBar
+
+    local draggingSlider = false
+    local UserInputService = game:GetService("UserInputService")
+
+    local function UpdateSlider(input)
+        local pos = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
+        RaioKillAura = math.floor(pos * 50)
+        SliderFill.Size = UDim2.new(pos, 0, 1, 0)
+        SliderValueLabel.Text = "Range: " .. tostring(RaioKillAura)
+    end
+
+    SliderBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingSlider = true
+            UpdateSlider(input)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingSlider = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            UpdateSlider(input)
+        end
+    end)
+
+
+    -- ==================================
+    -- 📦 CARD 2: BOTÃO DO CÍRCULO (SEPARADO)
+    -- ==================================
+    local CircleCard = Instance.new("Frame")
+    CircleCard.Name = "CircleCard"
+    CircleCard.Size = UDim2.new(1, -6, 0, 50)
+    CircleCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    CircleCard.BorderSizePixel = 0
+    CircleCard.Parent = PageFrame
+
+    local CircleCardCorner = Instance.new("UICorner")
+    CircleCardCorner.CornerRadius = UDim.new(0, 10)
+    CircleCardCorner.Parent = CircleCard
+
+    local CircleCardStroke = Instance.new("UIStroke")
+    CircleCardStroke.Color = Color3.fromRGB(39, 40, 48)
+    CircleCardStroke.Thickness = 1
+    CircleCardStroke.Parent = CircleCard
+
+    local CircleTitle = Instance.new("TextLabel")
+    CircleTitle.Name = "Title"
+    CircleTitle.Size = UDim2.new(1, -70, 1, 0)
+    CircleTitle.Position = UDim2.fromOffset(12, 0)
+    CircleTitle.BackgroundTransparency = 1
+    CircleTitle.Text = "⭕ Show Aura Circle"
+    CircleTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    CircleTitle.TextSize = 12
+    CircleTitle.Font = Enum.Font.GothamSemibold
+    CircleTitle.TextXAlignment = Enum.TextXAlignment.Left
+    CircleTitle.Parent = CircleCard
+
+    local CircleToggleBtn = Instance.new("TextButton")
+    CircleToggleBtn.Name = "ToggleBtn"
+    CircleToggleBtn.Size = UDim2.fromOffset(40, 22)
+    CircleToggleBtn.AnchorPoint = Vector2.new(1, 0.5)
+    CircleToggleBtn.Position = UDim2.new(1, -12, 0.5, 0)
+    CircleToggleBtn.BackgroundColor3 = Color3.fromRGB(35, 37, 48)
+    CircleToggleBtn.BorderSizePixel = 0
+    CircleToggleBtn.Text = ""
+    CircleToggleBtn.AutoButtonColor = false
+    CircleToggleBtn.Parent = CircleCard
+
+    local CircleToggleCorner = Instance.new("UICorner")
+    CircleToggleCorner.CornerRadius = UDim.new(1, 0)
+    CircleToggleCorner.Parent = CircleToggleBtn
+
+    local CircleToggleCircle = Instance.new("Frame")
+    CircleToggleCircle.Name = "Circle"
+    CircleToggleCircle.Size = UDim2.fromOffset(16, 16)
+    CircleToggleCircle.Position = UDim2.new(0, 3, 0.5, -8)
+    CircleToggleCircle.BackgroundColor3 = Color3.fromRGB(150, 150, 160)
+    CircleToggleCircle.BorderSizePixel = 0
+    CircleToggleCircle.Parent = CircleToggleBtn
+
+    local CircleToggleCircleCorner = Instance.new("UICorner")
+    CircleToggleCircleCorner.CornerRadius = UDim.new(1, 0)
+    CircleToggleCircleCorner.Parent = CircleToggleCircle
+
+    -- Lógica do Toggle do Círculo
+    CircleToggleBtn.Activated:Connect(function()
+        MostrarCirculoAura = not MostrarCirculoAura
+        if MostrarCirculoAura then
+            TweenService:Create(CircleToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 120, 255)}):Play()
+            TweenService:Create(CircleToggleCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -19, 0.5, -8), BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+        else
+            TweenService:Create(CircleToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 37, 48)}):Play()
+            TweenService:Create(CircleToggleCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -8), BackgroundColor3 = Color3.fromRGB(150, 150, 160)}):Play()
+        end
+    end)
+else
+    warn("Error: PageFrame not found!")
+end
+
+
+-- ===============================================
+-- SHERIFF
+-- ===============================================
 local SectionTitle = Instance.new("TextLabel")
 SectionTitle.Name = "SectionTitle"
 SectionTitle.Size = UDim2.new(1, -12, 0, 24)
 SectionTitle.BackgroundTransparency = 1
 SectionTitle.Text = "SHERIFF"
 SectionTitle.TextColor3 = Color3.fromRGB(140, 142, 153)
-SectionTitle.TextSize = 11
+SectionTitle.TextSize = 20
 SectionTitle.Font = Enum.Font.GothamBold
 SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
 SectionTitle.Parent = PageFrame
