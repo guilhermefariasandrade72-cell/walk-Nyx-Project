@@ -76,7 +76,6 @@ local Resizing       = false
 local IconAssets = {
     house    = "rbxassetid://10723407389",
     eye      = "rbxassetid://6031075929",
-    teleport = "rbxassetid://6035047409",
     settings = "rbxassetid://10734950309",
     x        = "rbxassetid://10747384394",
 }
@@ -156,6 +155,64 @@ local function CreateDirectPlayerIcon(Parent, IconColor)
     return Container
 end
 
+-- Criação do ícone de emoji personalizado (Círculo, Olhos e Sorriso)
+local EmojiIcon = Instance.new("Frame")
+EmojiIcon.Name = "EmojiIcon"
+EmojiIcon.Size = UDim2.fromOffset(24, 24) -- Tamanho padrão do ícone na barra
+EmojiIcon.BackgroundTransparency = 1
+EmojiIcon.Parent = TabButton -- Substitua pelo container do botão da aba
+
+-- Cabeça / Círculo principal
+local Head = Instance.new("Frame")
+Head.Name = "Head"
+Head.Size = UDim2.fromScale(1, 1)
+Head.BackgroundColor3 = Color3.fromRGB(255, 220, 50) -- Amarelo clássico de emoji
+Head.BorderSizePixel = 0
+Head.Parent = EmojiIcon
+
+local HeadCorner = Instance.new("UICorner")
+HeadCorner.CornerRadius = UDim.new(1, 0) -- Deixa perfeitamente redondo
+HeadCorner.Parent = Head
+
+-- Olho esquerdo
+local LeftEye = Instance.new("Frame")
+LeftEye.Name = "LeftEye"
+LeftEye.Size = UDim2.fromOffset(3, 3)
+LeftEye.Position = UDim2.new(0, 6, 0, 7)
+LeftEye.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+LeftEye.BorderSizePixel = 0
+LeftEye.Parent = Head
+
+local LeftEyeCorner = Instance.new("UICorner")
+LeftEyeCorner.CornerRadius = UDim.new(1, 0)
+LeftEyeCorner.Parent = LeftEye
+
+-- Olho direito
+local RightEye = Instance.new("Frame")
+RightEye.Name = "RightEye"
+RightEye.Size = UDim2.fromOffset(3, 3)
+RightEye.Position = UDim2.new(1, -9, 0, 7)
+RightEye.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+RightEye.BorderSizePixel = 0
+RightEye.Parent = Head
+
+local RightEyeCorner = Instance.new("UICorner")
+RightEyeCorner.CornerRadius = UDim.new(1, 0)
+RightEyeCorner.Parent = RightEye
+
+-- Sorriso (utilizando um quadro arredondado cortado ou um pequeno traço simulando a boca)
+local Smile = Instance.new("Frame")
+Smile.Name = "Smile"
+Smile.Size = UDim2.fromOffset(10, 5)
+Smile.Position = UDim2.new(0.5, -5, 0.6, 0)
+Smile.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Smile.BorderSizePixel = 0
+Smile.Parent = Head
+
+local SmileCorner = Instance.new("UICorner")
+SmileCorner.CornerRadius = UDim.new(0, 0, 1, 1) -- Arredonda apenas a parte de baixo para simular um sorriso
+SmileCorner.Parent = Smile
+
 --==============================================================--
 -- TABS
 --==============================================================--
@@ -165,7 +222,7 @@ local TabsData = {
     { Name = "Auto Farm", Icon = "circle-dollar-sign", IsCustom = false, IsTextIcon = true, CustomSize = 32 },
     { Name = "ESP",       Icon = "eye",                IsCustom = false },
     { Name = "Player",    Icon = "user",               IsCustom = true  },
-    { Name = "Teleport", Icon = "teleport", IsCustom = false },
+    { Name = "Fling & Teleport", Icon = "emoji", IsCustom = true },
     { Name = "Settings",  Icon = "settings",           IsCustom = false },
 }
 
