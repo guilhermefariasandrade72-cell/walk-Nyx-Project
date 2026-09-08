@@ -440,8 +440,6 @@ local function GetMurderer()
                     isMurderer = true
                 elseif Info.Role and string.lower(Info.Role) == "murderer" then
                     isMurderer = true
-                elseif MyTeam ~= "" and p.Team and p.Team.Name == MyTeam and MyTeam == "Innocents" then
-                    -- Caso o jogo oculte papéis, checa se está no mesmo time de inocentes e tem arma (exemplo alternativo se necessário)
                 end
                 
                 if isMurderer then
@@ -463,7 +461,6 @@ local function ShootMurderer()
 
     local Gun = Char:FindFirstChild("Gun") or (player.Backpack and player.Backpack:FindFirstChild("Gun"))
     
-    -- Se não tiver a arma, avisa no botão temporariamente
     if not Gun then
         if ShootButtonGui then
             local lbl = ShootButtonGui:FindFirstChild("TextLabel", true)
@@ -535,7 +532,7 @@ local function ShootMurderer()
     Pressed = false
 end
 
--- 🎯 CREATE NYX AIM FLOATING BUTTON (MAIOR)
+-- 🎯 CREATE NYX AIM FLOATING BUTTON (IGUAL AO "INVISIBLE")
 local function CreateNyxAimButton()
     if ShootButtonGui then return end
     
@@ -551,10 +548,11 @@ local function CreateNyxAimButton()
     GuiBtn.Parent = ParentGui
 
     local Btn = Instance.new("ImageButton")
-    Btn.Size = UDim2.new(0, 160, 0, 55) -- Aumentado para ficar maior e mais confortável
-    Btn.Position = UDim2.new(0.5, -80, 0.5, -28)
-    Btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Btn.BackgroundTransparency = 0.4
+    -- Aumentado ainda mais para cima e pros lados (Largura: 180, Altura: 75)
+    Btn.Size = UDim2.new(0, 180, 0, 75)
+    Btn.Position = UDim2.new(0.5, -90, 0.5, -37)
+    Btn.BackgroundColor3 = Color3.fromRGB(16, 17, 22) -- Mesmo tom escuro do card "Invisible"
+    Btn.BackgroundTransparency = 0.25
     Btn.AutoButtonColor = false
     Btn.Parent = GuiBtn
 
@@ -563,7 +561,7 @@ local function CreateNyxAimButton()
     Corner.Parent = Btn
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(255, 75, 95) -- Vermelho mais claro e vivo
+    Stroke.Color = Color3.fromRGB(225, 40, 56) -- Mesmo vermelho exato do contorno do botão "Invisible"
     Stroke.Thickness = 2
     Stroke.Parent = Btn
 
@@ -572,7 +570,7 @@ local function CreateNyxAimButton()
     Label.BackgroundTransparency = 1
     Label.Text = "Nyx AIM"
     Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Label.TextSize = 16
+    Label.TextSize = 18
     Label.Font = Enum.Font.GothamBold
     Label.Parent = Btn
 
@@ -707,8 +705,8 @@ if PageFrame then
             RemoveNyxAimButton()
         end
         
-        local bgColor = NyxAimEnabled and Color3.fromRGB(240, 60, 80) or Color3.fromRGB(11, 12, 16)
-        local strokeColor = NyxAimEnabled and Color3.fromRGB(255, 90, 110) or Color3.fromRGB(39, 40, 48)
+        local bgColor = NyxAimEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+        local strokeColor = NyxAimEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
         local textTrans = NyxAimEnabled and 0 or 1
 
         TweenService:Create(NyxAimToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
@@ -756,9 +754,9 @@ if PageFrame then
     GrabGunToggle.AutoButtonColor = false
     GrabGunToggle.Parent = GrabGunCard
 
-    local GrabGunToggleCorner = Instance.new("UICorner")
-    GrabGunToggleCorner.CornerRadius = UDim.new(0, 6)
-    GrabGunToggleCorner.Parent = GrabGunToggle
+    local GrabGunToggleToggleCorner = Instance.new("UICorner")
+    GrabGunToggleToggleCorner.CornerRadius = UDim.new(0, 6)
+    GrabGunToggleToggleCorner.Parent = GrabGunToggle
 
     local GrabGunToggleStroke = Instance.new("UIStroke")
     GrabGunToggleStroke.Color = Color3.fromRGB(39, 40, 48)
@@ -772,7 +770,6 @@ if PageFrame then
     GrabGunCheck.Text = "✔"
     GrabGunCheck.TextColor3 = Color3.new(1, 1, 1)
     GrabGunCheck.TextSize = 14
-    GradeGunFont = Enum.Font.GothamBold
     GrabGunCheck.Font = Enum.Font.GothamBold
     GrabGunCheck.TextTransparency = 1
     GrabGunCheck.Parent = GrabGunToggle
@@ -780,8 +777,8 @@ if PageFrame then
     GrabGunToggle.Activated:Connect(function()
         AutoGrabGun = not AutoGrabGun
         
-        local bgColor = AutoGrabGun and Color3.fromRGB(240, 60, 80) or Color3.fromRGB(11, 12, 16)
-        local strokeColor = AutoGrabGun and Color3.fromRGB(255, 90, 110) or Color3.fromRGB(39, 40, 48)
+        local bgColor = AutoGrabGun and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+        local strokeColor = AutoGrabGun and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
         local textTrans = AutoGrabGun and 0 or 1
 
         TweenService:Create(GrabGunToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
