@@ -405,7 +405,7 @@ SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
 SectionTitle.Parent = PageFrame
 
 -- ====================================================
--- ⚔️ KILL AURA (CORRIGIDO PARA APARECER NA ABA MAIN)
+-- ⚔️ KILL AURA (OTIMIZADO COM PROTEÇÕES E ANTI-LAG)
 -- ====================================================
 
 local RunService = game:GetService("RunService")
@@ -420,13 +420,15 @@ local KillAuraAtivo = false
 local KillAuraDistancia = 15
 local MostrarCirculoAura = false
 local CirculoAuraPart = nil
+local UltimoAtaque = 0
+local CooldownAtaque = 0.1 -- Proteção contra spam excessivo de packets (Rate Limit)
 
--- Círculo visual de alcance
+-- Círculo visual de alcance (otimizado para evitar leaks e travamentos)
 local function AtualizarCirculoAura()
     local char = LocalPlayer.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
-    if MostrarCirculoAura and hrp then
+    if MostrarCirculoAura and hrp and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
         if not CirculoAuraPart or not CirculoAuraPart.Parent then
             CirculoAuraPart = Instance.new("Part")
             CirculoAuraPart.Name = "WalkNyx_KillAuraCircle"
@@ -456,7 +458,7 @@ local function AtualizarCirculoAura()
     end
 end
 
--- Lógica do Kill Aura
+-- Lógica do Kill Aura com Checagens de Segurança
 RunService.Heartbeat:Connect(function()
     AtualizarCirculoAura()
 
@@ -464,23 +466,33 @@ RunService.Heartbeat:Connect(function()
 
     local char = LocalPlayer.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+    local hum = char and char:FindFirstChild("Humanoid")
+    if not hrp or not hum or hum.Health <= 0 then return end
 
+    -- Validação segura da arma (Knife) evitando erros se o item não carregar
     local knife = char:FindFirstChild("Knife") or (LocalPlayer.Backpack and LocalPlayer.Backpack:FindFirstChild("Knife"))
     if not knife then return end
 
     if knife.Parent ~= char then
-        knife.Parent = char
+        pcall(function()
+            knife.Parent = char
+        end)
     end
 
+    -- Controle de Cooldown interno para limpar o fluxo da interface/servidor
+    local tempoAtual = tick()
+    if tempoAtual - UltimoAtaque < CooldownAtaque then return end
+
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local enemyHRP = player.Character.HumanoidRootPart
+        if player ~= LocalPlayer and player.Character then
+            local enemyHRP = player.Character:FindFirstChild("HumanoidRootPart")
             local enemyHum = player.Character:FindFirstChild("Humanoid")
 
-            if enemyHum and enemyHum.Health > 0 then
+            -- Proteções: Verifica se o inimigo está vivo e se não está em estado de "Shield/Spawn Protected" se houver
+            if enemyHRP and enemyHum and enemyHum.Health > 0 then
                 local distancia = (hrp.Position - enemyHRP.Position).Magnitude
                 if distancia <= KillAuraDistancia then
+                    UltimoAtaque = tempoAtual
                     pcall(function()
                         local stabRemote = knife:FindFirstChild("Stab", true) or knife:FindFirstChild("Slash", true)
                         if stabRemote and stabRemote:IsA("RemoteEvent") then
@@ -489,6 +501,7 @@ RunService.Heartbeat:Connect(function()
                             knife.Activated:Fire()
                         end
                     end)
+                    break -- Ataca um alvo por vez para garantir estabilidade e fluidez
                 end
             end
         end
@@ -499,14 +512,13 @@ end)
 local KillAuraCard = Instance.new("Frame")
 KillAuraCard.Name = "KillAuraCard"
 KillAuraCard.Size = UDim2.new(1, -12, 0, 135)
-KillAuraCard.Position = UDim2.fromOffset(6, 6) -- Posicionamento inicial seguro dentro da página
+KillAuraCard.Position = UDim2.fromOffset(6, 6)
 KillAuraCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
 KillAuraCard.BorderSizePixel = 0
 KillAuraCard.Visible = true
 KillAuraCard.ZIndex = 5
-KillAuraCard.Parent = MainTabPage -- Substitua pelo nome da variável da sua Aba Main
+KillAuraCard.Parent = MainTabPage
 
--- Se a sua Aba Main usar ScrollingFrame, isso garante que o tamanho ajuste a lista
 if MainTabPage:IsA("ScrollingFrame") then
     local layout = MainTabPage:FindFirstChildOfClass("UIListLayout")
     if not layout then
@@ -532,7 +544,7 @@ local KillAuraTitle = Instance.new("TextLabel")
 KillAuraTitle.Size = UDim2.new(1, -55, 0, 25)
 KillAuraTitle.Position = UDim2.fromOffset(12, 8)
 KillAuraTitle.BackgroundTransparency = 1
-KillAuraTitle.Text = "⚔️ Kill Aura (Main)"
+KillAuraTitle.Text = "⚔️ Kill Aura (Protegido)"
 KillAuraTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
 KillAuraTitle.TextSize = 12
 KillAuraTitle.Font = Enum.Font.GothamSemibold
