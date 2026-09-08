@@ -405,7 +405,6 @@ local Stats = game:GetService("Stats")
 
 local player = Players.LocalPlayer
 local NyxAimEnabled = false
-local AutoGrabGun = false
 local ShootButtonGui = nil
 local Pressed = false
 local isDragging = false
@@ -413,7 +412,7 @@ local buttonStartPos, dragStartPos
 local ShootPredictMultiplier = 1.2
 
 -- ===========================================
--- 🎯 SYSTEM — SHOOT MURDERER & AUTO GRAB GUN
+-- 🎯 SYSTEM — SHOOT MURDERER
 -- ===========================================
 
 local function GetPing()
@@ -428,8 +427,6 @@ local function GetMurderer()
     if not DataRemote then return nil end
     local ok, Data = pcall(function() return DataRemote:InvokeServer() end)
     if not ok or not Data then return nil end
-
-    local MyTeam = player.Team and player.Team.Name or ""
 
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
@@ -463,12 +460,17 @@ local function ShootMurderer()
     
     if not Gun then
         if ShootButtonGui then
-            local lbl = ShootButtonGui:FindFirstChild("TextLabel", true)
-            if lbl then
+            local lbl = ShootButtonGui:FindFirstChild("NyxText", true)
+            local statusLbl = ShootButtonGui:FindFirstChild("StatusText", true)
+            if lbl and statusLbl then
                 lbl.Text = "No Gun!"
+                statusLbl.Text = "Missing"
+                statusLbl.TextColor3 = Color3.fromRGB(255, 165, 0)
                 task.delay(1.2, function()
                     if lbl and lbl.Parent then
                         lbl.Text = "Nyx AIM"
+                        statusLbl.Text = NyxAimEnabled and "On" or "Off"
+                        statusLbl.TextColor3 = NyxAimEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
                     end
                 end)
             end
@@ -532,7 +534,7 @@ local function ShootMurderer()
     Pressed = false
 end
 
--- 🎯 CREATE NYX AIM FLOATING BUTTON (IGUAL AO "INVISIBLE")
+-- 🎯 CREATE NYX AIM FLOATING BUTTON (ESTILO IDÊNTICO AO INVISIBLE)
 local function CreateNyxAimButton()
     if ShootButtonGui then return end
     
@@ -547,56 +549,77 @@ local function CreateNyxAimButton()
     GuiBtn.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     GuiBtn.Parent = ParentGui
 
+    -- Botão retangular maior (Largura: 160, Altura: 70) com mesmo tom e borda
     local Btn = Instance.new("ImageButton")
-    -- Aumentado ainda mais para cima e pros lados (Largura: 180, Altura: 75)
-    Btn.Size = UDim2.new(0, 180, 0, 75)
-    Btn.Position = UDim2.new(0.5, -90, 0.5, -37)
-    Btn.BackgroundColor3 = Color3.fromRGB(16, 17, 22) -- Mesmo tom escuro do card "Invisible"
-    Btn.BackgroundTransparency = 0.25
+    Btn.Size = UDim2.new(0, 160, 0, 70)
+    Btn.Position = UDim2.new(0.5, -80, 0.3, -35)
+    Btn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    Btn.BackgroundTransparency = 0.3
     Btn.AutoButtonColor = false
+    Btn.BorderSizePixel = 0
     Btn.Parent = GuiBtn
 
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 12)
     Corner.Parent = Btn
 
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(225, 40, 56) -- Mesmo vermelho exato do contorno do botão "Invisible"
-    Stroke.Thickness = 2
-    Stroke.Parent = Btn
+    local Borda = Instance.new("UIStroke")
+    Borda.Color = NyxAimEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    Borda.Thickness = 3
+    Borda.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    Borda.Parent = Btn
 
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, 0, 1, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = "Nyx AIM"
-    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Label.TextSize = 18
-    Label.Font = Enum.Font.GothamBold
-    Label.Parent = Btn
+    local Texto = Instance.new("TextLabel")
+    Texto.Name = "NyxText"
+    Texto.Size = UDim2.new(1, 0, 0, 20)
+    Texto.Position = UDim2.new(0, 0, 0, 15)
+    Texto.BackgroundTransparency = 1
+    Texto.Text = "Nyx AIM"
+    Texto.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Texto.TextSize = 12
+    Texto.Font = Enum.Font.GothamBold
+    Texto.Parent = Btn
+
+    local StatusTexto = Instance.new("TextLabel")
+    StatusTexto.Name = "StatusText"
+    StatusTexto.Size = UDim2.new(1, 0, 0, 15)
+    StatusTexto.Position = UDim2.new(0, 0, 0, 35)
+    StatusTexto.BackgroundTransparency = 1
+    StatusTexto.Text = NyxAimEnabled and "On" or "Off"
+    StatusTexto.TextColor3 = NyxAimEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
+    StatusTexto.TextSize = 11
+    StatusTexto.Font = Enum.Font.GothamSemibold
+    StatusTexto.Parent = Btn
+
+    local dragThreshold = 10
+    local dragStartMousePos, buttonStartPosScreen
 
     Btn.InputBegan:Connect(function(Input)
         if Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = true
-            buttonStartPos = Btn.Position
-            dragStartPos = Input.Position
-            Input.Changed:Connect(function()
-                if Input.UserInputState == Enum.UserInputState.End then 
-                    isDragging = false 
-                end
-            end)
+            isDragging = false
+            dragStartMousePos = Input.Position
+            buttonStartPosScreen = Btn.Position
         end
     end)
 
     Btn.InputChanged:Connect(function(Input)
-        if isDragging and (Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseMovement) then
-            Btn.Position = buttonStartPos + UDim2.fromOffset(Input.Position.X - dragStartPos.X, Input.Position.Y - dragStartPos.Y)
+        if (Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseMovement) and dragStartMousePos then
+            local delta = Input.Position - dragStartMousePos
+            if delta.Magnitude > dragThreshold then
+                isDragging = true
+                Btn.Position = buttonStartPosScreen + UDim2.fromOffset(delta.X, delta.Y)
+            end
         end
     end)
 
-    Btn.MouseButton1Click:Connect(function() 
-        if not isDragging then 
-            ShootMurderer() 
-        end 
+    Btn.InputEnded:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if not isDragging then 
+                ShootMurderer() 
+            end
+            dragStartMousePos = nil
+            isDragging = false
+        end
     end)
 
     ShootButtonGui = GuiBtn
@@ -609,35 +632,10 @@ local function RemoveNyxAimButton()
     end
 end
 
--- 🔫 AUTO GRAB GUN SYSTEM
-local function GetGun()
-    if not AutoGrabGun then return end
-    
-    local Char = player.Character
-    if not Char or not Char:FindFirstChild("HumanoidRootPart") then return end
-
-    local MapContainer = Workspace:FindFirstChild("CoinContainer", true) and Workspace:FindFirstChild("CoinContainer", true).Parent
-    local mapToSearch = MapContainer or Workspace
-
-    local gunDrop = mapToSearch:FindFirstChild("GunDrop", true) or Workspace:FindFirstChild("GunDrop", true)
-    
-    if gunDrop and gunDrop:IsA("BasePart") then
-        gunDrop.CFrame = Char.HumanoidRootPart.CFrame
-    end
-end
-
-task.spawn(function()
-    while true do
-        pcall(GetGun)
-        task.wait(0.1)
-    end
-end)
-
 -- ==================================
 -- 🔘 BUTTONS — MAIN TAB
 -- ==================================
 if PageFrame then
-    -- 🎯 NYX AIM BUTTON
     local NyxAimCard = Instance.new("Frame")
     NyxAimCard.Name = "NyxAimCard"
     NyxAimCard.Size = UDim2.new(1, -6, 0, 50)
@@ -684,7 +682,7 @@ if PageFrame then
     local NyxAimToggleStroke = Instance.new("UIStroke")
     NyxAimToggleStroke.Color = Color3.fromRGB(39, 40, 48)
     NyxAimToggleStroke.Thickness = 1
-    NyxAimToggleStroke.Parent = NyxAimToggle
+    NyxAimToggleStroke.Parent = NyxAimCard -- Corrigido para o parent correto
 
     local NyxAimCheck = Instance.new("TextLabel")
     NyxAimCheck.Name = "CheckMark"
@@ -710,80 +708,7 @@ if PageFrame then
         local textTrans = NyxAimEnabled and 0 or 1
 
         TweenService:Create(NyxAimToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
-        TweenService:Create(NyxAimToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = strokeColor}):Play()
         TweenService:Create(NyxAimCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
-    end)
-
-    -- 🔫 AUTO GRAB GUN BUTTON
-    local GrabGunCard = Instance.new("Frame")
-    GrabGunCard.Name = "GrabGunCard"
-    GrabGunCard.Size = UDim2.new(1, -6, 0, 50)
-    GrabGunCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-    GrabGunCard.BorderSizePixel = 0
-    GrabGunCard.Parent = PageFrame
-
-    local GrabGunCardCorner = Instance.new("UICorner")
-    GrabGunCardCorner.CornerRadius = UDim.new(0, 10)
-    GrabGunCardCorner.Parent = GrabGunCard
-
-    local GrabGunCardStroke = Instance.new("UIStroke")
-    GrabGunCardStroke.Color = Color3.fromRGB(39, 40, 48)
-    GrabGunCardStroke.Thickness = 1
-    GrabGunCardStroke.Parent = GrabGunCard
-
-    local GrabGunTitle = Instance.new("TextLabel")
-    GrabGunTitle.Name = "Title"
-    GrabGunTitle.Size = UDim2.new(1, -60, 1, 0)
-    GrabGunTitle.Position = UDim2.fromOffset(12, 0)
-    GrabGunTitle.BackgroundTransparency = 1
-    GrabGunTitle.Text = "🔫 Auto Grab Gun"
-    GrabGunTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
-    GrabGunTitle.TextSize = 12
-    GrabGunTitle.Font = Enum.Font.GothamSemibold
-    GrabGunTitle.TextXAlignment = Enum.TextXAlignment.Left
-    GrabGunTitle.Parent = GrabGunCard
-
-    local GrabGunToggle = Instance.new("TextButton")
-    GrabGunToggle.Name = "ToggleButton"
-    GrabGunToggle.Size = UDim2.fromOffset(26, 26)
-    GrabGunToggle.AnchorPoint = Vector2.new(1, 0.5)
-    GrabGunToggle.Position = UDim2.new(1, -12, 0.5, 0)
-    GrabGunToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-    GrabGunToggle.BorderSizePixel = 0
-    GrabGunToggle.Text = ""
-    GrabGunToggle.AutoButtonColor = false
-    GrabGunToggle.Parent = GrabGunCard
-
-    local GrabGunToggleToggleCorner = Instance.new("UICorner")
-    GrabGunToggleToggleCorner.CornerRadius = UDim.new(0, 6)
-    GrabGunToggleToggleCorner.Parent = GrabGunToggle
-
-    local GrabGunToggleStroke = Instance.new("UIStroke")
-    GrabGunToggleStroke.Color = Color3.fromRGB(39, 40, 48)
-    GrabGunToggleStroke.Thickness = 1
-    GrabGunToggleStroke.Parent = GrabGunToggle
-
-    local GrabGunCheck = Instance.new("TextLabel")
-    GrabGunCheck.Name = "CheckMark"
-    GrabGunCheck.Size = UDim2.fromScale(1, 1)
-    GrabGunCheck.BackgroundTransparency = 1
-    GrabGunCheck.Text = "✔"
-    GrabGunCheck.TextColor3 = Color3.new(1, 1, 1)
-    GrabGunCheck.TextSize = 14
-    GrabGunCheck.Font = Enum.Font.GothamBold
-    GrabGunCheck.TextTransparency = 1
-    GrabGunCheck.Parent = GrabGunToggle
-
-    GrabGunToggle.Activated:Connect(function()
-        AutoGrabGun = not AutoGrabGun
-        
-        local bgColor = AutoGrabGun and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-        local strokeColor = AutoGrabGun and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-        local textTrans = AutoGrabGun and 0 or 1
-
-        TweenService:Create(GrabGunToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
-        TweenService:Create(GrabGunToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = strokeColor}):Play()
-        TweenService:Create(GrabGunCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
     end)
 else
     warn("Error: PageFrame not found!")
