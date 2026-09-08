@@ -405,7 +405,7 @@ SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
 SectionTitle.Parent = PageFrame
 
 -- ====================================================
--- ⚔️ KILL AURA (DIRETO NA ABA MAIN)
+-- ⚔️ KILL AURA (CORRIGIDO PARA APARECER NA ABA MAIN)
 -- ====================================================
 
 local RunService = game:GetService("RunService")
@@ -495,13 +495,29 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- --- CARD VISUAL DA ABA MAIN ---
+-- --- CARD VISUAL DA ABA MAIN (CORRIGIDO) ---
 local KillAuraCard = Instance.new("Frame")
 KillAuraCard.Name = "KillAuraCard"
-KillAuraCard.Size = UDim2.new(1, -6, 0, 135)
+KillAuraCard.Size = UDim2.new(1, -12, 0, 135)
+KillAuraCard.Position = UDim2.fromOffset(6, 6) -- Posicionamento inicial seguro dentro da página
 KillAuraCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
 KillAuraCard.BorderSizePixel = 0
+KillAuraCard.Visible = true
+KillAuraCard.ZIndex = 5
 KillAuraCard.Parent = MainTabPage -- Substitua pelo nome da variável da sua Aba Main
+
+-- Se a sua Aba Main usar ScrollingFrame, isso garante que o tamanho ajuste a lista
+if MainTabPage:IsA("ScrollingFrame") then
+    local layout = MainTabPage:FindFirstChildOfClass("UIListLayout")
+    if not layout then
+        layout = Instance.new("UIListLayout")
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+        layout.Padding = UDim.new(0, 8)
+        layout.Parent = MainTabPage
+    end
+    KillAuraCard.Position = UDim2.new(0, 0, 0, 0)
+    MainTabPage.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 150)
+end
 
 local KillAuraCorner = Instance.new("UICorner")
 KillAuraCorner.CornerRadius = UDim.new(0, 10)
@@ -521,6 +537,7 @@ KillAuraTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
 KillAuraTitle.TextSize = 12
 KillAuraTitle.Font = Enum.Font.GothamSemibold
 KillAuraTitle.TextXAlignment = Enum.TextXAlignment.Left
+KillAuraTitle.ZIndex = 6
 KillAuraTitle.Parent = KillAuraCard
 
 -- Botão Toggle 1 (Ligar/Desligar)
@@ -531,6 +548,7 @@ AuraToggleBtn.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
 AuraToggleBtn.BorderSizePixel = 0
 AuraToggleBtn.Text = ""
 AuraToggleBtn.AutoButtonColor = false
+AuraToggleBtn.ZIndex = 6
 AuraToggleBtn.Parent = KillAuraCard
 
 local AuraToggleCorner = Instance.new("UICorner")
@@ -550,6 +568,7 @@ AuraCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
 AuraCheck.TextSize = 14
 AuraCheck.Font = Enum.Font.GothamBold
 AuraCheck.TextTransparency = 1
+AuraCheck.ZIndex = 7
 AuraCheck.Parent = AuraToggleBtn
 
 AuraToggleBtn.Activated:Connect(function()
@@ -571,6 +590,7 @@ CircleToggleBtn.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
 CircleToggleBtn.BorderSizePixel = 0
 CircleToggleBtn.Text = ""
 CircleToggleBtn.AutoButtonColor = false
+CircleToggleBtn.ZIndex = 6
 CircleToggleBtn.Parent = KillAuraCard
 
 local CircleToggleCorner = Instance.new("UICorner")
@@ -590,6 +610,7 @@ CircleCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
 CircleCheck.TextSize = 14
 CircleCheck.Font = Enum.Font.GothamBold
 CircleCheck.TextTransparency = 1
+CircleCheck.ZIndex = 7
 CircleCheck.Parent = CircleToggleBtn
 
 local CircleLabel = Instance.new("TextLabel")
@@ -601,6 +622,7 @@ CircleLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
 CircleLabel.TextSize = 11
 CircleLabel.Font = Enum.Font.Gotham
 CircleLabel.TextXAlignment = Enum.TextXAlignment.Left
+CircleLabel.ZIndex = 6
 CircleLabel.Parent = KillAuraCard
 
 CircleToggleBtn.Activated:Connect(function()
@@ -619,6 +641,7 @@ local AuraSliderContainer = Instance.new("Frame")
 AuraSliderContainer.Size = UDim2.new(1, -24, 0, 30)
 AuraSliderContainer.Position = UDim2.fromOffset(12, 85)
 AuraSliderContainer.BackgroundTransparency = 1
+AuraSliderContainer.ZIndex = 6
 AuraSliderContainer.Parent = KillAuraCard
 
 local AuraSliderLabel = Instance.new("TextLabel")
@@ -629,6 +652,7 @@ AuraSliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
 AuraSliderLabel.TextSize = 10
 AuraSliderLabel.Font = Enum.Font.Gotham
 AuraSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+AuraSliderLabel.ZIndex = 6
 AuraSliderLabel.Parent = AuraSliderContainer
 
 local AuraSliderValue = Instance.new("TextLabel")
@@ -640,6 +664,7 @@ AuraSliderValue.TextColor3 = Color3.fromRGB(165, 166, 177)
 AuraSliderValue.TextSize = 10
 AuraSliderValue.Font = Enum.Font.Gotham
 AuraSliderValue.TextXAlignment = Enum.TextXAlignment.Right
+AuraSliderValue.ZIndex = 6
 AuraSliderValue.Parent = AuraSliderContainer
 
 local AuraSliderBg = Instance.new("Frame")
@@ -647,6 +672,7 @@ AuraSliderBg.Size = UDim2.new(1, 0, 0, 6)
 AuraSliderBg.Position = UDim2.fromOffset(0, 20)
 AuraSliderBg.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
 AuraSliderBg.BorderSizePixel = 0
+AuraSliderBg.ZIndex = 6
 AuraSliderBg.Parent = AuraSliderContainer
 
 local AuraSliderBgCorner = Instance.new("UICorner")
@@ -657,6 +683,7 @@ local AuraSliderFill = Instance.new("Frame")
 AuraSliderFill.Size = UDim2.new(0.25, 0, 1, 0)
 AuraSliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
 AuraSliderFill.BorderSizePixel = 0
+AuraSliderFill.ZIndex = 7
 AuraSliderFill.Parent = AuraSliderBg
 
 local AuraSliderFillCorner = Instance.new("UICorner")
@@ -669,6 +696,7 @@ AuraSliderButton.Position = UDim2.fromScale(0.25, 0.5)
 AuraSliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
 AuraSliderButton.BackgroundTransparency = 1
 AuraSliderButton.Text = ""
+AuraSliderButton.ZIndex = 8
 AuraSliderButton.Parent = AuraSliderBg
 
 local AuraSliding = false
