@@ -714,6 +714,267 @@ else
     warn("Error: PageFrame not found!")
 end
 
+-- ==================================
+-- 🎯 AUTO GRAB GUN SYSTEM & FLOATING BUTTON
+-- ==================================
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local AutoGrabGunEnabled = false
+local GrabButtonGui = nil
+local isDraggingGrab = false
+
+local function GetGunDrop()
+    local MapContainer = Workspace:FindFirstChild("CoinContainer", true) and Workspace:FindFirstChild("CoinContainer", true).Parent
+    local mapToSearch = MapContainer or Workspace
+    local gunDrop = mapToSearch:FindFirstChild("GunDrop", true) or Workspace:FindFirstChild("GunDrop", true)
+    if gunDrop and gunDrop:IsA("BasePart") then
+        return gunDrop
+    end
+    return nil
+end
+
+local function TriggerGrabGun()
+    local Char = player.Character
+    if not Char or not Char:FindFirstChild("HumanoidRootPart") then return end
+
+    local gunDrop = GetGunDrop()
+    if gunDrop then
+        gunDrop.CFrame = Char.HumanoidRootPart.CFrame
+        if GrabButtonGui then
+            local texto = GrabButtonGui:FindFirstChild("GrabText", true)
+            local statusTexto = GrabButtonGui:FindFirstChild("StatusText", true)
+            if texto and statusTexto then
+                texto.Text = "Grabbed!"
+                statusTexto.Text = "Success"
+                statusTexto.TextColor3 = Color3.fromRGB(0, 255, 0)
+                task.delay(1.2, function()
+                    if texto and texto.Parent then
+                        texto.Text = "Auto Gun"
+                        statusTexto.Text = AutoGrabGunEnabled and "On" or "Off"
+                        statusTexto.TextColor3 = AutoGrabGunEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
+                    end
+                end)
+            end
+        end
+    else
+        if GrabButtonGui then
+            local texto = GrabButtonGui:FindFirstChild("GrabText", true)
+            local statusTexto = GrabButtonGui:FindFirstChild("StatusText", true)
+            if texto and statusTexto then
+                texto.Text = "No Drop!"
+                statusTexto.Text = "Missing"
+                statusTexto.TextColor3 = Color3.fromRGB(255, 165, 0)
+                task.delay(1.2, function()
+                    if texto and texto.Parent then
+                        texto.Text = "Auto Gun"
+                        statusTexto.Text = AutoGrabGunEnabled and "On" or "Off"
+                        statusTexto.TextColor3 = AutoGrabGunEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
+                    end
+                end)
+            end
+        end
+    end
+end
+
+local function CreateGrabGunButton()
+    if GrabButtonGui then return end
+
+    local ParentGui = CoreGui
+    pcall(function()
+        if not CoreGui then ParentGui = player:WaitForChild("PlayerGui") end
+    end)
+
+    local GuiBtn = Instance.new("ScreenGui")
+    GuiBtn.Name = "AstralX_GrabGunButton"
+    GuiBtn.ResetOnSpawn = false
+    GuiBtn.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    GuiBtn.Parent = ParentGui
+
+    -- Botão redondo 70x70 com UICorner circular (CornerRadius = UDim.new(1, 0))
+    local Btn = Instance.new("ImageButton")
+    Btn.Size = UDim2.new(0, 70, 0, 70)
+    Btn.Position = UDim2.new(0.5, -35, 0.5, -35)
+    Btn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    Btn.BackgroundTransparency = 0.3
+    Btn.BorderSizePixel = 0
+    Btn.Parent = GuiBtn
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(1, 0) -- Circular perfeito
+    Corner.Parent = Btn
+
+    local Borda = Instance.new("UIStroke")
+    Borda.Color = AutoGrabGunEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    Borda.Thickness = 3
+    Borda.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    Borda.Parent = Btn
+
+    local Texto = Instance.new("TextLabel")
+    Texto.Name = "GrabText"
+    Texto.Size = UDim2.new(1, 0, 0, 18)
+    Texto.Position = UDim2.new(0, 0, 0, 18)
+    Texto.BackgroundTransparency = 1
+    Texto.Text = "Auto Gun"
+    Texto.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Texto.TextSize = 11
+    Texto.Font = Enum.Font.GothamBold
+    Texto.Parent = Btn
+
+    local StatusTexto = Instance.new("TextLabel")
+    StatusTexto.Name = "StatusText"
+    StatusTexto.Size = UDim2.new(1, 0, 0, 14)
+    StatusTexto.Position = UDim2.new(0, 0, 0, 36)
+    StatusTexto.BackgroundTransparency = 1
+    StatusTexto.Text = AutoGrabGunEnabled and "On" or "Off"
+    StatusTexto.TextColor3 = AutoGrabGunEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
+    StatusTexto.TextSize = 10
+    StatusTexto.Font = Enum.Font.GothamSemibold
+    StatusTexto.Parent = Btn
+
+    local dragThreshold = 10
+    local dragStartMousePos, buttonStartPosScreen
+
+    Btn.InputBegan:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDraggingGrab = false
+            dragStartMousePos = Input.Position
+            buttonStartPosScreen = Btn.Position
+        end
+    end)
+
+    Btn.InputChanged:Connect(function(Input)
+        if (Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseMovement) and dragStartMousePos then
+            local delta = Input.Position - dragStartMousePos
+            if delta.Magnitude > dragThreshold then
+                isDraggingGrab = true
+                Btn.Position = buttonStartPosScreen + UDim2.fromOffset(delta.X, delta.Y)
+            end
+        end
+    end)
+
+    Btn.InputEnded:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if not isDraggingGrab then 
+                TriggerGrabGun() 
+            end
+            dragStartMousePos = nil
+            isDraggingGrab = false
+        end
+    end)
+
+    GrabButtonGui = GuiBtn
+end
+
+local function RemoveGrabGunButton()
+    if GrabButtonGui then 
+        GrabButtonGui:Destroy() 
+        GrabButtonGui = nil 
+    end
+end
+
+-- Loop opcional para puxar automaticamente se estiver ativado pelo menu
+task.spawn(function()
+    while true do
+        if AutoGrabGunEnabled then
+            local Char = player.Character
+            if Char and Char:FindFirstChild("HumanoidRootPart") then
+                local gunDrop = GetGunDrop()
+                if gunDrop then
+                    gunDrop.CFrame = Char.HumanoidRootPart.CFrame
+                end
+            end
+        end
+        task.wait(0.1)
+    end
+end)
+
+-- ==================================
+-- 🔘 BUTTONS — MENU TAB
+-- ==================================
+if PageFrame then
+    local GrabGunCard = Instance.new("Frame")
+    GrabGunCard.Name = "GrabGunCard"
+    GrabGunCard.Size = UDim2.new(1, -6, 0, 50)
+    GrabGunCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    GrabGunCard.BorderSizePixel = 0
+    GrabGunCard.Parent = PageFrame
+
+    local GrabGunCardCorner = Instance.new("UICorner")
+    GrabGunCardCorner.CornerRadius = UDim.new(0, 10)
+    GrabGunCardCorner.Parent = GrabGunCard
+
+    local GrabGunCardStroke = Instance.new("UIStroke")
+    GrabGunCardStroke.Color = Color3.fromRGB(39, 40, 48)
+    GrabGunCardStroke.Thickness = 1
+    GrabGunCardStroke.Parent = GrabGunCard
+
+    local GrabGunTitle = Instance.new("TextLabel")
+    GrabGunTitle.Name = "Title"
+    GrabGunTitle.Size = UDim2.new(1, -60, 1, 0)
+    GrabGunTitle.Position = UDim2.fromOffset(12, 0)
+    GrabGunTitle.BackgroundTransparency = 1
+    GrabGunTitle.Text = "🔫 Auto Grab Gun"
+    GrabGunTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    GrabGunTitle.TextSize = 12
+    GrabGunTitle.Font = Enum.Font.GothamSemibold
+    GrabGunTitle.TextXAlignment = Enum.TextXAlignment.Left
+    GrabGunTitle.Parent = GrabGunCard
+
+    local GrabGunToggle = Instance.new("TextButton")
+    GrabGunToggle.Name = "ToggleButton"
+    GrabGunToggle.Size = UDim2.fromOffset(26, 26)
+    GrabGunToggle.AnchorPoint = Vector2.new(1, 0.5)
+    GrabGunToggle.Position = UDim2.new(1, -12, 0.5, 0)
+    GrabGunToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    GrabGunToggle.BorderSizePixel = 0
+    GrabGunToggle.Text = ""
+    GrabGunToggle.AutoButtonColor = false
+    GrabGunToggle.Parent = GrabGunCard
+
+    local GrabGunToggleCorner = Instance.new("UICorner")
+    GrabGunToggleCorner.CornerRadius = UDim.new(0, 6)
+    GrabGunToggleCorner.Parent = GrabGunToggle
+
+    local GrabGunToggleStroke = Instance.new("UIStroke")
+    GrabGunToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+    GrabGunToggleStroke.Thickness = 1
+    GrabGunToggleStroke.Parent = GrabGunToggle
+
+    local GrabGunCheck = Instance.new("TextLabel")
+    GrabGunCheck.Name = "CheckMark"
+    GrabGunCheck.Size = UDim2.fromScale(1, 1)
+    GrabGunCheck.BackgroundTransparency = 1
+    GrabGunCheck.Text = "✔"
+    GrabGunCheck.TextColor3 = Color3.new(1, 1, 1)
+    GrabGunCheck.TextSize = 14
+    GrabGunCheck.Font = Enum.Font.GothamBold
+    GrabGunCheck.TextTransparency = 1
+    GrabGunCheck.Parent = GrabGunToggle
+
+    GrabGunToggle.Activated:Connect(function()
+        AutoGrabGunEnabled = not AutoGrabGunEnabled
+        if AutoGrabGunEnabled then
+            CreateGrabGunButton()
+        else
+            RemoveGrabGunButton()
+        end
+        
+        local bgColor = AutoGrabGunEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+        local strokeColor = AutoGrabGunEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+        local textTrans = AutoGrabGunEnabled and 0 or 1
+
+        TweenService:Create(GrabGunToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
+        TweenService:Create(GrabGunToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = strokeColor}):Play()
+        TweenService:Create(GrabGunCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
+    end)
+else
+    warn("Error: PageFrame not found!")
+end
+
 -- ================================================
 --              ABA AUTO FARM
     elseif TabData.Name == "Auto Farm" then
