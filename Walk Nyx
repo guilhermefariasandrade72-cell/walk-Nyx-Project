@@ -394,8 +394,16 @@ for Index, TabData in ipairs(TabsData) do
 -- ================================================
 
 -- ==================================
--- 🎯 VARIABLES — NYX AIM & AUTO GRAB GUN
+-- 🎯 VARIABLES & SERVICES
 -- ==================================
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local Stats = game:GetService("Stats")
+
+local player = Players.LocalPlayer
 local NyxAimEnabled = false
 local AutoGrabGun = false
 local ShootButtonGui = nil
@@ -403,8 +411,6 @@ local Pressed = false
 local isDragging = false
 local buttonStartPos, dragStartPos
 local ShootPredictMultiplier = 1.2
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
 
 -- ===========================================
 -- 🎯 SYSTEM — SHOOT MURDERER & AUTO GRAB GUN
@@ -423,11 +429,11 @@ local function GetMurderer()
     local ok, Data = pcall(function() return DataRemote:InvokeServer() end)
     if not ok or not Data then return nil end
 
-    for _, Player in ipairs(Players:GetPlayers()) do
-        if Player ~= player and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            local Info = Data[Player.Name]
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local Info = Data[p.Name]
             if Info and not Info.Killed and not Info.Dead and Info.Role == "Murderer" then
-                return Player
+                return p
             end
         end
     end
@@ -473,7 +479,6 @@ local function ShootMurderer()
     local Velocity = TargetHRP.Velocity
     local PredictedPos = Velocity.Magnitude < 1 and TargetTorso.Position or TargetTorso.Position + (Velocity * PredictionTime)
     
-    -- 🧱 WALLBANG LOGIC
     local MyPos = Char.HumanoidRootPart.Position
     local RayDirection = (PredictedPos - MyPos)
     
@@ -546,7 +551,6 @@ local function CreateNyxAimButton()
     Label.Font = Enum.Font.GothamBold
     Label.Parent = Btn
 
-    -- Drag System
     Btn.InputBegan:Connect(function(Input)
         if Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseButton1 then
             isDragging = true
@@ -566,7 +570,6 @@ local function CreateNyxAimButton()
         end
     end)
 
-    -- Click to Shoot
     Btn.MouseButton1Click:Connect(function() 
         if not isDragging then 
             ShootMurderer() 
@@ -576,7 +579,6 @@ local function CreateNyxAimButton()
     ShootButtonGui = GuiBtn
 end
 
--- 🎯 REMOVE NYX AIM BUTTON
 local function RemoveNyxAimButton()
     if ShootButtonGui then 
         ShootButtonGui:Destroy() 
@@ -601,8 +603,11 @@ local function GetGun()
     end
 end
 
-RunService.Heartbeat:Connect(function()
-    GetGun()
+task.spawn(function()
+    while true do
+        pcall(GetGun)
+        task.wait(0.1)
+    end
 end)
 
 -- ==================================
