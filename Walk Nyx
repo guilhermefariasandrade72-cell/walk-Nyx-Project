@@ -609,19 +609,10 @@ end)
 -- 🔘 BUTTONS — MAIN TAB
 -- ==================================
 if PageFrame then
-    -- Garante que exista um UIListLayout na aba para organizar os cards em lista empilhada
-    local existingLayout = PageFrame:FindFirstChildOfClass("UIListLayout")
-    if not existingLayout then
-        local ListLayout = Instance.new("UIListLayout")
-        ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        ListLayout.Padding = UDim.new(0, 6)
-        ListLayout.Parent = PageFrame
-    end
-
     -- 🎯 NYX AIM BUTTON
     local NyxAimCard = Instance.new("Frame")
     NyxAimCard.Name = "NyxAimCard"
-    NyxAimCard.Size = UDim2.new(1, 0, 0, 50)
+    NyxAimCard.Size = UDim2.new(1, -6, 0, 50)
     NyxAimCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
     NyxAimCard.BorderSizePixel = 0
     NyxAimCard.Parent = PageFrame
@@ -698,7 +689,7 @@ if PageFrame then
     -- 🔫 AUTO GRAB GUN BUTTON
     local GrabGunCard = Instance.new("Frame")
     GrabGunCard.Name = "GrabGunCard"
-    GrabGunCard.Size = UDim2.new(1, 0, 0, 50)
+    GrabGunCard.Size = UDim2.new(1, -6, 0, 50)
     GrabGunCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
     GrabGunCard.BorderSizePixel = 0
     GrabGunCard.Parent = PageFrame
@@ -769,18 +760,6 @@ if PageFrame then
 else
     warn("Error: PageFrame not found!")
 end
-
-
-
-
-
-
-
-
-
-
-
-
 
 -- ================================================
 --              ABA AUTO FARM
