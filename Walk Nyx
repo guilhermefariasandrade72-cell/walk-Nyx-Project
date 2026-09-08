@@ -1236,82 +1236,7 @@ if PageFrame then
         TweenService:Create(AimlockCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
     end)
 
-    -- 👁️ 2. SHOW FOV TOGGLE CARD
-    local ShowFOVCard = Instance.new("Frame")
-    ShowFOVCard.Name = "ShowFOVCard"
-    ShowFOVCard.Size = UDim2.new(1, -6, 0, 50)
-    ShowFOVCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-    ShowFOVCard.BorderSizePixel = 0
-    ShowFOVCard.Parent = PageFrame
-
-    local ShowFOVCorner = Instance.new("UICorner")
-    ShowFOVCorner.CornerRadius = UDim.new(0, 10)
-    ShowFOVCorner.Parent = ShowFOVCard
-
-    local ShowFOVStroke = Instance.new("UIStroke")
-    ShowFOVStroke.Color = Color3.fromRGB(39, 40, 48)
-    ShowFOVStroke.Thickness = 1
-    ShowFOVStroke.Parent = ShowFOVCard
-
-    local ShowFOVTitle = Instance.new("TextLabel")
-    ShowFOVTitle.Name = "Title"
-    ShowFOVTitle.Size = UDim2.new(1, -60, 1, 0)
-    ShowFOVTitle.Position = UDim2.fromOffset(12, 0)
-    ShowFOVTitle.BackgroundTransparency = 1
-    ShowFOVTitle.Text = "👁️ Show FOV"
-    ShowFOVTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
-    ShowFOVTitle.TextSize = 12
-    ShowFOVTitle.Font = Enum.Font.GothamSemibold
-    ShowFOVTitle.TextXAlignment = Enum.TextXAlignment.Left
-    ShowFOVTitle.Parent = ShowFOVCard
-
-    local ShowFOVToggle = Instance.new("TextButton")
-    ShowFOVToggle.Name = "ToggleButton"
-    ShowFOVToggle.Size = UDim2.fromOffset(26, 26)
-    ShowFOVToggle.AnchorPoint = Vector2.new(1, 0.5)
-    ShowFOVToggle.Position = UDim2.new(1, -12, 0.5, 0)
-    ShowFOVToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-    ShowFOVToggle.BorderSizePixel = 0
-    ShowFOVToggle.Text = ""
-    ShowFOVToggle.AutoButtonColor = false
-    ShowFOVToggle.Parent = ShowFOVCard
-
-    local ShowFOVToggleCorner = Instance.new("UICorner")
-    ShowFOVToggleCorner.CornerRadius = UDim.new(0, 6)
-    ShowFOVToggleCorner.Parent = ShowFOVToggle
-
-    local ShowFOVToggleStroke = Instance.new("UIStroke")
-    ShowFOVToggleStroke.Color = Color3.fromRGB(39, 40, 48)
-    ShowFOVToggleStroke.Thickness = 1
-    ShowFOVToggleStroke.Parent = ShowFOVToggle
-
-    local ShowFOVCheck = Instance.new("TextLabel")
-    ShowFOVCheck.Name = "CheckMark"
-    ShowFOVCheck.Size = UDim2.fromScale(1, 1)
-    ShowFOVCheck.BackgroundTransparency = 1
-    ShowFOVCheck.Text = "✔"
-    ShowFOVCheck.TextColor3 = Color3.new(1, 1, 1)
-    ShowFOVCheck.TextSize = 14
-    ShowFOVCheck.Font = Enum.Font.GothamBold
-    ShowFOVCheck.TextTransparency = 1
-    ShowFOVCheck.Parent = ShowFOVToggle
-
-    ShowFOVToggle.Activated:Connect(function()
-        ShowFOV = not ShowFOV
-        if FOVCircle then
-            FOVCircle.Visible = ShowFOV
-        end
-        
-        local bgColor = ShowFOV and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-        local strokeColor = ShowFOV and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
-        local textTrans = ShowFOV and 0 or 1
-
-        TweenService:Create(ShowFOVToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
-        TweenService:Create(ShowFOVToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = strokeColor}):Play()
-        TweenService:Create(ShowFOVCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
-    end)
-
-    -- 🎚️ 3. FOV SLIDER CARD
+    -- 🎚️ 2. FOV SLIDER CARD (Logo abaixo do Aimlock)
     local FOVSliderCard = Instance.new("Frame")
     FOVSliderCard.Name = "FOVSliderCard"
     FOVSliderCard.Size = UDim2.new(1, -6, 0, 60)
@@ -1406,6 +1331,81 @@ if PageFrame then
                 FOVCircle.Size = UDim2.new(0, FOVRadius, 0, FOVRadius)
             end
         end
+    end)
+
+    -- 👁️ 3. SHOW FOV TOGGLE CARD (Logo abaixo do Slider)
+    local ShowFOVCard = Instance.new("Frame")
+    ShowFOVCard.Name = "ShowFOVCard"
+    ShowFOVCard.Size = UDim2.new(1, -6, 0, 50)
+    ShowFOVCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    ShowFOVCard.BorderSizePixel = 0
+    ShowFOVCard.Parent = PageFrame
+
+    local ShowFOVCorner = Instance.new("UICorner")
+    ShowFOVCorner.CornerRadius = UDim.new(0, 10)
+    ShowFOVCorner.Parent = ShowFOVCard
+
+    local ShowFOVStroke = Instance.new("UIStroke")
+    ShowFOVStroke.Color = Color3.fromRGB(39, 40, 48)
+    ShowFOVStroke.Thickness = 1
+    ShowFOVStroke.Parent = ShowFOVCard
+
+    local ShowFOVTitle = Instance.new("TextLabel")
+    ShowFOVTitle.Name = "Title"
+    ShowFOVTitle.Size = UDim2.new(1, -60, 1, 0)
+    ShowFOVTitle.Position = UDim2.fromOffset(12, 0)
+    ShowFOVTitle.BackgroundTransparency = 1
+    ShowFOVTitle.Text = "👁️ Show FOV"
+    ShowFOVTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    ShowFOVTitle.TextSize = 12
+    ShowFOVTitle.Font = Enum.Font.GothamSemibold
+    ShowFOVTitle.TextXAlignment = Enum.TextXAlignment.Left
+    ShowFOVTitle.Parent = ShowFOVCard
+
+    local ShowFOVToggle = Instance.new("TextButton")
+    ShowFOVToggle.Name = "ToggleButton"
+    ShowFOVToggle.Size = UDim2.fromOffset(26, 26)
+    ShowFOVToggle.AnchorPoint = Vector2.new(1, 0.5)
+    ShowFOVToggle.Position = UDim2.new(1, -12, 0.5, 0)
+    ShowFOVToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    ShowFOVToggle.BorderSizePixel = 0
+    ShowFOVToggle.Text = ""
+    ShowFOVToggle.AutoButtonColor = false
+    ShowFOVToggle.Parent = ShowFOVCard
+
+    local ShowFOVToggleCorner = Instance.new("UICorner")
+    ShowFOVToggleCorner.CornerRadius = UDim.new(0, 6)
+    ShowFOVToggleCorner.Parent = ShowFOVToggle
+
+    local ShowFOVToggleStroke = Instance.new("UIStroke")
+    ShowFOVToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+    ShowFOVToggleStroke.Thickness = 1
+    ShowFOVToggleStroke.Parent = ShowFOVToggle
+
+    local ShowFOVCheck = Instance.new("TextLabel")
+    ShowFOVCheck.Name = "CheckMark"
+    ShowFOVCheck.Size = UDim2.fromScale(1, 1)
+    ShowFOVCheck.BackgroundTransparency = 1
+    ShowFOVCheck.Text = "✔"
+    ShowFOVCheck.TextColor3 = Color3.new(1, 1, 1)
+    ShowFOVCheck.TextSize = 14
+    ShowFOVCheck.Font = Enum.Font.GothamBold
+    ShowFOVCheck.TextTransparency = 1
+    ShowFOVCheck.Parent = ShowFOVToggle
+
+    ShowFOVToggle.Activated:Connect(function()
+        ShowFOV = not ShowFOV
+        if FOVCircle then
+            FOVCircle.Visible = ShowFOV
+        end
+        
+        local bgColor = ShowFOV and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+        local strokeColor = ShowFOV and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+        local textTrans = ShowFOV and 0 or 1
+
+        TweenService:Create(ShowFOVToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
+        TweenService:Create(ShowFOVToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = strokeColor}):Play()
+        TweenService:Create(ShowFOVCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
     end)
 else
     warn("Error: PageFrame not found!")
