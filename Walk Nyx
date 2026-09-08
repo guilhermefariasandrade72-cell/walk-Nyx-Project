@@ -393,6 +393,17 @@ for Index, TabData in ipairs(TabsData) do
     if TabData.Name == "Main" then
 -- ================================================
 
+local SectionTitle = Instance.new("TextLabel")
+SectionTitle.Name = "SectionTitle"
+SectionTitle.Size = UDim2.new(1, -12, 0, 24)
+SectionTitle.BackgroundTransparency = 1
+SectionTitle.Text = "SHERIFF"
+SectionTitle.TextColor3 = Color3.fromRGB(140, 142, 153)
+SectionTitle.TextSize = 11
+SectionTitle.Font = Enum.Font.GothamBold
+SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+SectionTitle.Parent = PageFrame
+
 -- ==================================
 -- 🎯 SERVICES & VARIABLES
 -- ==================================
