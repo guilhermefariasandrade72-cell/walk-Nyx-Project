@@ -77,6 +77,7 @@ local IconAssets = {
     house    = "rbxassetid://10723407389",
     eye      = "rbxassetid://6031075929",
     settings = "rbxassetid://10734950309",
+    teleport = "rbxassetid://6031075929",
     x        = "rbxassetid://10747384394",
 }
 
@@ -164,6 +165,7 @@ local TabsData = {
     { Name = "Auto Farm", Icon = "circle-dollar-sign", IsCustom = false, IsTextIcon = true, CustomSize = 32 },
     { Name = "ESP",       Icon = "eye",                IsCustom = false },
     { Name = "Player",    Icon = "user",               IsCustom = true  },
+    { Name = "Teleport", Icon = "teleport", IsCustom = false },
     { Name = "Settings",  Icon = "settings",           IsCustom = false },
 }
 
