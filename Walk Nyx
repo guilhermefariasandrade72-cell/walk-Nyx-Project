@@ -419,10 +419,9 @@ if PageFrame then
         OldCircleCard:Destroy()
     end
 
-    -- CARD PRINCIPAL
     local KillAuraCard = Instance.new("Frame")
     KillAuraCard.Name = "KillAuraCard"
-    KillAuraCard.Size = UDim2.new(1, -12, 0, 135)
+    KillAuraCard.Size = UDim2.new(1, -12, 0, 115)
     KillAuraCard.Position = UDim2.fromOffset(6, 6)
     KillAuraCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
     KillAuraCard.BorderSizePixel = 0
@@ -438,25 +437,14 @@ if PageFrame then
     KillAuraStroke.Thickness = 1
     KillAuraStroke.Parent = KillAuraCard
 
-    local KillAuraTitle = Instance.new("TextLabel")
-    KillAuraTitle.Size = UDim2.new(1, -24, 0, 25)
-    KillAuraTitle.Position = UDim2.fromOffset(12, 8)
-    KillAuraTitle.BackgroundTransparency = 1
-    KillAuraTitle.Text = "⚔️ Kill Aura"
-    KillAuraTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
-    KillAuraTitle.TextSize = 12
-    KillAuraTitle.Font = Enum.Font.GothamSemibold
-    KillAuraTitle.TextXAlignment = Enum.TextXAlignment.Left
-    KillAuraTitle.ZIndex = 6
-    KillAuraTitle.Parent = KillAuraCard
-
     -- TOGGLE KILL AURA
+
     local AuraLabel = Instance.new("TextLabel")
     AuraLabel.Size = UDim2.new(1, -55, 0, 25)
-    AuraLabel.Position = UDim2.fromOffset(12, 42)
+    AuraLabel.Position = UDim2.fromOffset(12, 15)
     AuraLabel.BackgroundTransparency = 1
     AuraLabel.Text = "Ativar Kill Aura"
-    AuraLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+    AuraLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     AuraLabel.TextSize = 11
     AuraLabel.Font = Enum.Font.Gotham
     AuraLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -466,7 +454,7 @@ if PageFrame then
     local AuraToggleBtn = Instance.new("TextButton")
     AuraToggleBtn.Name = "AuraToggle"
     AuraToggleBtn.Size = UDim2.fromOffset(26, 26)
-    AuraToggleBtn.Position = UDim2.new(1, -38, 0, 42)
+    AuraToggleBtn.Position = UDim2.new(1, -38, 0, 15)
     AuraToggleBtn.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
     AuraToggleBtn.BorderSizePixel = 0
     AuraToggleBtn.Text = ""
@@ -527,10 +515,11 @@ if PageFrame then
     end)
 
     -- SLIDER
+
     local AuraSliderContainer = Instance.new("Frame")
     AuraSliderContainer.Name = "DistanceSlider"
-    AuraSliderContainer.Size = UDim2.new(1, -24, 0, 30)
-    AuraSliderContainer.Position = UDim2.fromOffset(12, 85)
+    AuraSliderContainer.Size = UDim2.new(1, -24, 0, 40)
+    AuraSliderContainer.Position = UDim2.fromOffset(12, 55)
     AuraSliderContainer.BackgroundTransparency = 1
     AuraSliderContainer.ZIndex = 6
     AuraSliderContainer.Parent = KillAuraCard
@@ -539,7 +528,7 @@ if PageFrame then
     AuraSliderLabel.Size = UDim2.new(1, -45, 0, 14)
     AuraSliderLabel.BackgroundTransparency = 1
     AuraSliderLabel.Text = "Distância do Alcance"
-    AuraSliderLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+    AuraSliderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     AuraSliderLabel.TextSize = 10
     AuraSliderLabel.Font = Enum.Font.Gotham
     AuraSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -551,7 +540,7 @@ if PageFrame then
     AuraSliderValue.Position = UDim2.new(1, -40, 0, 0)
     AuraSliderValue.BackgroundTransparency = 1
     AuraSliderValue.Text = tostring(KillAuraDistancia or 15)
-    AuraSliderValue.TextColor3 = Color3.fromRGB(165, 166, 177)
+    AuraSliderValue.TextColor3 = Color3.fromRGB(255, 255, 255)
     AuraSliderValue.TextSize = 10
     AuraSliderValue.Font = Enum.Font.Gotham
     AuraSliderValue.TextXAlignment = Enum.TextXAlignment.Right
@@ -559,8 +548,8 @@ if PageFrame then
     AuraSliderValue.Parent = AuraSliderContainer
 
     local AuraSliderBg = Instance.new("Frame")
-    AuraSliderBg.Size = UDim2.new(1, 0, 0, 6)
-    AuraSliderBg.Position = UDim2.fromOffset(0, 20)
+    AuraSliderBg.Size = UDim2.new(1, 0, 0, 5)
+    AuraSliderBg.Position = UDim2.fromOffset(0, 25)
     AuraSliderBg.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
     AuraSliderBg.BorderSizePixel = 0
     AuraSliderBg.ZIndex = 6
@@ -571,7 +560,6 @@ if PageFrame then
     AuraSliderBgCorner.Parent = AuraSliderBg
 
     local AuraSliderFill = Instance.new("Frame")
-    AuraSliderFill.Size = UDim2.new(0.25, 0, 1, 0)
     AuraSliderFill.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
     AuraSliderFill.BorderSizePixel = 0
     AuraSliderFill.ZIndex = 7
@@ -580,20 +568,6 @@ if PageFrame then
     local AuraSliderFillCorner = Instance.new("UICorner")
     AuraSliderFillCorner.CornerRadius = UDim.new(0, 3)
     AuraSliderFillCorner.Parent = AuraSliderFill
-
-    local AuraSliderButton = Instance.new("TextButton")
-    AuraSliderButton.Size = UDim2.fromOffset(18, 18)
-    AuraSliderButton.Position = UDim2.new(0.25, 0, 0.5, 0)
-    AuraSliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    AuraSliderButton.BackgroundColor3 = Color3.fromRGB(245, 245, 248)
-    AuraSliderButton.BorderSizePixel = 0
-    AuraSliderButton.Text = ""
-    AuraSliderButton.ZIndex = 8
-    AuraSliderButton.Parent = AuraSliderBg
-
-    local SliderCorner = Instance.new("UICorner")
-    SliderCorner.CornerRadius = UDim.new(1, 0)
-    SliderCorner.Parent = AuraSliderButton
 
     local AuraSliding = false
     local AuraMin = 5
@@ -611,17 +585,32 @@ if PageFrame then
         AuraSliderFill.Size =
             UDim2.new(porcentagem, 0, 1, 0)
 
-        AuraSliderButton.Position =
-            UDim2.new(porcentagem, 0, 0.5, 0)
-
         AuraSliderValue.Text =
             tostring(KillAuraDistancia)
     end
 
-    AuraSliderButton.InputBegan:Connect(function(input)
+    AuraSliderBg.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
+
             AuraSliding = true
+
+            local mouseX = input.Position.X
+            local startX = AuraSliderBg.AbsolutePosition.X
+            local width = AuraSliderBg.AbsoluteSize.X
+
+            local porcentagem =
+                math.clamp(
+                    (mouseX - startX) / width,
+                    0,
+                    1
+                )
+
+            local valor =
+                AuraMin +
+                ((AuraMax - AuraMin) * porcentagem)
+
+            AtualizarAuraSlider(valor)
         end
     end)
 
@@ -656,17 +645,19 @@ if PageFrame then
     UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
+
             AuraSliding = false
         end
     end)
 
     AtualizarAuraSlider(KillAuraDistancia or 15)
 
-    -- CARD SEPARADO DO CÍRCULO
+    -- CARD DO CÍRCULO
+
     local KillAuraCircleCard = Instance.new("Frame")
     KillAuraCircleCard.Name = "KillAuraCircleCard"
     KillAuraCircleCard.Size = UDim2.new(1, -12, 0, 52)
-    KillAuraCircleCard.Position = UDim2.fromOffset(6, 149)
+    KillAuraCircleCard.Position = UDim2.fromOffset(6, 129)
     KillAuraCircleCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
     KillAuraCircleCard.BorderSizePixel = 0
     KillAuraCircleCard.ZIndex = 5
@@ -686,7 +677,7 @@ if PageFrame then
     CircleLabel.Position = UDim2.fromOffset(12, 13)
     CircleLabel.BackgroundTransparency = 1
     CircleLabel.Text = "Mostrar Círculo do Raio"
-    CircleLabel.TextColor3 = Color3.fromRGB(165, 166, 177)
+    CircleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     CircleLabel.TextSize = 11
     CircleLabel.Font = Enum.Font.Gotham
     CircleLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -757,7 +748,6 @@ if PageFrame then
     end)
 
 end
-
 
 -- ===============================================
 -- SHERIFF
