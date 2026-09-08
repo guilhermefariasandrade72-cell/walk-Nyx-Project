@@ -488,7 +488,6 @@ RunService.Heartbeat:Connect(function()
             local enemyHRP = player.Character:FindFirstChild("HumanoidRootPart")
             local enemyHum = player.Character:FindFirstChild("Humanoid")
 
-            -- Proteções: Verifica se o inimigo está vivo e se não está em estado de "Shield/Spawn Protected" se houver
             if enemyHRP and enemyHum and enemyHum.Health > 0 then
                 local distancia = (hrp.Position - enemyHRP.Position).Magnitude
                 if distancia <= KillAuraDistancia then
@@ -501,14 +500,43 @@ RunService.Heartbeat:Connect(function()
                             knife.Activated:Fire()
                         end
                     end)
-                    break -- Ataca um alvo por vez para garantir estabilidade e fluidez
+                    break 
                 end
             end
         end
     end
 end)
 
--- --- CARD VISUAL DA ABA MAIN (CORRIGIDO) ---
+-- --- CARD VISUAL DA ABA MAIN (COM BUSCA SEGURA DE CONTAINER) ---
+local targetParent = nil
+
+-- Tenta usar a variável global se existir e for válida
+if (typeof(MainTabPage) == "Instance") then
+    targetParent = MainTabPage
+else
+    -- Se não existir, varre a CoreGui/PlayerGui procurando a página principal da interface
+    for _, gui in ipairs(game:GetService("CoreGui"):GetDescendants()) do
+        if gui.Name == "MainPage" or (gui:IsA("ScrollingFrame") and (gui.Name:match("Main") or gui.Name:match("Page"))) then
+            targetParent = gui
+            break
+        end
+    end
+    
+    if not targetParent and LocalPlayer:FindFirstChild("PlayerGui") then
+        for _, gui in ipairs(LocalPlayer.PlayerGui:GetDescendants()) do
+            if gui.Name == "MainPage" or (gui:IsA("ScrollingFrame") and (gui.Name:match("Main") or gui.Name:match("Page"))) then
+                targetParent = gui
+                break
+            end
+        end
+    end
+end
+
+if not targetParent then
+    warn("Walk Nyx: Container da Aba Main não localizado automaticamente. Crie uma variável MainTabPage antes do script.")
+    return
+end
+
 local KillAuraCard = Instance.new("Frame")
 KillAuraCard.Name = "KillAuraCard"
 KillAuraCard.Size = UDim2.new(1, -12, 0, 135)
@@ -517,18 +545,18 @@ KillAuraCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
 KillAuraCard.BorderSizePixel = 0
 KillAuraCard.Visible = true
 KillAuraCard.ZIndex = 5
-KillAuraCard.Parent = MainTabPage
+KillAuraCard.Parent = targetParent
 
-if MainTabPage:IsA("ScrollingFrame") then
-    local layout = MainTabPage:FindFirstChildOfClass("UIListLayout")
+if targetParent:IsA("ScrollingFrame") then
+    local layout = targetParent:FindFirstChildOfClass("UIListLayout")
     if not layout then
         layout = Instance.new("UIListLayout")
         layout.SortOrder = Enum.SortOrder.LayoutOrder
         layout.Padding = UDim.new(0, 8)
-        layout.Parent = MainTabPage
+        layout.Parent = targetParent
     end
     KillAuraCard.Position = UDim2.new(0, 0, 0, 0)
-    MainTabPage.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 150)
+    targetParent.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 150)
 end
 
 local KillAuraCorner = Instance.new("UICorner")
