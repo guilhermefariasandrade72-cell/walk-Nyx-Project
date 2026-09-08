@@ -76,10 +76,15 @@ local Resizing       = false
 local IconAssets = {
     house    = "rbxassetid://10723407389",
     eye      = "rbxassetid://6031075929",
-    teleport = "rbxassetid://6031075929",
+    teleport = "rbxassetid://6023426915",
     settings = "rbxassetid://10734950309",
     x        = "rbxassetid://10747384394",
 }
+
+-- teleport = "rbxassetid://6023426915", -- Pin do mapa
+-- teleport = "rbxassetid://6023426955", -- Variação de pin
+-- teleport = "rbxassetid://6034818372", -- Bandeira
+-- teleport = "rbxassetid://6035047409", -- Avião de papel
 
 --==============================================================--
 -- CRIAÇÃO DE ÍCONE
