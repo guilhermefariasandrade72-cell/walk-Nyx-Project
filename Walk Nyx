@@ -790,7 +790,7 @@ if PageFrame then
     NyxAimTitle.Size = UDim2.new(1, -60, 1, 0)
     NyxAimTitle.Position = UDim2.fromOffset(12, 0)
     NyxAimTitle.BackgroundTransparency = 1
-    NyxAimTitle.Text = "🎯 Nyx AIM"
+    NyxAimTitle.Text = "Button Silent AIM"
     NyxAimTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
     NyxAimTitle.TextSize = 12
     NyxAimTitle.Font = Enum.Font.GothamSemibold
@@ -867,7 +867,7 @@ if PageFrame then
     GrabGunTitle.Size = UDim2.new(1, -60, 1, 0)
     GrabGunTitle.Position = UDim2.fromOffset(12, 0)
     GrabGunTitle.BackgroundTransparency = 1
-    GrabGunTitle.Text = "🔫 Grab Gun"
+    GrabGunTitle.Text = "Button Grab Gun"
     GrabGunTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
     GrabGunTitle.TextSize = 12
     GrabGunTitle.Font = Enum.Font.GothamSemibold
@@ -985,7 +985,7 @@ if PageFrame then
     AutoPullTitle.Size = UDim2.new(1, -60, 1, 0)
     AutoPullTitle.Position = UDim2.fromOffset(12, 0)
     AutoPullTitle.BackgroundTransparency = 1
-    AutoPullTitle.Text = "🔫 Auto Pull Gun"
+    AutoPullTitle.Text = "Auto Grab Gun"
     AutoPullTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
     AutoPullTitle.TextSize = 12
     AutoPullTitle.Font = Enum.Font.GothamSemibold
@@ -1198,7 +1198,7 @@ if PageFrame then
     AimlockTitle.Size = UDim2.new(1, -60, 0, 40)
     AimlockTitle.Position = UDim2.fromOffset(12, 0)
     AimlockTitle.BackgroundTransparency = 1
-    AimlockTitle.Text = "🎯 Aimlock"
+    AimlockTitle.Text = "Aimbot"
     AimlockTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
     AimlockTitle.TextSize = 12
     AimlockTitle.Font = Enum.Font.GothamSemibold
@@ -1360,7 +1360,7 @@ if PageFrame then
     ShowFOVTitle.Size = UDim2.new(1, -60, 1, 0)
     ShowFOVTitle.Position = UDim2.fromOffset(12, 0)
     ShowFOVTitle.BackgroundTransparency = 1
-    ShowFOVTitle.Text = "👁️ Show FOV"
+    ShowFOVTitle.Text = "Show FOV"
     ShowFOVTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
     ShowFOVTitle.TextSize = 12
     ShowFOVTitle.Font = Enum.Font.GothamSemibold
