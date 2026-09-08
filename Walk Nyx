@@ -429,11 +429,24 @@ local function GetMurderer()
     local ok, Data = pcall(function() return DataRemote:InvokeServer() end)
     if not ok or not Data then return nil end
 
+    local MyTeam = player.Team and player.Team.Name or ""
+
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
             local Info = Data[p.Name]
-            if Info and not Info.Killed and not Info.Dead and Info.Role == "Murderer" then
-                return p
+            if Info and not Info.Killed and not Info.Dead then
+                local isMurderer = false
+                if Info.Role == "Murderer" then
+                    isMurderer = true
+                elseif Info.Role and string.lower(Info.Role) == "murderer" then
+                    isMurderer = true
+                elseif MyTeam ~= "" and p.Team and p.Team.Name == MyTeam and MyTeam == "Innocents" then
+                    -- Caso o jogo oculte papéis, checa se está no mesmo time de inocentes e tem arma (exemplo alternativo se necessário)
+                end
+                
+                if isMurderer then
+                    return p
+                end
             end
         end
     end
@@ -442,19 +455,31 @@ end
 
 local function ShootMurderer()
     if Pressed then return end
-    Pressed = true
 
     local Char = player.Character
     if not Char or not Char:FindFirstChild("HumanoidRootPart") then 
-        Pressed = false 
         return 
     end
 
     local Gun = Char:FindFirstChild("Gun") or (player.Backpack and player.Backpack:FindFirstChild("Gun"))
-    if not Gun then 
-        Pressed = false 
+    
+    -- Se não tiver a arma, avisa no botão temporariamente
+    if not Gun then
+        if ShootButtonGui then
+            local lbl = ShootButtonGui:FindFirstChild("TextLabel", true)
+            if lbl then
+                lbl.Text = "No Gun!"
+                task.delay(1.2, function()
+                    if lbl and lbl.Parent then
+                        lbl.Text = "Nyx AIM"
+                    end
+                end)
+            end
+        end
         return 
     end
+
+    Pressed = true
 
     if Gun.Parent ~= Char then
         Gun.Parent = Char
@@ -510,7 +535,7 @@ local function ShootMurderer()
     Pressed = false
 end
 
--- 🎯 CREATE NYX AIM FLOATING BUTTON
+-- 🎯 CREATE NYX AIM FLOATING BUTTON (MAIOR)
 local function CreateNyxAimButton()
     if ShootButtonGui then return end
     
@@ -526,8 +551,8 @@ local function CreateNyxAimButton()
     GuiBtn.Parent = ParentGui
 
     local Btn = Instance.new("ImageButton")
-    Btn.Size = UDim2.new(0, 130, 0, 45)
-    Btn.Position = UDim2.new(0.5, -65, 0.5, -22)
+    Btn.Size = UDim2.new(0, 160, 0, 55) -- Aumentado para ficar maior e mais confortável
+    Btn.Position = UDim2.new(0.5, -80, 0.5, -28)
     Btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Btn.BackgroundTransparency = 0.4
     Btn.AutoButtonColor = false
@@ -538,7 +563,7 @@ local function CreateNyxAimButton()
     Corner.Parent = Btn
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(220, 40, 60)
+    Stroke.Color = Color3.fromRGB(255, 75, 95) -- Vermelho mais claro e vivo
     Stroke.Thickness = 2
     Stroke.Parent = Btn
 
@@ -547,7 +572,7 @@ local function CreateNyxAimButton()
     Label.BackgroundTransparency = 1
     Label.Text = "Nyx AIM"
     Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Label.TextSize = 15
+    Label.TextSize = 16
     Label.Font = Enum.Font.GothamBold
     Label.Parent = Btn
 
@@ -682,8 +707,8 @@ if PageFrame then
             RemoveNyxAimButton()
         end
         
-        local bgColor = NyxAimEnabled and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-        local strokeColor = NyxAimEnabled and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+        local bgColor = NyxAimEnabled and Color3.fromRGB(240, 60, 80) or Color3.fromRGB(11, 12, 16)
+        local strokeColor = NyxAimEnabled and Color3.fromRGB(255, 90, 110) or Color3.fromRGB(39, 40, 48)
         local textTrans = NyxAimEnabled and 0 or 1
 
         TweenService:Create(NyxAimToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
@@ -747,6 +772,7 @@ if PageFrame then
     GrabGunCheck.Text = "✔"
     GrabGunCheck.TextColor3 = Color3.new(1, 1, 1)
     GrabGunCheck.TextSize = 14
+    GradeGunFont = Enum.Font.GothamBold
     GrabGunCheck.Font = Enum.Font.GothamBold
     GrabGunCheck.TextTransparency = 1
     GrabGunCheck.Parent = GrabGunToggle
@@ -754,8 +780,8 @@ if PageFrame then
     GrabGunToggle.Activated:Connect(function()
         AutoGrabGun = not AutoGrabGun
         
-        local bgColor = AutoGrabGun and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
-        local strokeColor = AutoGrabGun and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+        local bgColor = AutoGrabGun and Color3.fromRGB(240, 60, 80) or Color3.fromRGB(11, 12, 16)
+        local strokeColor = AutoGrabGun and Color3.fromRGB(255, 90, 110) or Color3.fromRGB(39, 40, 48)
         local textTrans = AutoGrabGun and 0 or 1
 
         TweenService:Create(GrabGunToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
