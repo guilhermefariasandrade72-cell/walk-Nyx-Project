@@ -405,13 +405,125 @@ SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
 SectionTitle.Parent = PageFrame
 
 -- ==================================
--- 🔴 UI — KILL AURA CONTROLS
+-- 🔴 VARIÁVEIS E SERVIÇOS DO KILL AURA
+-- ==================================
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+local KillAuraAtivo = false
+local RaioKillAura = 15
+local MostrarCirculoAura = false
+local CirculoAdornment = nil
+
+-- 📏 CRIAR / ATUALIZAR O CÍRCULO VERMELHO VISUAL
+local function AtualizarCirculoAura()
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+    if not MostrarCirculoAura or not hrp then
+        if CirculoAdornment then
+            CirculoAdornment:Destroy()
+            CirculoAdornment = nil
+        end
+        return
+    end
+
+    if not CirculoAdornment or not CirculoAdornment.Parent then
+        CirculoAdornment = Instance.new("CylinderHandleAdornment")
+        CirculoAdornment.Name = "KillAuraRangeVisual"
+        CirculoAdornment.Color3 = Color3.fromRGB(255, 0, 0)
+        CirculoAdornment.Transparency = 0.6
+        CirculoAdornment.AlwaysOnTop = true
+        CirculoAdornment.ZIndex = 5
+        CirculoAdornment.CFrame = CFrame.Angles(math.rad(90), 0, 0)
+    end
+
+    CirculoAdornment.Adornee = hrp
+    CirculoAdornment.Parent = hrp
+    CirculoAdornment.Height = 0.2
+    CirculoAdornment.Radius = RaioKillAura
+end
+
+-- ⚔️ EXECUTAR ATAQUE DE FACA
+local function ExecutarAtaque(Alvo)
+    local Char = player.Character
+    if not Char then return end
+    
+    local Faca = Char:FindFirstChild("Knife") or (player:FindFirstChild("Backpack") and player.Backpack:FindFirstChild("Knife"))
+    if not Faca then return end
+    
+    if Faca.Parent ~= Char then 
+        Faca.Parent = Char 
+        task.wait(0.02) 
+    end
+    
+    local Eventos = Faca:FindFirstChild("Events")
+    if not Eventos then return end
+
+    if Alvo and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
+        pcall(function()
+            Eventos.KnifeStabbed:FireServer()
+            Eventos.HandleTouched:FireServer(Alvo.Character.Head)
+        end)
+    end
+end
+
+-- 🔴 LOOP DE ATUALIZAÇÃO DO CÍRCULO
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        AtualizarCirculoAura()
+    end
+end)
+
+-- ⚔️ LOOP DO KILL AURA
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+
+        if KillAuraAtivo then
+            local char = player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+            if hrp and hum and hum.Health > 0 then
+                for _, Alvo in ipairs(Players:GetPlayers()) do
+                    if not KillAuraAtivo then break end
+                    
+                    if Alvo ~= player and Alvo.Character then
+                        local alvoHrp = Alvo.Character:FindFirstChild("HumanoidRootPart")
+                        local alvoHum = Alvo.Character:FindFirstChildOfClass("Humanoid")
+                        
+                        if alvoHrp and alvoHum and alvoHum.Health > 0 then
+                            local distancia = (hrp.Position - alvoHrp.Position).Magnitude
+                            
+                            if distancia <= RaioKillAura then
+                                ExecutarAtaque(Alvo)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+player.CharacterAdded:Connect(function()
+    task.wait(1)
+    AtualizarCirculoAura()
+end)
+
+
+-- ==================================
+-- 🔴 UI — KILL AURA CONTROLS (ABA MAIN)
 -- ==================================
 if PageFrame then
-    -- Garante que os cards fiquem empilhados em lista
+    -- Garante que os cards fiquem empilhados em lista corretamente
     if not PageFrame:FindFirstChildOfClass("UIListLayout") then
         local ListLayout = Instance.new("UIListLayout")
-        ListLayout.SortOrder = Enum.SortOrder.LayoutIndex
+        ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
         ListLayout.Padding = UDim.new(0, 8)
         ListLayout.Parent = PageFrame
     end
@@ -421,7 +533,7 @@ if PageFrame then
     -- ==================================
     local KillAuraCard = Instance.new("Frame")
     KillAuraCard.Name = "KillAuraCard"
-    KillAuraCard.Size = UDim2.new(1, -6, 0, 95) -- Altura maior para caber o toggle e o slider
+    KillAuraCard.Size = UDim2.new(1, -6, 0, 95)
     KillAuraCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
     KillAuraCard.BorderSizePixel = 0
     KillAuraCard.Parent = PageFrame
@@ -435,7 +547,6 @@ if PageFrame then
     KillAuraCardStroke.Thickness = 1
     KillAuraCardStroke.Parent = KillAuraCard
 
-    -- Título do Card 1
     local KillAuraTitle = Instance.new("TextLabel")
     KillAuraTitle.Name = "Title"
     KillAuraTitle.Size = UDim2.new(1, -70, 0, 40)
@@ -448,7 +559,6 @@ if PageFrame then
     KillAuraTitle.TextXAlignment = Enum.TextXAlignment.Left
     KillAuraTitle.Parent = KillAuraCard
 
-    -- Botão Toggle do Kill Aura
     local KillAuraToggleBtn = Instance.new("TextButton")
     KillAuraToggleBtn.Name = "ToggleBtn"
     KillAuraToggleBtn.Size = UDim2.fromOffset(40, 22)
@@ -476,7 +586,6 @@ if PageFrame then
     CircleCorner.CornerRadius = UDim.new(1, 0)
     CircleCorner.Parent = ToggleCircle
 
-    -- Lógica do Toggle
     KillAuraToggleBtn.Activated:Connect(function()
         KillAuraAtivo = not KillAuraAtivo
         if KillAuraAtivo then
@@ -488,7 +597,7 @@ if PageFrame then
         end
     end)
 
-    -- Slider de Distância (Dentro do mesmo card)
+    -- Slider de Distância
     local SliderBar = Instance.new("Frame")
     SliderBar.Name = "SliderBar"
     SliderBar.Size = UDim2.new(1, -24, 0, 6)
@@ -503,7 +612,6 @@ if PageFrame then
 
     local SliderFill = Instance.new("Frame")
     SliderFill.Name = "Fill"
-    -- Valor inicial: Raio 15 de 50 max -> 15/50 = 0.3
     SliderFill.Size = UDim2.new(RaioKillAura / 50, 0, 1, 0)
     SliderFill.BackgroundColor3 = Color3.fromRGB(45, 120, 255)
     SliderFill.BorderSizePixel = 0
@@ -525,7 +633,6 @@ if PageFrame then
     SliderValueLabel.TextXAlignment = Enum.TextXAlignment.Right
     SliderValueLabel.Parent = KillAuraCard
 
-    -- Função para arrastar o Slider (funciona no celular e PC)
     local SliderBtn = Instance.new("TextButton")
     SliderBtn.Name = "SliderBtn"
     SliderBtn.Size = UDim2.new(1, 0, 0, 30)
@@ -535,7 +642,6 @@ if PageFrame then
     SliderBtn.Parent = SliderBar
 
     local draggingSlider = false
-    local UserInputService = game:GetService("UserInputService")
 
     local function UpdateSlider(input)
         local pos = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
@@ -622,7 +728,6 @@ if PageFrame then
     CircleToggleCircleCorner.CornerRadius = UDim.new(1, 0)
     CircleToggleCircleCorner.Parent = CircleToggleCircle
 
-    -- Lógica do Toggle do Círculo
     CircleToggleBtn.Activated:Connect(function()
         MostrarCirculoAura = not MostrarCirculoAura
         if MostrarCirculoAura then
@@ -636,7 +741,6 @@ if PageFrame then
 else
     warn("Error: PageFrame not found!")
 end
-
 
 -- ===============================================
 -- SHERIFF
