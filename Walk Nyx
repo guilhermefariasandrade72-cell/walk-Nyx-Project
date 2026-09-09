@@ -405,6 +405,9 @@ local player = Players.LocalPlayer
 local selectedPlayerName = nil
 local isFlinging = false
 
+-- Variável de referência para o container principal (compatível com o padrão do seu menu)
+local targetParent = PageFrame
+
 -- ==================================
 -- SISTEMA — FLING INTELIGENTE
 -- ==================================
@@ -504,26 +507,28 @@ end
 -- ==================================
 -- BOTOES — TELEPORT & FLING
 -- ==================================
-if PageFrame then
-    -- SEPARADOR / TITULO DA SESSAO
-    local FlingSectionLabel = Instance.new("TextLabel")
-    FlingSectionLabel.Name = "SectionLabel"
-    FlingSectionLabel.Size = UDim2.new(1, -6, 0, 30)
-    FlingSectionLabel.BackgroundTransparency = 1
-    FlingSectionLabel.Text = "TELEPORT & FLING"
-    FlingSectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
-    FlingSectionLabel.TextSize = 14
-    FlingSectionLabel.Font = Enum.Font.GothamBold
-    FlingSectionLabel.TextXAlignment = Enum.TextXAlignment.Left
-    FlingSectionLabel.Parent = PageFrame
+if targetParent then
+    -- Verifica se já existe um UIListLayout no container principal para manter a organização
+    local mainLayout = targetParent:FindFirstChildOfClass("UIListLayout")
+    if not mainLayout then
+        mainLayout = Instance.new("UIListLayout")
+        mainLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        mainLayout.Padding = UDim.new(0, 8)
+        mainLayout.Parent = targetParent
+    end
 
-    -- 📦 CARD PRINCIPAL
+    -- 📦 CARD PRINCIPAL DO FLING
     local FlingCard = Instance.new("Frame")
     FlingCard.Name = "FlingCard"
-    FlingCard.Size = UDim2.new(1, -6, 0, 220)
+    FlingCard.Size = UDim2.new(1, -12, 0, 225)
     FlingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
     FlingCard.BorderSizePixel = 0
-    FlingCard.Parent = PageFrame
+    FlingCard.ZIndex = 5
+    FlingCard.Parent = targetParent
+
+    if targetParent:IsA("ScrollingFrame") then
+        targetParent.CanvasSize = UDim2.new(0, 0, 0, mainLayout.AbsoluteContentSize.Y + 150)
+    end
 
     local FlingCardCorner = Instance.new("UICorner")
     FlingCardCorner.CornerRadius = UDim.new(0, 10)
@@ -537,27 +542,34 @@ if PageFrame then
     -- 📝 TITULO DO CARD
     local FlingTitle = Instance.new("TextLabel")
     FlingTitle.Name = "Title"
-    FlingTitle.Size = UDim2.new(1, -16, 0, 25)
+    FlingTitle.Size = UDim2.new(1, -24, 0, 25)
     FlingTitle.Position = UDim2.fromOffset(12, 8)
     FlingTitle.BackgroundTransparency = 1
-    FlingTitle.Text = "Select Player"
-    FlingTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FlingTitle.Text = "🎯 Select Player & Fling"
+    FlingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
     FlingTitle.TextSize = 12
     FlingTitle.Font = Enum.Font.GothamSemibold
     FlingTitle.TextXAlignment = Enum.TextXAlignment.Left
+    FlingTitle.ZIndex = 6
     FlingTitle.Parent = FlingCard
 
     -- 📜 LISTA DE JOGADORES
     local PlayerListFrame = Instance.new("ScrollingFrame")
     PlayerListFrame.Name = "PlayerList"
-    PlayerListFrame.Size = UDim2.new(1, -16, 0, 130)
-    PlayerListFrame.Position = UDim2.fromOffset(8, 35)
-    PlayerListFrame.BackgroundTransparency = 1
+    PlayerListFrame.Size = UDim2.new(1, -24, 0, 130)
+    PlayerListFrame.Position = UDim2.fromOffset(12, 38)
+    PlayerListFrame.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    PlayerListFrame.BackgroundTransparency = 0.5
     PlayerListFrame.BorderSizePixel = 0
     PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     PlayerListFrame.ScrollBarThickness = 4
     PlayerListFrame.ScrollBarColor3 = Color3.fromRGB(60, 62, 78)
+    PlayerListFrame.ZIndex = 6
     PlayerListFrame.Parent = FlingCard
+
+    local PlayerListCorner = Instance.new("UICorner")
+    PlayerListCorner.CornerRadius = UDim.new(0, 6)
+    PlayerListCorner.Parent = PlayerListFrame
 
     local PlayerListLayout = Instance.new("UIListLayout")
     PlayerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -567,15 +579,16 @@ if PageFrame then
     -- 🔘 BOTÃO FLING
     local FlingBtn = Instance.new("TextButton")
     FlingBtn.Name = "FlingButton"
-    FlingBtn.Size = UDim2.new(1, -16, 0, 35)
-    FlingBtn.Position = UDim2.fromOffset(8, 177)
+    FlingBtn.Size = UDim2.new(1, -24, 0, 35)
+    FlingBtn.Position = UDim2.fromOffset(12, 178)
     FlingBtn.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
     FlingBtn.BorderSizePixel = 0
-    FlingBtn.Text = "FLING"
+    FlingBtn.Text = "EXECUTAR FLING"
     FlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     FlingBtn.TextSize = 12
     FlingBtn.Font = Enum.Font.GothamBold
     FlingBtn.AutoButtonColor = false
+    FlingBtn.ZIndex = 6
     FlingBtn.Parent = FlingCard
 
     local FlingBtnCorner = Instance.new("UICorner")
@@ -598,7 +611,7 @@ if PageFrame then
                 count = count + 1
                 local PlayerBtn = Instance.new("TextButton")
                 PlayerBtn.Name = "PlayerBtn_"..p.Name
-                PlayerBtn.Size = UDim2.new(1, 0, 0, 28)
+                PlayerBtn.Size = UDim2.new(1, -4, 0, 28)
                 PlayerBtn.BackgroundColor3 = (selectedPlayerName == p.Name) and Color3.fromRGB(45, 48, 62) or Color3.fromRGB(24, 25, 32)
                 PlayerBtn.BorderSizePixel = 0
                 PlayerBtn.Text = "  " .. p.Name
@@ -607,6 +620,7 @@ if PageFrame then
                 PlayerBtn.Font = Enum.Font.Gotham
                 PlayerBtn.TextXAlignment = Enum.TextXAlignment.Left
                 PlayerBtn.AutoButtonColor = false
+                PlayerBtn.ZIndex = 7
                 PlayerBtn.Parent = PlayerListFrame
 
                 local PlayerBtnCorner = Instance.new("UICorner")
@@ -646,8 +660,6 @@ if PageFrame then
 else
     warn("Error: PageFrame not found!")
 end
-
-
 
 
 
