@@ -405,6 +405,127 @@ SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
 SectionTitle.Parent = PageFrame
 
 -- ==================================
+-- VARIÁVEIS — KILL ALL INSTANT
+-- ==================================
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+
+-- ==================================
+-- SISTEMA — KILL ALL INSTANT
+-- ==================================
+
+local function ExecutarAtaque(Alvo)
+    local Char = player.Character
+    if not Char then return end
+    
+    local Faca = Char:FindFirstChild("Knife") or (player.Backpack and player.Backpack:FindFirstChild("Knife"))
+    if not Faca then return end
+    
+    if Faca.Parent ~= Char then 
+        Faca.Parent = Char 
+        task.wait(0.02) 
+    end
+    
+    local Eventos = Faca:FindFirstChild("Events")
+    if not Eventos then return end
+
+    if Alvo and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
+        pcall(function()
+            Eventos.KnifeStabbed:FireServer()
+            Eventos.HandleTouched:FireServer(Alvo.Character.Head)
+        end)
+    end
+end
+
+local function KillAllInstantaneo()
+    for _, Alvo in ipairs(Players:GetPlayers()) do
+        if Alvo ~= player and Alvo.Character and Alvo.Character:FindFirstChild("Head") then
+            ExecutarAtaque(Alvo)
+        end
+    end
+end
+
+-- ==================================
+-- BOTÃO — KILL ALL INSTANT
+-- ==================================
+if PageFrame then
+    -- SEPARADOR / TITULO DA SESSAO
+    local KillAllSectionLabel = Instance.new("TextLabel")
+    KillAllSectionLabel.Name = "SectionLabel"
+    KillAllSectionLabel.Size = UDim2.new(1, -6, 0, 30)
+    KillAllSectionLabel.BackgroundTransparency = 1
+    KillAllSectionLabel.Text = "KILL ALL"
+    KillAllSectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
+    KillAllSectionLabel.TextSize = 14
+    KillAllSectionLabel.Font = Enum.Font.GothamBold
+    KillAllSectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+    KillAllSectionLabel.Parent = PageFrame
+
+    -- 📦 CARD
+    local KillAllCard = Instance.new("Frame")
+    KillAllCard.Name = "KillAllCard"
+    KillAllCard.Size = UDim2.new(1, -6, 0, 50)
+    KillAllCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    KillAllCard.BorderSizePixel = 0
+    KillAllCard.Parent = PageFrame
+
+    local KillAllCardCorner = Instance.new("UICorner")
+    KillAllCardCorner.CornerRadius = UDim.new(0, 10)
+    KillAllCardCorner.Parent = KillAllCard
+
+    local KillAllCardStroke = Instance.new("UIStroke")
+    KillAllCardStroke.Color = Color3.fromRGB(39, 40, 48)
+    KillAllCardStroke.Thickness = 1
+    KillAllCardStroke.Parent = KillAllCard
+
+    -- 📝 TITULO
+    local KillAllLabel = Instance.new("TextLabel")
+    KillAllLabel.Name = "Title"
+    KillAllLabel.Size = UDim2.new(1, -100, 1, 0)
+    KillAllLabel.Position = UDim2.fromOffset(12, 0)
+    KillAllLabel.BackgroundTransparency = 1
+    KillAllLabel.Text = "Kill All Instant"
+    KillAllLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    KillAllLabel.TextSize = 12
+    KillAllLabel.Font = Enum.Font.GothamSemibold
+    KillAllLabel.TextXAlignment = Enum.TextXAlignment.Left
+    KillAllLabel.Parent = KillAllCard
+
+    -- 🔘 BOTÃO DE CLIQUE — MATA TODO MUNDO AGORA
+    local KillAllButton = Instance.new("TextButton")
+    KillAllButton.Name = "ActionButton"
+    KillAllButton.Size = UDim2.fromOffset(90, 34)
+    KillAllButton.AnchorPoint = Vector2.new(1, 0.5)
+    KillAllButton.Position = UDim2.new(1, -12, 0.5, 0)
+    KillAllButton.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+    KillAllButton.BorderSizePixel = 0
+    KillAllButton.Text = "KILL ALL"
+    KillAllButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    KillAllButton.TextSize = 12
+    KillAllButton.Font = Enum.Font.GothamBold
+    KillAllButton.AutoButtonColor = false
+    KillAllButton.Parent = KillAllCard
+
+    local KillAllButtonCorner = Instance.new("UICorner")
+    KillAllButtonCorner.CornerRadius = UDim.new(0, 8)
+    KillAllButtonCorner.Parent = KillAllButton
+
+    -- ✅ AO CLICAR — MATA TODO MUNDO INSTANTANEAMENTE
+    KillAllButton.Activated:Connect(function()
+        KillAllInstantaneo()
+        
+        -- Animação de clique
+        TweenService:Create(KillAllButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(180, 25, 40)}):Play()
+        task.wait(0.1)
+        TweenService:Create(KillAllButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(225, 40, 56)}):Play()
+    end)
+else
+    warn("Error: PageFrame not found!")
+end
+
+-- ==================================
 -- VARIÁVEIS — KILL AURA
 -- ==================================
 local Players = game:GetService("Players")
@@ -521,17 +642,6 @@ end)
 -- BOTOES — KILL AURA
 -- ==================================
 if PageFrame then
-    -- SEPARADOR / TITULO DA SESSAO
-    local KillAuraSectionLabel = Instance.new("TextLabel")
-    KillAuraSectionLabel.Name = "SectionLabel"
-    KillAuraSectionLabel.Size = UDim2.new(1, -6, 0, 30)
-    KillAuraSectionLabel.BackgroundTransparency = 1
-    KillAuraSectionLabel.Text = "KILL AURA"
-    KillAuraSectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
-    KillAuraSectionLabel.TextSize = 14
-    KillAuraSectionLabel.Font = Enum.Font.GothamBold
-    KillAuraSectionLabel.TextXAlignment = Enum.TextXAlignment.Left
-    KillAuraSectionLabel.Parent = PageFrame
 
     local KillAuraCard = Instance.new("Frame")
     KillAuraCard.Name = "KillAuraCard"
