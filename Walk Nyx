@@ -418,26 +418,59 @@ local ThrowButtonGui = nil
 local isDragging = false
 
 -- ==================================
--- SISTEMA — THROW KNIFE (do Kairis Hub)
+-- FUNÇÕES AUXILIARES (Sistema Kairis Hub)
 -- ==================================
-local function ThrowKnife()
-    local Char = player.Character
-    if not Char then return end
-    
-    local Faca = Char:FindFirstChild("Knife") or (player.Backpack and player.Backpack:FindFirstChild("Knife"))
-    if not Faca then return end
-    
-    if Faca.Parent ~= Char then
-        Faca.Parent = Char
-        task.wait(0.02)
+local function getClosestPlayerFrontCFrame()
+    local closestCharacter = nil
+    local shortestDistance = math.huge
+    local myChar = player.Character
+    if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return nil, nil end
+    local myHRP = myChar.HumanoidRootPart
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
+            if p.Character.Humanoid.Health > 0 then
+                local targetHRP = p.Character.HumanoidRootPart
+                local distance = (myHRP.Position - targetHRP.Position).Magnitude
+                if distance < shortestDistance then
+                    shortestDistance = distance
+                    closestCharacter = p.Character
+                end
+            end
+        end
     end
-    
-    local Eventos = Faca:FindFirstChild("Events")
-    if not Eventos then return end
-    
-    pcall(function()
-        Eventos.KnifeThrown:FireServer()
-    end)
+    if closestCharacter then
+        local hrp = closestCharacter.HumanoidRootPart
+        return hrp.CFrame + (hrp.CFrame.LookVector * 2), hrp.CFrame
+    end
+    return nil, nil
+end
+
+-- ==================================
+-- SISTEMA — THROW KNIFE (Atualizado)
+-- ==================================
+local function ThrowKnife(btnRef)
+    local knife = player.Character and player.Character:FindFirstChild("Knife") or player:FindFirstChild("Backpack") and player.Backpack:FindFirstChild("Knife")
+    if knife and knife:FindFirstChild("Events") and knife.Events:FindFirstChild("KnifeThrown") then
+        local frontTarget, exactTarget = getClosestPlayerFrontCFrame()
+        if frontTarget and exactTarget then
+            local args = {frontTarget, exactTarget}
+            knife.Events.KnifeThrown:FireServer(unpack(args))
+        else
+            if btnRef then
+                local oldText = btnRef.Text
+                btnRef.Text = "Target Not Found"
+                task.wait(1)
+                if btnRef then btnRef.Text = oldText end
+            end
+        end
+    else
+        if btnRef then
+            local oldText = btnRef.Text
+            btnRef.Text = "No Knife"
+            task.wait(1)
+            if btnRef then btnRef.Text = oldText end
+        end
+    end
 end
 
 -- ==================================
@@ -483,9 +516,9 @@ local function CriarBotaoFlutuante()
     BtnStroke.Transparency = 0
     BtnStroke.Parent = Btn
 
-    -- ✅ AO CLICAR — JOGA A FACA
+    -- ✅ AO CLICAR — JOGA A FACA COM O SISTEMA INTELIGENTE
     Btn.Activated:Connect(function()
-        ThrowKnife()
+        ThrowKnife(Btn)
         TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(60, 10, 10)}):Play()
         task.wait(0.1)
         TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(30, 0, 0)}):Play()
@@ -614,10 +647,6 @@ if PageFrame then
 else
     warn("Error: PageFrame not found!")
 end
-
-
-
-
 
 -- ==================================
 -- VARIÁVEIS — KILL ALL INSTANT
