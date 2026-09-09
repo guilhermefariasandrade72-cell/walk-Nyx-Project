@@ -451,17 +451,6 @@ end
 -- BOTÃO — KILL ALL INSTANT
 -- ==================================
 if PageFrame then
-    -- SEPARADOR / TITULO DA SESSAO
-    local KillAllSectionLabel = Instance.new("TextLabel")
-    KillAllSectionLabel.Name = "SectionLabel"
-    KillAllSectionLabel.Size = UDim2.new(1, -6, 0, 30)
-    KillAllSectionLabel.BackgroundTransparency = 1
-    KillAllSectionLabel.Text = "KILL ALL"
-    KillAllSectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
-    KillAllSectionLabel.TextSize = 14
-    KillAllSectionLabel.Font = Enum.Font.GothamBold
-    KillAllSectionLabel.TextXAlignment = Enum.TextXAlignment.Left
-    KillAllSectionLabel.Parent = PageFrame
 
     -- 📦 CARD
     local KillAllCard = Instance.new("Frame")
@@ -814,18 +803,6 @@ if PageFrame then
             AuraActiveInput = nil
         end
     end)
-
-    -- SEPARADOR / TITULO DA SESSAO
-    local CircleSectionLabel = Instance.new("TextLabel")
-    CircleSectionLabel.Name = "SectionLabel"
-    CircleSectionLabel.Size = UDim2.new(1, -6, 0, 30)
-    CircleSectionLabel.BackgroundTransparency = 1
-    CircleSectionLabel.Text = "VISUAL"
-    CircleSectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
-    CircleSectionLabel.TextSize = 14
-    CircleSectionLabel.Font = Enum.Font.GothamBold
-    CircleSectionLabel.TextXAlignment = Enum.TextXAlignment.Left
-    CircleSectionLabel.Parent = PageFrame
 
     local KillAuraCircleCard = Instance.new("Frame")
     KillAuraCircleCard.Name = "KillAuraCircleCard"
