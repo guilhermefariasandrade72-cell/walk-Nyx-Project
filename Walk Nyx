@@ -405,6 +405,221 @@ SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
 SectionTitle.Parent = PageFrame
 
 -- ==================================
+-- VARIÁVEIS — THROW KNIFE FLUTUANTE
+-- ==================================
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+
+local player = Players.LocalPlayer
+
+local ShowThrowButton = false
+local ThrowButtonGui = nil
+local isDragging = false
+
+-- ==================================
+-- SISTEMA — THROW KNIFE (do Kairis Hub)
+-- ==================================
+local function ThrowKnife()
+    local Char = player.Character
+    if not Char then return end
+    
+    local Faca = Char:FindFirstChild("Knife") or (player.Backpack and player.Backpack:FindFirstChild("Knife"))
+    if not Faca then return end
+    
+    if Faca.Parent ~= Char then
+        Faca.Parent = Char
+        task.wait(0.02)
+    end
+    
+    local Eventos = Faca:FindFirstChild("Events")
+    if not Eventos then return end
+    
+    pcall(function()
+        Eventos.KnifeThrown:FireServer()
+    end)
+end
+
+-- ==================================
+-- FUNÇÃO CRIAR BOTÃO FLUTUANTE
+-- ==================================
+local function CriarBotaoFlutuante()
+    if ThrowButtonGui then return end
+
+    local ParentGui = CoreGui
+    pcall(function()
+        if not CoreGui then ParentGui = player:WaitForChild("PlayerGui") end
+    end)
+
+    ThrowButtonGui = Instance.new("ScreenGui")
+    ThrowButtonGui.Name = "ThrowKnifeFloating"
+    ThrowButtonGui.ResetOnSpawn = false
+    ThrowButtonGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ThrowButtonGui.Parent = ParentGui
+
+    -- 📦 BOTÃO FLUTUANTE
+    local Btn = Instance.new("TextButton")
+    Btn.Name = "ThrowKnifeBtn"
+    Btn.Size = UDim2.new(0, 140, 0, 50)
+    Btn.Position = UDim2.new(0.5, -70, 0.8, -25)
+    Btn.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+    Btn.BackgroundTransparency = 0.4
+    Btn.BorderSizePixel = 0
+    Btn.Text = "Throwing Knife"
+    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.TextSize = 13
+    Btn.Font = Enum.Font.GothamBold
+    Btn.AutoButtonColor = false
+    Btn.Parent = ThrowButtonGui
+
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 10)
+    BtnCorner.Parent = Btn
+
+    -- 🔴 BORDA VERMELHA
+    local BtnStroke = Instance.new("UIStroke")
+    BtnStroke.Color = Color3.fromRGB(225, 40, 56)
+    BtnStroke.Thickness = 2
+    BtnStroke.Transparency = 0
+    BtnStroke.Parent = Btn
+
+    -- ✅ AO CLICAR — JOGA A FACA
+    Btn.Activated:Connect(function()
+        ThrowKnife()
+        TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(60, 10, 10)}):Play()
+        task.wait(0.1)
+        TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(30, 0, 0)}):Play()
+    end)
+
+    -- 🖱️ ARRASTAR BOTÃO
+    local DragStart, StartPos
+    Btn.InputBegan:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+            isDragging = true
+            DragStart = Input.Position
+            StartPos = Btn.Position
+        end
+    end)
+
+    Btn.InputChanged:Connect(function(Input)
+        if isDragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+            local Delta = Input.Position - DragStart
+            Btn.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
+        end
+    end)
+
+    Btn.InputEnded:Connect(function()
+        isDragging = false
+    end)
+end
+
+-- ==================================
+-- BOTÃO TOGGLE NA ABA
+-- ==================================
+if PageFrame then
+    -- SEPARADOR / TITULO DA SESSAO
+    local ThrowKnifeSectionLabel = Instance.new("TextLabel")
+    ThrowKnifeSectionLabel.Name = "SectionLabel"
+    ThrowKnifeSectionLabel.Size = UDim2.new(1, -6, 0, 30)
+    ThrowKnifeSectionLabel.BackgroundTransparency = 1
+    ThrowKnifeSectionLabel.Text = "THROW KNIFE"
+    ThrowKnifeSectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
+    ThrowKnifeSectionLabel.TextSize = 14
+    ThrowKnifeSectionLabel.Font = Enum.Font.GothamBold
+    ThrowKnifeSectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+    ThrowKnifeSectionLabel.Parent = PageFrame
+
+    -- 📦 CARD
+    local ThrowKnifeCard = Instance.new("Frame")
+    ThrowKnifeCard.Name = "ThrowKnifeCard"
+    ThrowKnifeCard.Size = UDim2.new(1, -6, 0, 50)
+    ThrowKnifeCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    ThrowKnifeCard.BorderSizePixel = 0
+    ThrowKnifeCard.Parent = PageFrame
+
+    local ThrowKnifeCardCorner = Instance.new("UICorner")
+    ThrowKnifeCardCorner.CornerRadius = UDim.new(0, 10)
+    ThrowKnifeCardCorner.Parent = ThrowKnifeCard
+
+    local ThrowKnifeCardStroke = Instance.new("UIStroke")
+    ThrowKnifeCardStroke.Color = Color3.fromRGB(39, 40, 48)
+    ThrowKnifeCardStroke.Thickness = 1
+    ThrowKnifeCardStroke.Parent = ThrowKnifeCard
+
+    -- 📝 TITULO
+    local ThrowKnifeTitle = Instance.new("TextLabel")
+    ThrowKnifeTitle.Name = "Title"
+    ThrowKnifeTitle.Size = UDim2.new(1, -60, 1, 0)
+    ThrowKnifeTitle.Position = UDim2.fromOffset(12, 0)
+    ThrowKnifeTitle.BackgroundTransparency = 1
+    ThrowKnifeTitle.Text = "Show Throw Button"
+    ThrowKnifeTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ThrowKnifeTitle.TextSize = 12
+    ThrowKnifeTitle.Font = Enum.Font.GothamSemibold
+    ThrowKnifeTitle.TextXAlignment = Enum.TextXAlignment.Left
+    ThrowKnifeTitle.Parent = ThrowKnifeCard
+
+    -- 🔘 TOGGLE — MOSTRAR/ESCONDER BOTÃO FLUTUANTE
+    local ThrowKnifeToggle = Instance.new("TextButton")
+    ThrowKnifeToggle.Name = "ToggleButton"
+    ThrowKnifeToggle.Size = UDim2.fromOffset(26, 26)
+    ThrowKnifeToggle.AnchorPoint = Vector2.new(1, 0.5)
+    ThrowKnifeToggle.Position = UDim2.new(1, -12, 0.5, 0)
+    ThrowKnifeToggle.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    ThrowKnifeToggle.BorderSizePixel = 0
+    ThrowKnifeToggle.Text = ""
+    ThrowKnifeToggle.AutoButtonColor = false
+    ThrowKnifeToggle.Parent = ThrowKnifeCard
+
+    local ThrowKnifeToggleCorner = Instance.new("UICorner")
+    ThrowKnifeToggleCorner.CornerRadius = UDim.new(0, 6)
+    ThrowKnifeToggleCorner.Parent = ThrowKnifeToggle
+
+    local ThrowKnifeToggleStroke = Instance.new("UIStroke")
+    ThrowKnifeToggleStroke.Color = Color3.fromRGB(39, 40, 48)
+    ThrowKnifeToggleStroke.Thickness = 1
+    ThrowKnifeToggleStroke.Parent = ThrowKnifeToggle
+
+    local ThrowKnifeCheck = Instance.new("TextLabel")
+    ThrowKnifeCheck.Name = "CheckMark"
+    ThrowKnifeCheck.Size = UDim2.fromScale(1, 1)
+    ThrowKnifeCheck.BackgroundTransparency = 1
+    ThrowKnifeCheck.Text = "✔"
+    ThrowKnifeCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ThrowKnifeCheck.TextSize = 14
+    ThrowKnifeCheck.Font = Enum.Font.GothamBold
+    ThrowKnifeCheck.TextTransparency = 1
+    ThrowKnifeCheck.Parent = ThrowKnifeToggle
+
+    ThrowKnifeToggle.Activated:Connect(function()
+        ShowThrowButton = not ShowThrowButton
+        
+        local bgColor = ShowThrowButton and Color3.fromRGB(225, 40, 56) or Color3.fromRGB(11, 12, 16)
+        local strokeColor = ShowThrowButton and Color3.fromRGB(255, 65, 80) or Color3.fromRGB(39, 40, 48)
+        local textTrans = ShowThrowButton and 0 or 1
+
+        TweenService:Create(ThrowKnifeToggle, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = bgColor}):Play()
+        TweenService:Create(ThrowKnifeToggleStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = strokeColor}):Play()
+        TweenService:Create(ThrowKnifeCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
+
+        -- Mostra/esconde botão flutuante
+        if ShowThrowButton then
+            CriarBotaoFlutuante()
+            if ThrowButtonGui then ThrowButtonGui.Enabled = true end
+        else
+            if ThrowButtonGui then ThrowButtonGui:Destroy() end
+            ThrowButtonGui = nil
+        end
+    end)
+else
+    warn("Error: PageFrame not found!")
+end
+
+
+
+
+
+-- ==================================
 -- VARIÁVEIS — KILL ALL INSTANT
 -- ==================================
 local Players = game:GetService("Players")
