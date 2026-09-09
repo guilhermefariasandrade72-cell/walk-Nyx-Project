@@ -521,6 +521,18 @@ end)
 -- BOTOES — KILL AURA
 -- ==================================
 if PageFrame then
+    -- SEPARADOR / TITULO DA SESSAO
+    local KillAuraSectionLabel = Instance.new("TextLabel")
+    KillAuraSectionLabel.Name = "SectionLabel"
+    KillAuraSectionLabel.Size = UDim2.new(1, -6, 0, 30)
+    KillAuraSectionLabel.BackgroundTransparency = 1
+    KillAuraSectionLabel.Text = "KILL AURA"
+    KillAuraSectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
+    KillAuraSectionLabel.TextSize = 14
+    KillAuraSectionLabel.Font = Enum.Font.GothamBold
+    KillAuraSectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+    KillAuraSectionLabel.Parent = PageFrame
+
     local KillAuraCard = Instance.new("Frame")
     KillAuraCard.Name = "KillAuraCard"
     KillAuraCard.Size = UDim2.new(1, -6, 0, 85)
@@ -573,7 +585,7 @@ if PageFrame then
     KillAuraCheck.Name = "CheckMark"
     KillAuraCheck.Size = UDim2.fromScale(1, 1)
     KillAuraCheck.BackgroundTransparency = 1
-    KillAuraCheck.Text = ""
+    KillAuraCheck.Text = "✔"
     KillAuraCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
     KillAuraCheck.TextSize = 14
     KillAuraCheck.Font = Enum.Font.GothamBold
@@ -604,7 +616,7 @@ if PageFrame then
     AuraSliderLabel.Size = UDim2.new(1, -50, 0, 14)
     AuraSliderLabel.BackgroundTransparency = 1
     AuraSliderLabel.Text = "Attack Range"
-    AuraSliderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    AuraSliderLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
     AuraSliderLabel.TextSize = 12
     AuraSliderLabel.Font = Enum.Font.GothamSemibold
     AuraSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -616,7 +628,7 @@ if PageFrame then
     AuraSliderValue.Position = UDim2.new(1, -40, 0, 0)
     AuraSliderValue.BackgroundTransparency = 1
     AuraSliderValue.Text = tostring(RaioKillAura)
-    AuraSliderValue.TextColor3 = Color3.fromRGB(255, 255, 255)
+    AuraSliderValue.TextColor3 = Color3.fromRGB(180, 180, 195)
     AuraSliderValue.TextSize = 12
     AuraSliderValue.Font = Enum.Font.GothamSemibold
     AuraSliderValue.TextXAlignment = Enum.TextXAlignment.Right
@@ -693,6 +705,18 @@ if PageFrame then
         end
     end)
 
+    -- SEPARADOR / TITULO DA SESSAO
+    local CircleSectionLabel = Instance.new("TextLabel")
+    CircleSectionLabel.Name = "SectionLabel"
+    CircleSectionLabel.Size = UDim2.new(1, -6, 0, 30)
+    CircleSectionLabel.BackgroundTransparency = 1
+    CircleSectionLabel.Text = "VISUAL"
+    CircleSectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
+    CircleSectionLabel.TextSize = 14
+    CircleSectionLabel.Font = Enum.Font.GothamBold
+    CircleSectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+    CircleSectionLabel.Parent = PageFrame
+
     local KillAuraCircleCard = Instance.new("Frame")
     KillAuraCircleCard.Name = "KillAuraCircleCard"
     KillAuraCircleCard.Size = UDim2.new(1, -6, 0, 50)
@@ -745,7 +769,7 @@ if PageFrame then
     CircleCheck.Name = "CheckMark"
     CircleCheck.Size = UDim2.fromScale(1, 1)
     CircleCheck.BackgroundTransparency = 1
-    CircleCheck.Text = ""
+    CircleCheck.Text = "✔"
     CircleCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
     CircleCheck.TextSize = 14
     CircleCheck.Font = Enum.Font.GothamBold
