@@ -394,6 +394,8 @@ for Index, TabData in ipairs(TabsData) do
     if TabData.Name == "Main" then
 -- ================================================
 
+
+
 -- ==================================
 -- VARIÁVEIS — TELEPORT & FLING
 -- ==================================
@@ -405,7 +407,6 @@ local player = Players.LocalPlayer
 local selectedPlayerName = nil
 local isFlinging = false
 
--- Variável de referência para o container principal (compatível com o padrão do seu menu)
 local targetParent = PageFrame
 
 -- ==================================
@@ -508,7 +509,6 @@ end
 -- BOTOES — TELEPORT & FLING
 -- ==================================
 if targetParent then
-    -- Verifica se já existe um UIListLayout no container principal para manter a organização
     local mainLayout = targetParent:FindFirstChildOfClass("UIListLayout")
     if not mainLayout then
         mainLayout = Instance.new("UIListLayout")
@@ -517,7 +517,6 @@ if targetParent then
         mainLayout.Parent = targetParent
     end
 
-    -- 📦 CARD PRINCIPAL DO FLING
     local FlingCard = Instance.new("Frame")
     FlingCard.Name = "FlingCard"
     FlingCard.Size = UDim2.new(1, -12, 0, 225)
@@ -539,7 +538,6 @@ if targetParent then
     FlingCardStroke.Thickness = 1
     FlingCardStroke.Parent = FlingCard
 
-    -- 📝 TITULO DO CARD
     local FlingTitle = Instance.new("TextLabel")
     FlingTitle.Name = "Title"
     FlingTitle.Size = UDim2.new(1, -24, 0, 25)
@@ -553,7 +551,6 @@ if targetParent then
     FlingTitle.ZIndex = 6
     FlingTitle.Parent = FlingCard
 
-    -- 📜 LISTA DE JOGADORES
     local PlayerListFrame = Instance.new("ScrollingFrame")
     PlayerListFrame.Name = "PlayerList"
     PlayerListFrame.Size = UDim2.new(1, -24, 0, 130)
@@ -563,7 +560,6 @@ if targetParent then
     PlayerListFrame.BorderSizePixel = 0
     PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     PlayerListFrame.ScrollBarThickness = 4
-    PlayerListFrame.ScrollBarColor3 = Color3.fromRGB(60, 62, 78)
     PlayerListFrame.ZIndex = 6
     PlayerListFrame.Parent = FlingCard
 
@@ -576,7 +572,6 @@ if targetParent then
     PlayerListLayout.Padding = UDim.new(0, 4)
     PlayerListLayout.Parent = PlayerListFrame
 
-    -- 🔘 BOTÃO FLING
     local FlingBtn = Instance.new("TextButton")
     FlingBtn.Name = "FlingButton"
     FlingBtn.Size = UDim2.new(1, -24, 0, 35)
@@ -595,9 +590,6 @@ if targetParent then
     FlingBtnCorner.CornerRadius = UDim.new(0, 8)
     FlingBtnCorner.Parent = FlingBtn
 
-    -- ==================================
-    -- FUNÇÃO ATUALIZAR LISTA
-    -- ==================================
     local function refreshPlayerList()
         for _, child in ipairs(PlayerListFrame:GetChildren()) do
             if child:IsA("TextButton") then
@@ -636,9 +628,6 @@ if targetParent then
         PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, count * 32)
     end
 
-    -- ==================================
-    -- AÇÃO DO BOTÃO FLING
-    -- ==================================
     FlingBtn.Activated:Connect(function()
         if not selectedPlayerName then return end
         local target = Players:FindFirstChild(selectedPlayerName)
@@ -650,7 +639,6 @@ if targetParent then
         end
     end)
 
-    -- 🔄 ATUALIZA LISTA AUTOMATICAMENTE
     task.spawn(function()
         while true do
             pcall(refreshPlayerList)
@@ -660,9 +648,6 @@ if targetParent then
 else
     warn("Error: PageFrame not found!")
 end
-
-
-
 
 
 -- ==========================================
