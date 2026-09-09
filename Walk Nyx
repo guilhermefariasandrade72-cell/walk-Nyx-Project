@@ -405,7 +405,7 @@ SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
 SectionTitle.Parent = PageFrame
 
 -- ==================================
--- ⚔️ VARIÁVEIS — KILL AURA
+-- VARIÁVEIS — KILL AURA
 -- ==================================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -420,10 +420,9 @@ local MostrarCirculoAura = false
 local CirculoAdornment = nil
 
 -- ==================================
--- ⚔️ SISTEMA — KILL AURA
+-- SISTEMA — KILL AURA
 -- ==================================
 
--- 📏 CRIAR / ATUALIZAR O CÍRCULO VERMELHO VISUAL
 local function AtualizarCirculoAura()
     local char = player.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -452,7 +451,6 @@ local function AtualizarCirculoAura()
     CirculoAdornment.Radius = RaioKillAura
 end
 
--- ⚔️ EXECUTAR ATAQUE DE FACA
 local function ExecutarAtaque(Alvo)
     local Char = player.Character
     if not Char then return end
@@ -476,7 +474,6 @@ local function ExecutarAtaque(Alvo)
     end
 end
 
--- 🔴 LOOP DO CÍRCULO
 task.spawn(function()
     while true do
         task.wait(0.1)
@@ -484,7 +481,6 @@ task.spawn(function()
     end
 end)
 
--- ⚔️ LOOP DO KILL AURA
 task.spawn(function()
     while true do
         task.wait(0.1)
@@ -522,10 +518,9 @@ player.CharacterAdded:Connect(function()
 end)
 
 -- ==================================
--- ⚔️ BOTÕES — KILL AURA
+-- BOTOES — KILL AURA
 -- ==================================
 if PageFrame then
-    -- 📦 CARD PRINCIPAL — KILL AURA
     local KillAuraCard = Instance.new("Frame")
     KillAuraCard.Name = "KillAuraCard"
     KillAuraCard.Size = UDim2.new(1, -6, 0, 85)
@@ -542,20 +537,18 @@ if PageFrame then
     KillAuraStroke.Thickness = 1
     KillAuraStroke.Parent = KillAuraCard
 
-    -- 📝 TÍTULO
     local KillAuraTitle = Instance.new("TextLabel")
     KillAuraTitle.Name = "Title"
     KillAuraTitle.Size = UDim2.new(1, -60, 0, 25)
     KillAuraTitle.Position = UDim2.fromOffset(12, 5)
     KillAuraTitle.BackgroundTransparency = 1
-    KillAuraTitle.Text = "⚔️ Kill Aura"
+    KillAuraTitle.Text = "Kill Aura"
     KillAuraTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
     KillAuraTitle.TextSize = 12
     KillAuraTitle.Font = Enum.Font.GothamSemibold
     KillAuraTitle.TextXAlignment = Enum.TextXAlignment.Left
     KillAuraTitle.Parent = KillAuraCard
 
-    -- 🔘 TOGGLE LIGAR/DESLIGAR
     local KillAuraToggle = Instance.new("TextButton")
     KillAuraToggle.Name = "ToggleButton"
     KillAuraToggle.Size = UDim2.fromOffset(26, 26)
@@ -580,7 +573,7 @@ if PageFrame then
     KillAuraCheck.Name = "CheckMark"
     KillAuraCheck.Size = UDim2.fromScale(1, 1)
     KillAuraCheck.BackgroundTransparency = 1
-    KillAuraCheck.Text = "✔"
+    KillAuraCheck.Text = ""
     KillAuraCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
     KillAuraCheck.TextSize = 14
     KillAuraCheck.Font = Enum.Font.GothamBold
@@ -599,7 +592,6 @@ if PageFrame then
         TweenService:Create(KillAuraCheck, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = textTrans}):Play()
     end)
 
-    -- 🎚️ SLIDER DE DISTÂNCIA
     local AuraSliderContainer = Instance.new("Frame")
     AuraSliderContainer.Name = "SliderContainer"
     AuraSliderContainer.Size = UDim2.new(1, -24, 0, 30)
@@ -613,8 +605,8 @@ if PageFrame then
     AuraSliderLabel.BackgroundTransparency = 1
     AuraSliderLabel.Text = "Attack Range"
     AuraSliderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    AuraSliderLabel.TextSize = 10
-    AuraSliderLabel.Font = Enum.Font.Gotham
+    AuraSliderLabel.TextSize = 12
+    AuraSliderLabel.Font = Enum.Font.GothamSemibold
     AuraSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
     AuraSliderLabel.Parent = AuraSliderContainer
 
@@ -625,8 +617,8 @@ if PageFrame then
     AuraSliderValue.BackgroundTransparency = 1
     AuraSliderValue.Text = tostring(RaioKillAura)
     AuraSliderValue.TextColor3 = Color3.fromRGB(255, 255, 255)
-    AuraSliderValue.TextSize = 10
-    AuraSliderValue.Font = Enum.Font.Gotham
+    AuraSliderValue.TextSize = 12
+    AuraSliderValue.Font = Enum.Font.GothamSemibold
     AuraSliderValue.TextXAlignment = Enum.TextXAlignment.Right
     AuraSliderValue.Parent = AuraSliderContainer
 
@@ -653,7 +645,6 @@ if PageFrame then
     AuraSliderFillCorner.CornerRadius = UDim.new(0, 3)
     AuraSliderFillCorner.Parent = AuraSliderFill
 
-    -- 🎚️ LÓGICA DO SLIDER
     local AuraSliding = false
     local AuraActiveInput = nil
     local AuraMin = 5
@@ -702,7 +693,6 @@ if PageFrame then
         end
     end)
 
-    -- 📦 CARD — MOSTRAR CÍRCULO
     local KillAuraCircleCard = Instance.new("Frame")
     KillAuraCircleCard.Name = "KillAuraCircleCard"
     KillAuraCircleCard.Size = UDim2.new(1, -6, 0, 50)
@@ -719,20 +709,18 @@ if PageFrame then
     KillAuraCircleStroke.Thickness = 1
     KillAuraCircleStroke.Parent = KillAuraCircleCard
 
-    -- 📝 TÍTULO CÍRCULO
     local CircleLabel = Instance.new("TextLabel")
     CircleLabel.Name = "Title"
     CircleLabel.Size = UDim2.new(1, -60, 1, 0)
     CircleLabel.Position = UDim2.fromOffset(12, 0)
     CircleLabel.BackgroundTransparency = 1
-    CircleLabel.Text = "⭕ Show Range Circle"
+    CircleLabel.Text = "Show Range Circle"
     CircleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     CircleLabel.TextSize = 12
     CircleLabel.Font = Enum.Font.GothamSemibold
     CircleLabel.TextXAlignment = Enum.TextXAlignment.Left
     CircleLabel.Parent = KillAuraCircleCard
 
-    -- 🔘 TOGGLE CÍRCULO
     local CircleToggle = Instance.new("TextButton")
     CircleToggle.Name = "ToggleButton"
     CircleToggle.Size = UDim2.fromOffset(26, 26)
@@ -757,7 +745,7 @@ if PageFrame then
     CircleCheck.Name = "CheckMark"
     CircleCheck.Size = UDim2.fromScale(1, 1)
     CircleCheck.BackgroundTransparency = 1
-    CircleCheck.Text = "✔"
+    CircleCheck.Text = ""
     CircleCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
     CircleCheck.TextSize = 14
     CircleCheck.Font = Enum.Font.GothamBold
