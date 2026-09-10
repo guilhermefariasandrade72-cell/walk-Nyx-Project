@@ -400,7 +400,6 @@ for Index, TabData in ipairs(TabsData) do
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local ContentProvider = game:GetService("ContentProvider")
 
 local player = Players.LocalPlayer
 local selectedPlayerName = nil
@@ -505,7 +504,7 @@ local function executeCustomFling(targetPlr)
 end
 
 -- ==================================
--- INTERFACE — SELEÇÃO E FLING SEPARADOS
+-- BOTOES — TELEPORT & FLING
 -- ==================================
 if targetParent then
     local mainLayout = targetParent:FindFirstChildOfClass("UIListLayout")
@@ -516,77 +515,10 @@ if targetParent then
         mainLayout.Parent = targetParent
     end
 
-    -- 📦 CARD 1: SELETOR DE JOGADOR (Estilo limpo com foto de perfil)
-    local SelectCard = Instance.new("Frame")
-    SelectCard.Name = "SelectPlayerCard"
-    SelectCard.Size = UDim2.new(1, -6, 0, 55)
-    SelectCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-    SelectCard.BorderSizePixel = 0
-    SelectCard.ZIndex = 5
-    SelectCard.Parent = targetParent
-
-    local SelectCardCorner = Instance.new("UICorner")
-    SelectCardCorner.CornerRadius = UDim.new(0, 10)
-    SelectCardCorner.Parent = SelectCard
-
-    local SelectCardStroke = Instance.new("UIStroke")
-    SelectCardStroke.Color = Color3.fromRGB(39, 40, 48)
-    SelectCardStroke.Thickness = 1
-    SelectCardStroke.Parent = SelectCard
-
-    -- 🖼️ FOTO DE PERFIL DO ALVO ATUAL (ou ícone padrão)
-    local PlayerAvatar = Instance.new("ImageLabel")
-    PlayerAvatar.Name = "Avatar"
-    PlayerAvatar.Size = UDim2.fromOffset(36, 36)
-    PlayerAvatar.Position = UDim2.new(0, 10, 0.5, -18)
-    PlayerAvatar.BackgroundColor3 = Color3.fromRGB(24, 25, 32)
-    PlayerAvatar.BorderSizePixel = 0
-    PlayerAvatar.Image = "rbxassetid://0" -- Sem foto inicialmente
-    PlayerAvatar.ZIndex = 6
-    PlayerAvatar.Parent = SelectCard
-
-    local AvatarCorner = Instance.new("UICorner")
-    AvatarCorner.CornerRadius = UDim.new(0, 6)
-    AvatarCorner.Parent = PlayerAvatar
-
-    -- 📝 NOME DO JOGADOR SELECIONADO
-    local SelectLabel = Instance.new("TextLabel")
-    SelectLabel.Name = "Title"
-    SelectLabel.Size = UDim2.new(1, -160, 1, 0)
-    SelectLabel.Position = UDim2.fromOffset(56, 0)
-    SelectLabel.BackgroundTransparency = 1
-    SelectLabel.Text = "Nenhum Alvo Selecionado"
-    SelectLabel.TextColor3 = Color3.fromRGB(245, 245, 248)
-    SelectLabel.TextSize = 12
-    SelectLabel.Font = Enum.Font.GothamSemibold
-    SelectLabel.TextXAlignment = Enum.TextXAlignment.Left
-    SelectLabel.ZIndex = 6
-    SelectLabel.Parent = SelectCard
-
-    -- 🔘 BOTÃO PARA ESCOLHER / TROCAR ALVO (abre lista ou cicla entre os players)
-    local SelectButton = Instance.new("TextButton")
-    SelectButton.Name = "ActionButton"
-    SelectButton.Size = UDim2.fromOffset(90, 34)
-    SelectButton.AnchorPoint = Vector2.new(1, 0.5)
-    SelectButton.Position = UDim2.new(1, -12, 0.5, 0)
-    SelectButton.BackgroundColor3 = Color3.fromRGB(35, 37, 48)
-    SelectButton.BorderSizePixel = 0
-    SelectButton.Text = "ESCOLHER"
-    SelectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    SelectButton.TextSize = 11
-    SelectButton.Font = Enum.Font.GothamBold
-    SelectButton.AutoButtonColor = false
-    SelectButton.ZIndex = 6
-    SelectButton.Parent = SelectCard
-
-    local SelectButtonCorner = Instance.new("UICorner")
-    SelectButtonCorner.CornerRadius = UDim.new(0, 8)
-    SelectButtonCorner.Parent = SelectButton
-
-    -- 📦 CARD 2: BOTÃO DE FLING (Separado embaixo)
+    -- 📦 CARD PRINCIPAL
     local FlingCard = Instance.new("Frame")
     FlingCard.Name = "FlingCard"
-    FlingCard.Size = UDim2.new(1, -6, 0, 50)
+    FlingCard.Size = UDim2.new(1, -6, 0, 225)
     FlingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
     FlingCard.BorderSizePixel = 0
     FlingCard.ZIndex = 5
@@ -601,99 +533,156 @@ if targetParent then
     FlingCardStroke.Thickness = 1
     FlingCardStroke.Parent = FlingCard
 
-    local FlingCardLabel = Instance.new("TextLabel")
-    FlingCardLabel.Name = "Title"
-    FlingCardLabel.Size = UDim2.new(1, -110, 1, 0)
-    FlingCardLabel.Position = UDim2.fromOffset(12, 0)
-    FlingCardLabel.BackgroundTransparency = 1
-    FlingCardLabel.Text = "Executar Fling no Alvo"
-    FlingCardLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FlingCardLabel.TextSize = 12
-    FlingCardLabel.Font = Enum.Font.GothamSemibold
-    FlingCardLabel.TextXAlignment = Enum.TextXAlignment.Left
-    FlingCardLabel.ZIndex = 6
-    FlingCardLabel.Parent = FlingCard
+    -- 📝 TITULO DO CARD
+    local FlingTitle = Instance.new("TextLabel")
+    FlingTitle.Name = "Title"
+    FlingTitle.Size = UDim2.new(1, -24, 0, 25)
+    FlingTitle.Position = UDim2.fromOffset(12, 8)
+    FlingTitle.BackgroundTransparency = 1
+    FlingTitle.Text = "🎯 Select Player & Fling"
+    FlingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    FlingTitle.TextSize = 12
+    FlingTitle.Font = Enum.Font.GothamSemibold
+    FlingTitle.TextXAlignment = Enum.TextXAlignment.Left
+    FlingTitle.ZIndex = 6
+    FlingTitle.Parent = FlingCard
 
-    local FlingButton = Instance.new("TextButton")
-    FlingButton.Name = "ActionButton"
-    FlingButton.Size = UDim2.fromOffset(90, 34)
-    FlingButton.AnchorPoint = Vector2.new(1, 0.5)
-    FlingButton.Position = UDim2.new(1, -12, 0.5, 0)
-    FlingButton.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
-    FlingButton.BorderSizePixel = 0
-    FlingButton.Text = "FLING"
-    FlingButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FlingButton.TextSize = 12
-    FlingButton.Font = Enum.Font.GothamBold
-    FlingButton.AutoButtonColor = false
-    FlingButton.ZIndex = 6
-    FlingButton.Parent = FlingCard
+    -- 📜 LISTA DE JOGADORES
+    local PlayerListFrame = Instance.new("ScrollingFrame")
+    PlayerListFrame.Name = "PlayerList"
+    PlayerListFrame.Size = UDim2.new(1, -24, 0, 130)
+    PlayerListFrame.Position = UDim2.fromOffset(12, 38)
+    PlayerListFrame.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    PlayerListFrame.BackgroundTransparency = 0.5
+    PlayerListFrame.BorderSizePixel = 0
+    PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    PlayerListFrame.ScrollBarThickness = 4
+    PlayerListFrame.ZIndex = 6
+    PlayerListFrame.Parent = FlingCard
 
-    local FlingButtonCorner = Instance.new("UICorner")
-    FlingButtonCorner.CornerRadius = UDim.new(0, 8)
-    FlingButtonCorner.Parent = FlingButton
+    local PlayerListCorner = Instance.new("UICorner")
+    PlayerListCorner.CornerRadius = UDim.new(0, 6)
+    PlayerListCorner.Parent = PlayerListFrame
 
-    -- Lógica para alternar/escolher o próximo jogador ao clicar no botão "ESCOLHER"
-    SelectButton.Activated:Connect(function()
-        local playerList = Players:GetPlayers()
-        local currentIndex = 0
-        
-        for i, p in ipairs(playerList) do
-            if p.Name == selectedPlayerName then
-                currentIndex = i
-                break
+    local PlayerListLayout = Instance.new("UIListLayout")
+    PlayerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    PlayerListLayout.Padding = UDim.new(0, 4)
+    PlayerListLayout.Parent = PlayerListFrame
+
+    -- 🔘 BOTÃO FLING
+    local FlingBtn = Instance.new("TextButton")
+    FlingBtn.Name = "FlingButton"
+    FlingBtn.Size = UDim2.new(1, -24, 0, 35)
+    FlingBtn.Position = UDim2.fromOffset(12, 178)
+    FlingBtn.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+    FlingBtn.BorderSizePixel = 0
+    FlingBtn.Text = "EXECUTAR FLING"
+    FlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FlingBtn.TextSize = 12
+    FlingBtn.Font = Enum.Font.GothamBold
+    FlingBtn.AutoButtonColor = false
+    FlingBtn.ZIndex = 6
+    FlingBtn.Parent = FlingCard
+
+    local FlingBtnCorner = Instance.new("UICorner")
+    FlingBtnCorner.CornerRadius = UDim.new(0, 8)
+    FlingBtnCorner.Parent = FlingBtn
+
+    -- ==================================
+    -- FUNÇÃO ATUALIZAR LISTA COM AVATAR
+    -- ==================================
+    local function refreshPlayerList()
+        for _, child in ipairs(PlayerListFrame:GetChildren()) do
+            if child:IsA("TextButton") then
+                child:Destroy()
             end
         end
-        
-        -- Pula para o próximo jogador da lista (ignorando a si mesmo)
-        local nextPlayer = nil
-        for i = 1, #playerList do
-            currentIndex = (currentIndex % #playerList) + 1
-            local p = playerList[currentIndex]
+
+        local count = 0
+        for _, p in ipairs(Players:GetPlayers()) do
             if p ~= player then
-                nextPlayer = p
-                break
+                count = count + 1
+                local PlayerBtn = Instance.new("TextButton")
+                PlayerBtn.Name = "PlayerBtn_"..p.Name
+                PlayerBtn.Size = UDim2.new(1, -4, 0, 30)
+                PlayerBtn.BackgroundColor3 = (selectedPlayerName == p.Name) and Color3.fromRGB(45, 48, 62) or Color3.fromRGB(24, 25, 32)
+                PlayerBtn.BorderSizePixel = 0
+                PlayerBtn.Text = "" -- Texto vazio para usar labels internos
+                PlayerBtn.AutoButtonColor = false
+                PlayerBtn.ZIndex = 7
+                PlayerBtn.Parent = PlayerListFrame
+
+                local PlayerBtnCorner = Instance.new("UICorner")
+                PlayerBtnCorner.CornerRadius = UDim.new(0, 6)
+                PlayerBtnCorner.Parent = PlayerBtn
+
+                -- 🖼️ Avatar do jogador na linha
+                local AvatarImg = Instance.new("ImageLabel")
+                AvatarImg.Name = "Avatar"
+                AvatarImg.Size = UDim2.fromOffset(22, 22)
+                AvatarImg.Position = UDim2.new(0, 6, 0.5, -11)
+                AvatarImg.BackgroundTransparency = 1
+                AvatarImg.Image = "rbxassetid://0"
+                AvatarImg.ZIndex = 8
+                AvatarImg.Parent = PlayerBtn
+
+                local AvatarCorner = Instance.new("UICorner")
+                AvatarCorner.CornerRadius = UDim.new(0, 4)
+                AvatarCorner.Parent = AvatarImg
+
+                -- Carrega o thumbnail de forma segura
+                pcall(function()
+                    local content = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+                    AvatarImg.Image = content
+                end)
+
+                -- 📝 Nome do jogador na linha
+                local NameLabel = Instance.new("TextLabel")
+                NameLabel.Name = "NameLabel"
+                NameLabel.Size = UDim2.new(1, -36, 1, 0)
+                NameLabel.Position = UDim2.fromOffset(34, 0)
+                NameLabel.BackgroundTransparency = 1
+                NameLabel.Text = p.Name
+                NameLabel.TextColor3 = Color3.fromRGB(220, 220, 230)
+                NameLabel.TextSize = 12
+                NameLabel.Font = Enum.Font.Gotham
+                NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+                NameLabel.ZIndex = 8
+                NameLabel.Parent = PlayerBtn
+
+                PlayerBtn.Activated:Connect(function()
+                    selectedPlayerName = p.Name
+                    refreshPlayerList()
+                end)
             end
         end
-        
-        if nextPlayer then
-            selectedPlayerName = nextPlayer.Name
-            SelectLabel.Text = nextPlayer.Name
-            
-            -- Atualiza a foto de perfil automaticamente
-            pcall(function()
-                local thumbType = Enum.ThumbnailType.HeadShot
-                local thumbSize = Enum.ThumbnailSize.Size420x420
-                local content, isReady = Players:GetUserThumbnailAsync(nextPlayer.UserId, thumbType, thumbSize)
-                PlayerAvatar.Image = content
-            end)
-        else
-            selectedPlayerName = nil
-            SelectLabel.Text = "Nenhum Jogador Disponível"
-            PlayerAvatar.Image = ""
-        end
-        
-        -- Efeito visual do botão
-        TweenService:Create(SelectButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(55, 58, 72)}):Play()
-        task.wait(0.1)
-        TweenService:Create(SelectButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(35, 37, 48)}):Play()
-    end)
+        PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, count * 34)
+    end
 
-    -- Ação do botão Fling
-    FlingButton.Activated:Connect(function()
+    -- ==================================
+    -- AÇÃO DO BOTÃO FLING
+    -- ==================================
+    FlingBtn.Activated:Connect(function()
         if not selectedPlayerName then return end
         local target = Players:FindFirstChild(selectedPlayerName)
         if target then
             executeCustomFling(target)
-            TweenService:Create(FlingButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(180, 25, 40)}):Play()
+            TweenService:Create(FlingBtn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(180, 25, 40)}):Play()
             task.wait(0.1)
-            TweenService:Create(FlingButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(225, 40, 56)}):Play()
+            TweenService:Create(FlingBtn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(225, 40, 56)}):Play()
+        end
+    end)
+
+    -- 🔄 ATUALIZA LISTA AUTOMATICAMENTE
+    task.spawn(function()
+        while true do
+            pcall(refreshPlayerList)
+            task.wait(1)
         end
     end)
 else
     warn("Error: PageFrame not found!")
 end
-
 
 -- ==========================================
 local SectionTitle = Instance.new("TextLabel")
