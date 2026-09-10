@@ -408,7 +408,7 @@ local selectedPlayerName = nil
 local isFlinging = false
 
 -- ==============================================================--
--- 🔍 SISTEMA DE IDENTIFICAÇÃO DE CARGOS CORRIGIDO (IGUAL AO ESP)
+-- 🔍 SISTEMA DE IDENTIFICAÇÃO DE CARGOS CORRIGIDO
 -- ==============================================================--
 
 local function ObterDadosCargos()
@@ -433,7 +433,7 @@ local function DescobrirCargo(player)
     -- Verifica se o jogador está morto (sem Humanoid ou Health <= 0)
     local humanoid = char and char:FindFirstChildOfClass("Humanoid")
     if not humanoid or humanoid.Health <= 0 then
-        return "Morto", 5
+        return "Lobby", 5
     end
 
     -- Checa itens na mão ou no inventário
@@ -453,15 +453,23 @@ local function DescobrirCargo(player)
         if serverRole == "Murderer" then
             return "Murderer", 1
         elseif serverRole == "Sheriff" then
-            return "Sheriff", 4
+            if temArma then
+                return "Sheriff", 4
+            else
+                return "Inocente", 3 -- Sheriff morreu e perdeu a arma
+            end
         elseif serverRole == "Hero" then
-            return "Hero", 4
+            if temArma then
+                return "Hero", 4
+            else
+                return "Inocente", 3 -- Herói anterior morreu e perdeu a arma
+            end
         end
     end
 
     -- Fallback visual caso a RemoteFunction demore, baseado na presença da arma
     if temArma then
-        return "Sheriff", 4
+        return "Hero", 4
     end
 
     return "Inocente", 3
@@ -733,7 +741,7 @@ if targetParent then
             end
         end
 
-        -- Ordena: 1. Murderer, 2/3. Inocente/Hero, 4. Sheriff, 5. Morto
+        -- Ordena: 1. Murderer, 2/3. Inocente/Hero, 4. Sheriff, 5. Lobby
         table.sort(playerDataList, function(a, b)
             if a.Priority == b.Priority then
                 return a.Player.Name < b.Player.Name
@@ -821,7 +829,7 @@ if targetParent then
                 elseif cargo == "Hero" then
                     roleBd.BackgroundColor3 = Color3.fromRGB(241, 196, 15) -- Amarelo
                     roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                elseif cargo == "Morto" then
+                elseif cargo == "Lobby" then
                     roleBd.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Branco
                     roleBd.TextColor3 = Color3.fromRGB(30, 30, 30)
                 else -- Inocente
