@@ -425,7 +425,7 @@ local function ObterDadosCargos()
 end
 
 local function DescobrirCargo(player)
-    if player == LocalPlayer then return "Inocente" end
+    if player == LocalPlayer then return "Inocente", 3 end
     
     local char = player.Character
     local backpack = player:FindFirstChild("Backpack")
@@ -433,7 +433,7 @@ local function DescobrirCargo(player)
     -- Verifica se o jogador está morto (sem Humanoid ou Health <= 0)
     local humanoid = char and char:FindFirstChildOfClass("Humanoid")
     if not humanoid or humanoid.Health <= 0 then
-        return "Morto"
+        return "Morto", 5
     end
 
     -- Checa itens na mão ou no inventário
@@ -441,7 +441,7 @@ local function DescobrirCargo(player)
     local temArma = (char and char:FindFirstChild("Gun")) or (backpack and backpack:FindFirstChild("Gun"))
 
     if temFaca then
-        return "Murderer"
+        return "Murderer", 1
     end
 
     -- Consulta o servidor para ver o estado real (Sheriff original ou se virou Herói)
@@ -451,25 +451,24 @@ local function DescobrirCargo(player)
         local serverRole = info.Role and tostring(info.Role) or ""
         
         if serverRole == "Murderer" then
-            return "Murderer"
+            return "Murderer", 1
         elseif serverRole == "Sheriff" then
             if temArma then
-                return "Sheriff"
+                return "Sheriff", 4
             end
         elseif serverRole == "Hero" then
             if temArma then
-                return "Hero"
+                return "Hero", 4
             end
         end
     end
 
     -- Fallback visual caso a RemoteFunction demore ou não retorne o Hero/Sheriff instantaneamente
     if temArma then
-        -- Se tem a arma mas não é o Murderer, checa se a arma caiu no chão em algum lugar ou se ele pegou recentemente
-        return "Sheriff"
+        return "Sheriff", 4
     end
 
-    return "Inocente"
+    return "Inocente", 3
 end
 
 -- ==============================================================--
@@ -702,7 +701,7 @@ if targetParent then
     Instance.new("UICorner", FlingButton).CornerRadius = UDim.new(0, 6)
 
     -- ==============================================================--
-    -- FUNÇÃO DE ATUALIZAÇÃO DA LISTA (SEM DUPLICATAS E COM REFRESH ÁGIL)
+    -- FUNÇÃO DE ATUALIZAÇÃO DA LISTA (COM ORDENAÇÃO DE CARGOS E CORES DO LOBBY)
     -- ==============================================================--
     local function refreshPlayerList()
         local activePlayerNames = {}
@@ -725,97 +724,122 @@ if targetParent then
             end
         end
 
-        local count = 0
+        -- Coleta e classifica os dados dos jogadores para ordenar a interface
+        local playerDataList = {}
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer then
-                count = count + 1
-                local btnName = "PlayerBtn_" .. p.Name
-                local PlayerBtn = PlayerListFrame:FindFirstChild(btnName)
-                local cargo = DescobrirCargo(p)
+                local cargo, priority = DescobrirCargo(p)
+                table.insert(playerDataList, {
+                    Player = p,
+                    Cargo = cargo,
+                    Priority = priority
+                })
+            end
+        end
 
-                if not PlayerBtn then
-                    PlayerBtn = Instance.new("TextButton")
-                    PlayerBtn.Name = btnName
-                    PlayerBtn.Size = UDim2.new(1, -4, 0, 30)
-                    PlayerBtn.BorderSizePixel = 0
-                    PlayerBtn.Text = ""
-                    PlayerBtn.AutoButtonColor = false
-                    PlayerBtn.ZIndex = 7
-                    PlayerBtn.Parent = PlayerListFrame
+        -- Ordena: 1. Murderer, 2/3. Inocente/Hero, 4. Sheriff (por último entre os vivos), 5. Morto
+        table.sort(playerDataList, function(a, b)
+            if a.Priority == b.Priority then
+                return a.Player.Name < b.Player.Name
+            end
+            return a.Priority < b.Priority
+        end)
 
-                    Instance.new("UICorner", PlayerBtn).CornerRadius = UDim.new(0, 6)
+        local count = 0
+        for index, data in ipairs(playerDataList) do
+            local p = data.Player
+            local cargo = data.Cargo
+            local priority = data.Priority
+            
+            count = count + 1
+            local btnName = "PlayerBtn_" .. p.Name
+            local PlayerBtn = PlayerListFrame:FindFirstChild(btnName)
 
-                    local AvatarImg = Instance.new("ImageLabel", PlayerBtn)
-                    AvatarImg.Name = "Avatar"
-                    AvatarImg.Size = UDim2.fromOffset(22, 22)
-                    AvatarImg.Position = UDim2.new(0, 5, 0.5, -11)
-                    AvatarImg.BackgroundTransparency = 1
-                    AvatarImg.ZIndex = 8
-                    Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(0, 4)
+            if not PlayerBtn then
+                PlayerBtn = Instance.new("TextButton")
+                PlayerBtn.Name = btnName
+                PlayerBtn.Size = UDim2.new(1, -4, 0, 30)
+                PlayerBtn.BorderSizePixel = 0
+                PlayerBtn.Text = ""
+                PlayerBtn.AutoButtonColor = false
+                PlayerBtn.ZIndex = 7
+                PlayerBtn.Parent = PlayerListFrame
 
-                    pcall(function()
-                        AvatarImg.Image = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
-                    end)
+                Instance.new("UICorner", PlayerBtn).CornerRadius = UDim.new(0, 6)
 
-                    local NameLabel = Instance.new("TextLabel", PlayerBtn)
-                    NameLabel.Name = "NameLabel"
-                    NameLabel.Size = UDim2.new(1, -110, 1, 0)
-                    NameLabel.Position = UDim2.fromOffset(32, 0)
-                    NameLabel.BackgroundTransparency = 1
-                    NameLabel.TextSize = 12
-                    NameLabel.Font = Enum.Font.Gotham
-                    NameLabel.TextXAlignment = Enum.TextXAlignment.Left
-                    NameLabel.ZIndex = 8
+                local AvatarImg = Instance.new("ImageLabel", PlayerBtn)
+                AvatarImg.Name = "Avatar"
+                AvatarImg.Size = UDim2.fromOffset(22, 22)
+                AvatarImg.Position = UDim2.new(0, 5, 0.5, -11)
+                AvatarImg.BackgroundTransparency = 1
+                AvatarImg.ZIndex = 8
+                Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(0, 4)
 
-                    local RoleBadge = Instance.new("TextLabel", PlayerBtn)
-                    RoleBadge.Name = "RoleBadge"
-                    RoleBadge.Size = UDim2.fromOffset(70, 20)
-                    RoleBadge.AnchorPoint = Vector2.new(1, 0.5)
-                    RoleBadge.Position = UDim2.new(1, -6, 0.5, 0)
-                    RoleBadge.BackgroundTransparency = 0.2
-                    RoleBadge.TextSize = 10
-                    RoleBadge.Font = Enum.Font.GothamBold
-                    RoleBadge.ZIndex = 8
-                    Instance.new("UICorner", RoleBadge).CornerRadius = UDim.new(0, 4)
+                pcall(function()
+                    AvatarImg.Image = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+                end)
 
-                    PlayerBtn.Activated:Connect(function()
-                        selectedPlayerName = p.Name
-                        refreshPlayerList()
-                    end)
+                local NameLabel = Instance.new("TextLabel", PlayerBtn)
+                NameLabel.Name = "NameLabel"
+                NameLabel.Size = UDim2.new(1, -110, 1, 0)
+                NameLabel.Position = UDim2.fromOffset(32, 0)
+                NameLabel.BackgroundTransparency = 1
+                NameLabel.TextSize = 12
+                NameLabel.Font = Enum.Font.Gotham
+                NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+                NameLabel.ZIndex = 8
+
+                local RoleBadge = Instance.new("TextLabel", PlayerBtn)
+                RoleBadge.Name = "RoleBadge"
+                RoleBadge.Size = UDim2.fromOffset(70, 20)
+                RoleBadge.AnchorPoint = Vector2.new(1, 0.5)
+                RoleBadge.Position = UDim2.new(1, -6, 0.5, 0)
+                RoleBadge.BackgroundTransparency = 0.2
+                RoleBadge.TextSize = 10
+                RoleBadge.Font = Enum.Font.GothamBold
+                RoleBadge.ZIndex = 8
+                Instance.new("UICorner", RoleBadge).CornerRadius = UDim.new(0, 4)
+
+                PlayerBtn.Activated:Connect(function()
+                    selectedPlayerName = p.Name
+                    refreshPlayerList()
+                end)
+            end
+
+            -- Atualiza a ordem visual no Layout
+            PlayerBtn.LayoutOrder = index
+
+            -- Atualiza textos, cores e cargos dinamicamente a cada ciclo
+            local nameLbl = PlayerBtn:FindFirstChild("NameLabel")
+            local roleBd = PlayerBtn:FindFirstChild("RoleBadge")
+
+            if nameLbl then nameLbl.Text = p.Name end
+            if roleBd then
+                roleBd.Text = cargo
+                if cargo == "Murderer" then
+                    roleBd.BackgroundColor3 = Color3.fromRGB(225, 40, 56) -- Vermelho
+                    roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
+                elseif cargo == "Sheriff" then
+                    roleBd.BackgroundColor3 = Color3.fromRGB(40, 120, 225) -- Azul
+                    roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
+                elseif cargo == "Hero" then
+                    roleBd.BackgroundColor3 = Color3.fromRGB(241, 196, 15) -- Amarelo
+                    roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
+                elseif cargo == "Morto" then
+                    roleBd.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Branco (Lobby/Morto igual ao ESP)
+                    roleBd.TextColor3 = Color3.fromRGB(30, 30, 30)
+                else -- Inocente
+                    roleBd.BackgroundColor3 = Color3.fromRGB(46, 204, 113) -- Verde
+                    roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
                 end
+            end
 
-                -- Atualiza textos, cores e cargos dinamicamente a cada ciclo
-                local nameLbl = PlayerBtn:FindFirstChild("NameLabel")
-                local roleBd = PlayerBtn:FindFirstChild("RoleBadge")
-
-                if nameLbl then nameLbl.Text = p.Name end
-                if roleBd then
-                    roleBd.Text = cargo
-                    if cargo == "Murderer" then
-                        roleBd.BackgroundColor3 = Color3.fromRGB(225, 40, 56) -- Vermelho
-                        roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    elseif cargo == "Sheriff" then
-                        roleBd.BackgroundColor3 = Color3.fromRGB(40, 120, 225) -- Azul
-                        roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    elseif cargo == "Hero" then
-                        roleBd.BackgroundColor3 = Color3.fromRGB(241, 196, 15) -- Amarelo
-                        roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    elseif cargo == "Morto" then
-                        roleBd.BackgroundColor3 = Color3.fromRGB(60, 60, 60) -- Cinza Escuro
-                        roleBd.TextColor3 = Color3.fromRGB(150, 150, 150)
-                    else -- Inocente
-                        roleBd.BackgroundColor3 = Color3.fromRGB(46, 204, 113) -- Verde
-                        roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    end
-                end
-
-                if selectedPlayerName == p.Name then
-                    PlayerBtn.BackgroundColor3 = Color3.fromRGB(45, 48, 62)
-                    if nameLbl then nameLbl.TextColor3 = Color3.fromRGB(255, 255, 255) end
-                else
-                    PlayerBtn.BackgroundColor3 = Color3.fromRGB(24, 25, 32)
-                    if nameLbl then nameLbl.TextColor3 = Color3.fromRGB(200, 200, 210) end
-                end
+            if selectedPlayerName == p.Name then
+                PlayerBtn.BackgroundColor3 = Color3.fromRGB(45, 48, 62)
+                if nameLbl then nameLbl.TextColor3 = Color3.fromRGB(255, 255, 255) end
+            else
+                PlayerBtn.BackgroundColor3 = Color3.fromRGB(24, 25, 32)
+                if nameLbl then nameLbl.TextColor3 = Color3.fromRGB(200, 200, 210) end
             end
         end
 
