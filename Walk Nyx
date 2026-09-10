@@ -684,6 +684,296 @@ else
     warn("Error: PageFrame not found!")
 end
 
+-- ==================================
+-- VARIÁVEIS — TELEPORT & FLING
+-- ==================================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local selectedPlayerName = nil
+local isFlinging = false
+
+local targetParent = PageFrame
+
+-- ==================================
+-- SISTEMA — FLING INTELIGENTE
+-- ==================================
+local function executeCustomFling(targetPlr)
+    if isFlinging then return end
+    if not targetPlr or not targetPlr.Character then return end
+    
+    local char = player.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChild("Humanoid")
+    if not root or not hum then return end
+    
+    local targetRoot = targetPlr.Character:FindFirstChild("HumanoidRootPart")
+    local targetHum = targetPlr.Character:FindFirstChild("Humanoid")
+    if not targetRoot then return end
+
+    isFlinging = true
+    local oldCFrame = root.CFrame
+
+    hum.PlatformStand = true
+
+    local noclipConnection
+    noclipConnection = RunService.Stepped:Connect(function()
+        if char then
+            for _, part in ipairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+
+    local spin = Instance.new("BodyAngularVelocity")
+    spin.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    spin.AngularVelocity = Vector3.new(120000, 120000, 120000)
+    spin.P = math.huge
+    spin.Parent = root
+
+    local startTime = tick()
+    local flingConnection
+
+    flingConnection = RunService.Heartbeat:Connect(function()
+        local elapsed = tick() - startTime
+        
+        if targetRoot and root then
+            local isTargetStandingStill = false
+            if targetHum and targetHum.MoveDirection.Magnitude < 0.05 and targetRoot.Velocity.Magnitude < 0.5 then
+                isTargetStandingStill = true
+            end
+
+            local angle = elapsed * 60
+            local offsetX, offsetY, offsetZ = 0, 0, 0
+
+            if isTargetStandingStill then
+                offsetX = 0
+                offsetY = 0
+                offsetZ = 0
+            else
+                offsetX = math.sin(angle * 1.5) * 2.5
+                offsetY = math.cos(angle * 2) * 2.5
+                offsetZ = -3 + (math.sin(angle * 1.2) * 2.5)
+            end
+            
+            root.CFrame = targetRoot.CFrame * CFrame.new(offsetX, offsetY, offsetZ) * targetRoot.CFrame.Rotation * CFrame.Angles(elapsed * 60, elapsed * 70, elapsed * 65)
+            root.Velocity = Vector3.new(120000, 120000, 120000)
+        end
+    end)
+
+    task.wait(3)
+
+    if flingConnection then flingConnection:Disconnect() end
+    if spin then spin:Destroy() end
+
+    root.Velocity = Vector3.zero
+    root.RotVelocity = Vector3.zero
+    root.CFrame = oldCFrame + Vector3.new(0, 5, 0)
+    
+    local holdConnection
+    holdConnection = RunService.Heartbeat:Connect(function()
+        if root then
+            root.Velocity = Vector3.zero
+            root.RotVelocity = Vector3.zero
+            root.CFrame = oldCFrame + Vector3.new(0, 5, 0)
+        end
+    end)
+
+    task.wait(0.5)
+
+    if holdConnection then holdConnection:Disconnect() end
+    if noclipConnection then noclipConnection:Disconnect() end
+    
+    hum.PlatformStand = false
+    isFlinging = false
+end
+
+-- ==================================
+-- BOTOES — TELEPORT & FLING
+-- ==================================
+if targetParent then
+    local mainLayout = targetParent:FindFirstChildOfClass("UIListLayout")
+    if not mainLayout then
+        mainLayout = Instance.new("UIListLayout")
+        mainLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        mainLayout.Padding = UDim.new(0, 8)
+        mainLayout.Parent = targetParent
+    end
+
+    -- 📦 CARD PRINCIPAL
+    local FlingCard = Instance.new("Frame")
+    FlingCard.Name = "FlingCard"
+    FlingCard.Size = UDim2.new(1, -6, 0, 225)
+    FlingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    FlingCard.BorderSizePixel = 0
+    FlingCard.ZIndex = 5
+    FlingCard.Parent = targetParent
+
+    local FlingCardCorner = Instance.new("UICorner")
+    FlingCardCorner.CornerRadius = UDim.new(0, 10)
+    FlingCardCorner.Parent = FlingCard
+
+    local FlingCardStroke = Instance.new("UIStroke")
+    FlingCardStroke.Color = Color3.fromRGB(39, 40, 48)
+    FlingCardStroke.Thickness = 1
+    FlingCardStroke.Parent = FlingCard
+
+    -- 📝 TITULO DO CARD
+    local FlingTitle = Instance.new("TextLabel")
+    FlingTitle.Name = "Title"
+    FlingTitle.Size = UDim2.new(1, -24, 0, 25)
+    FlingTitle.Position = UDim2.fromOffset(12, 8)
+    FlingTitle.BackgroundTransparency = 1
+    FlingTitle.Text = "🎯 Select Player & Fling"
+    FlingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    FlingTitle.TextSize = 12
+    FlingTitle.Font = Enum.Font.GothamSemibold
+    FlingTitle.TextXAlignment = Enum.TextXAlignment.Left
+    FlingTitle.ZIndex = 6
+    FlingTitle.Parent = FlingCard
+
+    -- 📜 LISTA DE JOGADORES
+    local PlayerListFrame = Instance.new("ScrollingFrame")
+    PlayerListFrame.Name = "PlayerList"
+    PlayerListFrame.Size = UDim2.new(1, -24, 0, 130)
+    PlayerListFrame.Position = UDim2.fromOffset(12, 38)
+    PlayerListFrame.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    PlayerListFrame.BackgroundTransparency = 0.5
+    PlayerListFrame.BorderSizePixel = 0
+    PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    PlayerListFrame.ScrollBarThickness = 4
+    PlayerListFrame.ZIndex = 6
+    PlayerListFrame.Parent = FlingCard
+
+    local PlayerListCorner = Instance.new("UICorner")
+    PlayerListCorner.CornerRadius = UDim.new(0, 6)
+    PlayerListCorner.Parent = PlayerListFrame
+
+    local PlayerListLayout = Instance.new("UIListLayout")
+    PlayerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    PlayerListLayout.Padding = UDim.new(0, 4)
+    PlayerListLayout.Parent = PlayerListFrame
+
+    -- 🔘 BOTÃO FLING
+    local FlingBtn = Instance.new("TextButton")
+    FlingBtn.Name = "FlingButton"
+    FlingBtn.Size = UDim2.new(1, -24, 0, 35)
+    FlingBtn.Position = UDim2.fromOffset(12, 178)
+    FlingBtn.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+    FlingBtn.BorderSizePixel = 0
+    FlingBtn.Text = "EXECUTAR FLING"
+    FlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FlingBtn.TextSize = 12
+    FlingBtn.Font = Enum.Font.GothamBold
+    FlingBtn.AutoButtonColor = false
+    FlingBtn.ZIndex = 6
+    FlingBtn.Parent = FlingCard
+
+    local FlingBtnCorner = Instance.new("UICorner")
+    FlingBtnCorner.CornerRadius = UDim.new(0, 8)
+    FlingBtnCorner.Parent = FlingBtn
+
+    -- ==================================
+    -- FUNÇÃO ATUALIZAR LISTA COM AVATAR
+    -- ==================================
+    local function refreshPlayerList()
+        for _, child in ipairs(PlayerListFrame:GetChildren()) do
+            if child:IsA("TextButton") then
+                child:Destroy()
+            end
+        end
+
+        local count = 0
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= player then
+                count = count + 1
+                local PlayerBtn = Instance.new("TextButton")
+                PlayerBtn.Name = "PlayerBtn_"..p.Name
+                PlayerBtn.Size = UDim2.new(1, -4, 0, 30)
+                PlayerBtn.BackgroundColor3 = (selectedPlayerName == p.Name) and Color3.fromRGB(45, 48, 62) or Color3.fromRGB(24, 25, 32)
+                PlayerBtn.BorderSizePixel = 0
+                PlayerBtn.Text = "" -- Texto vazio para usar labels internos
+                PlayerBtn.AutoButtonColor = false
+                PlayerBtn.ZIndex = 7
+                PlayerBtn.Parent = PlayerListFrame
+
+                local PlayerBtnCorner = Instance.new("UICorner")
+                PlayerBtnCorner.CornerRadius = UDim.new(0, 6)
+                PlayerBtnCorner.Parent = PlayerBtn
+
+                -- 🖼️ Avatar do jogador na linha
+                local AvatarImg = Instance.new("ImageLabel")
+                AvatarImg.Name = "Avatar"
+                AvatarImg.Size = UDim2.fromOffset(22, 22)
+                AvatarImg.Position = UDim2.new(0, 6, 0.5, -11)
+                AvatarImg.BackgroundTransparency = 1
+                AvatarImg.Image = "rbxassetid://0"
+                AvatarImg.ZIndex = 8
+                AvatarImg.Parent = PlayerBtn
+
+                local AvatarCorner = Instance.new("UICorner")
+                AvatarCorner.CornerRadius = UDim.new(0, 4)
+                AvatarCorner.Parent = AvatarImg
+
+                -- Carrega o thumbnail de forma segura
+                pcall(function()
+                    local content = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+                    AvatarImg.Image = content
+                end)
+
+                -- 📝 Nome do jogador na linha
+                local NameLabel = Instance.new("TextLabel")
+                NameLabel.Name = "NameLabel"
+                NameLabel.Size = UDim2.new(1, -36, 1, 0)
+                NameLabel.Position = UDim2.fromOffset(34, 0)
+                NameLabel.BackgroundTransparency = 1
+                NameLabel.Text = p.Name
+                NameLabel.TextColor3 = Color3.fromRGB(220, 220, 230)
+                NameLabel.TextSize = 12
+                NameLabel.Font = Enum.Font.Gotham
+                NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+                NameLabel.ZIndex = 8
+                NameLabel.Parent = PlayerBtn
+
+                PlayerBtn.Activated:Connect(function()
+                    selectedPlayerName = p.Name
+                    refreshPlayerList()
+                end)
+            end
+        end
+        PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, count * 34)
+    end
+
+    -- ==================================
+    -- AÇÃO DO BOTÃO FLING
+    -- ==================================
+    FlingBtn.Activated:Connect(function()
+        if not selectedPlayerName then return end
+        local target = Players:FindFirstChild(selectedPlayerName)
+        if target then
+            executeCustomFling(target)
+            TweenService:Create(FlingBtn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(180, 25, 40)}):Play()
+            task.wait(0.1)
+            TweenService:Create(FlingBtn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(225, 40, 56)}):Play()
+        end
+    end)
+
+    -- 🔄 ATUALIZA LISTA AUTOMATICAMENTE
+    task.spawn(function()
+        while true do
+            pcall(refreshPlayerList)
+            task.wait(1)
+        end
+    end)
+else
+    warn("Error: PageFrame not found!")
+end
+
 -- ==========================================
 local SectionTitle = Instance.new("TextLabel")
 SectionTitle.Name = "SectionTitle"
