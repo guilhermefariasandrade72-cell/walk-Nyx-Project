@@ -406,71 +406,56 @@ local LocalPlayer = Players.LocalPlayer
 local selectedPlayerName = nil
 local isFlinging = false
 
+-- 📊 DADOS DE CARGOS (MESMO DO ESP)
+local DadosCargos = {}
+local UltimaChecagemCargo = 0
+
 -- ==================================
--- SISTEMA — IDENTIFICAÇÃO DE CARGOS
+-- 📊 PEGAR CARGOS — IGUAL AO ESP
 -- ==================================
-local function ObterDadosCargos()
-    local funcs = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
-    if funcs and funcs:IsA("RemoteFunction") then
-        local ok, data = pcall(function()
-            return funcs:InvokeServer()
-        end)
-        if ok and type(data) == "table" then
-            return data
-        end
-    end
-    return nil
-end
-
-local function DescobrirCargo(player)
-    if player == LocalPlayer then return "Inocente", 3 end
-    
-    local char = player.Character
-    local backpack = player:FindFirstChild("Backpack")
-    
-    local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-    if not humanoid or humanoid.Health <= 0 then
-        return "Lobby", 5
-    end
-
-    local temFaca = (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife"))
-    local temArma = (char and char:FindFirstChild("Gun")) or (backpack and backpack:FindFirstChild("Gun"))
-
-    if temFaca then
-        return "Murderer", 1
-    end
-
-    local dados = ObterDadosCargos()
-    if dados and dados[player.Name] then
-        local info = dados[player.Name]
-        local serverRole = info.Role and tostring(info.Role) or ""
-        
-        if serverRole == "Murderer" then
-            return "Murderer", 1
-        elseif serverRole == "Sheriff" then
-            if temArma then
-                return "Sheriff", 4
-            else
-                return "Inocente", 3
-            end
-        elseif serverRole == "Hero" then
-            if temArma then
-                return "Hero", 2
-            else
-                return "Inocente", 3
-            end
-        end
-    end
-
-    if temArma then
-        return "Hero", 2
-    end
-
-    return "Inocente", 3
+local function PegarCargos()
+    if tick() - UltimaChecagemCargo < 2 then return end
+    UltimaChecagemCargo = tick()
+    task.spawn(function()
+        local R = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
+        if not R then return end
+        local ok, d = pcall(function() return R:InvokeServer() end)
+        if ok and d then DadosCargos = d end
+    end)
 end
 
 -- ==================================
--- SISTEMA — FLING INTELIGENTE
+-- 🎭 OBTER CARGO E COR — IGUAL AO ESP
+-- ==================================
+local function ObterCargoECor(Jogador)
+    if Jogador == LocalPlayer then 
+        return "Innocent", Color3.fromRGB(60, 200, 80)
+    end
+    
+    local Char = Jogador.Character
+    local Humanoid = Char and Char:FindFirstChildOfClass("Humanoid")
+    if not Humanoid or Humanoid.Health <= 0 then
+        return "Lobby", Color3.fromRGB(255, 255, 255)
+    end
+
+    local Info = DadosCargos[Jogador.Name]
+    if Info and not Info.Killed and not Info.Dead then
+        if Info.Role == "Murderer" then
+            return "Murderer", Color3.fromRGB(220, 50, 50)       -- 🔴 Vermelho
+        elseif Info.Role == "Sheriff" then
+            return "Sheriff", Color3.fromRGB(0, 85, 255)          -- 🔵 Azul
+        elseif Info.Role == "Hero" then
+            return "Hero", Color3.fromRGB(255, 215, 0)            -- 🟡 Amarelo
+        elseif Info.Role == "Innocent" then
+            return "Innocent", Color3.fromRGB(60, 200, 80)       -- 🟢 Verde
+        end
+    end
+    
+    return "Lobby", Color3.fromRGB(255, 255, 255)               -- ⚪ Branco
+end
+
+-- ==================================
+-- 🌪️ SISTEMA — FLING INTELIGENTE
 -- ==================================
 local function executeCustomFling(targetPlr)
     if isFlinging then return end
@@ -566,7 +551,7 @@ local function executeCustomFling(targetPlr)
 end
 
 -- ==================================
--- SISTEMA — TELEPORT
+-- 📍 SISTEMA — TELEPORT
 -- ==================================
 local function TeleportarPara(targetPlayer)
     local char = LocalPlayer.Character
@@ -580,7 +565,7 @@ local function TeleportarPara(targetPlayer)
 end
 
 -- ==================================
--- INTERFACE — TELEPORT & FLING
+-- 🖥️ INTERFACE — TELEPORT & FLING
 -- ==================================
 if PageFrame then
     -- SEPARADOR / TITULO DA SESSAO
@@ -691,9 +676,11 @@ if PageFrame then
     Instance.new("UICorner", FlingButton).CornerRadius = UDim.new(0, 6)
 
     -- ==================================
-    -- FUNÇÃO ATUALIZAR LISTA COM CORES
+    -- 🔄 ATUALIZAR LISTA — COM CORES NOME + BADGE
     -- ==================================
     local function refreshPlayerList()
+        PegarCargos() -- Atualiza os dados do servidor
+
         local activePlayerNames = {}
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer then
@@ -701,6 +688,7 @@ if PageFrame then
             end
         end
 
+        -- Remove jogadores que saíram
         for _, child in ipairs(PlayerListFrame:GetChildren()) do
             if child:IsA("TextButton") then
                 local playerName = child.Name:gsub("PlayerBtn_", "")
@@ -713,14 +701,22 @@ if PageFrame then
             end
         end
 
+        -- Coleta dados e ordena
         local playerDataList = {}
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer then
-                local cargo, priority = DescobrirCargo(p)
+                local Cargo, Cor = ObterCargoECor(p)
+                local Priority = 5
+                if Cargo == "Murderer" then Priority = 1
+                elseif Cargo == "Hero" then Priority = 2
+                elseif Cargo == "Innocent" then Priority = 3
+                elseif Cargo == "Sheriff" then Priority = 4
+                end
                 table.insert(playerDataList, {
                     Player = p,
-                    Cargo = cargo,
-                    Priority = priority
+                    Cargo = Cargo,
+                    Cor = Cor,
+                    Priority = Priority
                 })
             end
         end
@@ -735,7 +731,8 @@ if PageFrame then
         local count = 0
         for index, data in ipairs(playerDataList) do
             local p = data.Player
-            local cargo = data.Cargo
+            local Cargo = data.Cargo
+            local Cor = data.Cor
             
             count = count + 1
             local btnName = "PlayerBtn_" .. p.Name
@@ -752,6 +749,7 @@ if PageFrame then
 
                 Instance.new("UICorner", PlayerBtn).CornerRadius = UDim.new(0, 6)
 
+                -- 🏷️ NOME DO JOGADOR (COM COR DO ESP)
                 local NameLabel = Instance.new("TextLabel", PlayerBtn)
                 NameLabel.Name = "NameLabel"
                 NameLabel.Size = UDim2.new(1, -80, 1, 0)
@@ -761,6 +759,7 @@ if PageFrame then
                 NameLabel.Font = Enum.Font.Gotham
                 NameLabel.TextXAlignment = Enum.TextXAlignment.Left
 
+                -- 📛 BADGE DO CARGO
                 local RoleBadge = Instance.new("TextLabel", PlayerBtn)
                 RoleBadge.Name = "RoleBadge"
                 RoleBadge.Size = UDim2.fromOffset(65, 20)
@@ -782,35 +781,28 @@ if PageFrame then
             local nameLbl = PlayerBtn:FindFirstChild("NameLabel")
             local roleBd = PlayerBtn:FindFirstChild("RoleBadge")
 
-            if nameLbl then nameLbl.Text = p.Name end
+            -- ✅ NOME COM COR DO ESP
+            if nameLbl then
+                nameLbl.Text = p.Name
+                nameLbl.TextColor3 = Cor  -- 👈 COR DO NOME = MESMA DO ESP
+            end
+
+            -- ✅ BADGE COM COR DO ESP
             if roleBd then
-                roleBd.Text = cargo
-                
-                -- 🎨 CORES IGUAIS AO ASTRAL X HUB
-                if cargo == "Murderer" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(225, 40, 56)   -- 🔴 Vermelho
-                    roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                elseif cargo == "Sheriff" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(52, 152, 219)   -- 🔵 Azul
-                    roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                elseif cargo == "Hero" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(241, 196, 15)   -- 🟡 Amarelo
+                roleBd.Text = Cargo
+                roleBd.BackgroundColor3 = Cor  -- 👈 COR DO BADGE = MESMA DO ESP
+                if Cargo == "Lobby" then
                     roleBd.TextColor3 = Color3.fromRGB(30, 30, 30)
-                elseif cargo == "Lobby" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(255, 255, 255)   -- ⚪ Branco
-                    roleBd.TextColor3 = Color3.fromRGB(30, 30, 30)
-                else -- Inocente
-                    roleBd.BackgroundColor3 = Color3.fromRGB(46, 204, 113)   -- 🟢 Verde
+                else
                     roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
                 end
             end
 
+            -- Selecionado
             if selectedPlayerName == p.Name then
                 PlayerBtn.BackgroundColor3 = Color3.fromRGB(45, 48, 62)
-                if nameLbl then nameLbl.TextColor3 = Color3.fromRGB(255, 255, 255) end
             else
                 PlayerBtn.BackgroundColor3 = Color3.fromRGB(24, 25, 32)
-                if nameLbl then nameLbl.TextColor3 = Color3.fromRGB(200, 200, 210) end
             end
         end
 
@@ -846,7 +838,7 @@ if PageFrame then
     task.spawn(function()
         while true do
             pcall(refreshPlayerList)
-            task.wait(0.3)
+            task.wait(0.5)
         end
     end)
 else
