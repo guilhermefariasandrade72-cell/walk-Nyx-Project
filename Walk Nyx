@@ -408,7 +408,7 @@ local selectedPlayerName = nil
 local isFlinging = false
 
 -- ==============================================================--
--- 🔍 SISTEMA DE IDENTIFICAÇÃO DE CARGOS (BASEADO NO ESP)
+-- 🔍 SISTEMA DE IDENTIFICAÇÃO DE CARGOS CORRIGIDO
 -- ==============================================================--
 
 local function ObterDadosCargos()
@@ -427,27 +427,45 @@ end
 local function DescobrirCargo(player)
     if player == LocalPlayer then return "Inocente" end
     
-    local dados = ObterDadosCargos()
-    if dados and dados[player.Name] then
-        local info = dados[player.Name]
-        if info.Role == "Murderer" or (info.Role and string.lower(info.Role) == "murderer") then
-            return "Murderer"
-        elseif info.Role == "Sheriff" or (info.Role and string.lower(info.Role) == "sheriff") then
-            return "Sheriff"
-        elseif info.Role == "Hero" or (info.Role and string.lower(info.Role) == "hero") then
-            return "Hero"
-        end
-    end
-
     local char = player.Character
     local backpack = player:FindFirstChild("Backpack")
     
+    -- Verifica se o jogador está morto (sem Humanoid ou Health <= 0)
+    local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+    if not humanoid or humanoid.Health <= 0 then
+        return "Morto"
+    end
+
+    -- Checa itens na mão ou no inventário
     local temFaca = (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife"))
     local temArma = (char and char:FindFirstChild("Gun")) or (backpack and backpack:FindFirstChild("Gun"))
 
     if temFaca then
         return "Murderer"
-    elseif temArma then
+    end
+
+    -- Consulta o servidor para ver o estado real (Sheriff original ou se virou Herói)
+    local dados = ObterDadosCargos()
+    if dados and dados[player.Name] then
+        local info = dados[player.Name]
+        local serverRole = info.Role and tostring(info.Role) or ""
+        
+        if serverRole == "Murderer" then
+            return "Murderer"
+        elseif serverRole == "Sheriff" then
+            if temArma then
+                return "Sheriff"
+            end
+        elseif serverRole == "Hero" then
+            if temArma then
+                return "Hero"
+            end
+        end
+    end
+
+    -- Fallback visual caso a RemoteFunction demore ou não retorne o Hero/Sheriff instantaneamente
+    if temArma then
+        -- Se tem a arma mas não é o Murderer, checa se a arma caiu no chão em algum lugar ou se ele pegou recentemente
         return "Sheriff"
     end
 
@@ -651,7 +669,7 @@ if targetParent then
     ActionLabel.TextXAlignment = Enum.TextXAlignment.Left
     ActionLabel.ZIndex = 6
 
-    -- Botão TP (Alterado para verde e corrigido para o toque mobile via Activated)
+    -- Botão TP (Verde)
     local TPButton = Instance.new("TextButton", ActionCard)
     TPButton.Name = "TPButton"
     TPButton.Size = UDim2.fromOffset(80, 30)
@@ -683,9 +701,9 @@ if targetParent then
     FlingButton.ZIndex = 6
     Instance.new("UICorner", FlingButton).CornerRadius = UDim.new(0, 6)
 
-    -- ==================================
-    -- FUNÇÃO DE ATUALIZAÇÃO DA LISTA
-    -- ==================================
+    -- ==============================================================--
+    -- FUNÇÃO DE ATUALIZAÇÃO DA LISTA (SEM DUPLICATAS E COM REFRESH ÁGIL)
+    -- ==============================================================--
     local function refreshPlayerList()
         local activePlayerNames = {}
         for _, p in ipairs(Players:GetPlayers()) do
@@ -694,7 +712,7 @@ if targetParent then
             end
         end
 
-        -- Remove botões de jogadores que saíram ou duplicados antigos
+        -- Remove botões de jogadores que saíram da partida ou duplicados órfãos
         for _, child in ipairs(PlayerListFrame:GetChildren()) do
             if child:IsA("TextButton") then
                 local playerName = child.Name:gsub("PlayerBtn_", "")
@@ -760,14 +778,13 @@ if targetParent then
                     RoleBadge.ZIndex = 8
                     Instance.new("UICorner", RoleBadge).CornerRadius = UDim.new(0, 4)
 
-                    -- Usando Activated em vez de InputBegan para registrar o toque mobile perfeitamente
                     PlayerBtn.Activated:Connect(function()
                         selectedPlayerName = p.Name
                         refreshPlayerList()
                     end)
                 end
 
-                -- Atualiza textos, cores e cargos dinamicamente
+                -- Atualiza textos, cores e cargos dinamicamente a cada ciclo
                 local nameLbl = PlayerBtn:FindFirstChild("NameLabel")
                 local roleBd = PlayerBtn:FindFirstChild("RoleBadge")
 
@@ -775,14 +792,20 @@ if targetParent then
                 if roleBd then
                     roleBd.Text = cargo
                     if cargo == "Murderer" then
-                        roleBd.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+                        roleBd.BackgroundColor3 = Color3.fromRGB(225, 40, 56) -- Vermelho
                         roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    elseif cargo == "Sheriff" or cargo == "Hero" then
-                        roleBd.BackgroundColor3 = Color3.fromRGB(40, 120, 225)
+                    elseif cargo == "Sheriff" then
+                        roleBd.BackgroundColor3 = Color3.fromRGB(40, 120, 225) -- Azul
                         roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    else
-                        roleBd.BackgroundColor3 = Color3.fromRGB(35, 36, 45)
-                        roleBd.TextColor3 = Color3.fromRGB(160, 160, 170)
+                    elseif cargo == "Hero" then
+                        roleBd.BackgroundColor3 = Color3.fromRGB(241, 196, 15) -- Amarelo
+                        roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    elseif cargo == "Morto" then
+                        roleBd.BackgroundColor3 = Color3.fromRGB(60, 60, 60) -- Cinza Escuro
+                        roleBd.TextColor3 = Color3.fromRGB(150, 150, 150)
+                    else -- Inocente
+                        roleBd.BackgroundColor3 = Color3.fromRGB(46, 204, 113) -- Verde
+                        roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
                     end
                 end
 
@@ -814,9 +837,7 @@ if targetParent then
     end)
 
     FlingButton.Activated:Connect(function()
-        if not selectedPlayerName then response = nil
-            if not selectedPlayerName then return end
-        end
+        if not selectedPlayerName then return end
         local target = Players:FindFirstChild(selectedPlayerName)
         if target then
             executeCustomFling(target)
@@ -826,11 +847,11 @@ if targetParent then
         end
     end)
 
-    -- Loop de atualização contínua da lista e dos papéis detectados
+    -- Loop otimizado para atualizar a lista e checar mortes/mudanças de armas rapidamente a cada 0.3 segundos
     task.spawn(function()
         while true do
             pcall(refreshPlayerList)
-            task.wait(1)
+            task.wait(0.3)
         end
     end)
 else
