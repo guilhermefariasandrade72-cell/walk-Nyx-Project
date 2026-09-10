@@ -405,7 +405,7 @@ local player = Players.LocalPlayer
 local selectedPlayerName = nil
 local isFlinging = false
 
-local targetParent = PageFrame
+local targetParent = PageFrame -- Certifique-se de que PageFrame está definido no seu escopo principal
 
 -- ==================================
 -- SISTEMA — FLING INTELIGENTE
