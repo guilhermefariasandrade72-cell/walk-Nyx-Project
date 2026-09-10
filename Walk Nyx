@@ -1,5 +1,5 @@
 --==============================================================--
---        agghauahahHahhaahhshs              WALK NYX PROJECT                        --
+--                    WALK NYX PROJECT                        --
 --              PREMIUM UI / MOBILE / LUCIDE                  --
 --==============================================================--
 
@@ -394,347 +394,409 @@ for Index, TabData in ipairs(TabsData) do
     if TabData.Name == "Main" then
 -- ================================================
 
--- ==================================
--- VARIÁVEIS — TELEPORT & FLING
--- ==================================
+-- ==============================================================--
+--             WALK NYX PROJECT - FLING & TP MODULE             --
+-- ==============================================================--
+
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 
-local player = Players.LocalPlayer
-local selectedPlayerName = nil
-local isFlinging = false
+local LocalPlayer = Players.LocalPlayer
 
-local targetParent = PageFrame -- Certifique-se de que PageFrame está definido no seu escopo principal
+-- Variáveis de Estado dos Botões e Comandos
+local FlingMurdererAtivo = false
+local FlingSheriffAtivo = false
 
--- ==================================
--- SISTEMA — FLING INTELIGENTE
--- ==================================
-local function executeCustomFling(targetPlr)
-    if isFlinging then return end
-    if not targetPlr or not targetPlr.Character then return end
-    
-    local char = player.Character
-    if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChild("Humanoid")
-    if not root or not hum then return end
-    
-    local targetRoot = targetPlr.Character:FindFirstChild("HumanoidRootPart")
-    local targetHum = targetPlr.Character:FindFirstChild("Humanoid")
-    if not targetRoot then return end
+local FlingButtonMurderGui = nil
+local FlingButtonSheriffGui = nil
 
-    isFlinging = true
-    local oldCFrame = root.CFrame
+local isDraggingFlingM = false
+local isDraggingFlingS = false
 
-    hum.PlatformStand = true
+-- ==============================================================--
+-- 🔍 SISTEMA DE IDENTIFICAÇÃO DE CARGOS (BASEADO NO ESP DO SCRIPT)
+-- ==============================================================--
 
-    local noclipConnection
-    noclipConnection = RunService.Stepped:Connect(function()
-        if char then
-            for _, part in ipairs(char:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
+local function ObterDadosCargos()
+    local funcs = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
+    if funcs and funcs:IsA("RemoteFunction") then
+        local ok, data = pcall(function()
+            return funcs:InvokeServer()
+        end)
+        if ok and type(data) == "table" then
+            return data
         end
-    end)
-
-    local spin = Instance.new("BodyAngularVelocity")
-    spin.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    spin.AngularVelocity = Vector3.new(120000, 120000, 120000)
-    spin.P = math.huge
-    spin.Parent = root
-
-    local startTime = tick()
-    local flingConnection
-
-    flingConnection = RunService.Heartbeat:Connect(function()
-        local elapsed = tick() - startTime
-        
-        if targetRoot and root then
-            local isTargetStandingStill = false
-            if targetHum and targetHum.MoveDirection.Magnitude < 0.05 and targetRoot.Velocity.Magnitude < 0.5 then
-                isTargetStandingStill = true
-            end
-
-            local angle = elapsed * 60
-            local offsetX, offsetY, offsetZ = 0, 0, 0
-
-            if isTargetStandingStill then
-                offsetX = 0
-                offsetY = 0
-                offsetZ = 0
-            else
-                offsetX = math.sin(angle * 1.5) * 2.5
-                offsetY = math.cos(angle * 2) * 2.5
-                offsetZ = -3 + (math.sin(angle * 1.2) * 2.5)
-            end
-            
-            root.CFrame = targetRoot.CFrame * CFrame.new(offsetX, offsetY, offsetZ) * targetRoot.CFrame.Rotation * CFrame.Angles(elapsed * 60, elapsed * 70, elapsed * 65)
-            root.Velocity = Vector3.new(120000, 120000, 120000)
-        end
-    end)
-
-    task.wait(3)
-
-    if flingConnection then flingConnection:Disconnect() end
-    if spin then spin:Destroy() end
-
-    root.Velocity = Vector3.zero
-    root.RotVelocity = Vector3.zero
-    root.CFrame = oldCFrame + Vector3.new(0, 5, 0)
-    
-    local holdConnection
-    holdConnection = RunService.Heartbeat:Connect(function()
-        if root then
-            root.Velocity = Vector3.zero
-            root.RotVelocity = Vector3.zero
-            root.CFrame = oldCFrame + Vector3.new(0, 5, 0)
-        end
-    end)
-
-    task.wait(0.5)
-
-    if holdConnection then holdConnection:Disconnect() end
-    if noclipConnection then noclipConnection:Disconnect() end
-    
-    hum.PlatformStand = false
-    isFlinging = false
+    end
+    return nil
 end
 
--- ==================================
--- INTERFACE — LISTA E BOTÃO SEPARADOS
--- ==================================
-if targetParent then
-    local mainLayout = targetParent:FindFirstChildOfClass("UIListLayout")
-    if not mainLayout then
-        mainLayout = Instance.new("UIListLayout")
-        mainLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        mainLayout.Padding = UDim.new(0, 8)
-        mainLayout.Parent = targetParent
+local function DescobrirCargo(player)
+    if player == LocalPlayer then return "Inocente" end
+    
+    -- 1. Tentativa via RemoteFunction (Sistema padrão MM2)
+    local dados = ObterDadosCargos()
+    if dados and dados[player.Name] then
+        local info = dados[player.Name]
+        if info.Role == "Murderer" or (info.Role and string.lower(info.Role) == "murderer") then
+            return "Murderer"
+        elseif info.Role == "Sheriff" or (info.Role and string.lower(info.Role) == "sheriff") then
+            return "Sheriff"
+        elseif info.Role == "Hero" or (info.Role and string.lower(info.Role) == "hero") then
+            return "Hero"
+        end
     end
 
-    -- 📦 CARD 1: LISTA DE SELEÇÃO DE JOGADORES (Com Avatar e Scrollbar Vermelha)
-    local ListCard = Instance.new("Frame")
-    ListCard.Name = "PlayerListCard"
-    ListCard.Size = UDim2.new(1, -6, 0, 160)
-    ListCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-    ListCard.BorderSizePixel = 0
-    ListCard.ZIndex = 5
-    ListCard.Parent = targetParent
+    -- 2. Tentativa secundária via Itens no Inventário/Character
+    local char = player.Character
+    local backpack = player:FindFirstChild("Backpack")
+    
+    local temFaca = (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife"))
+    local temArma = (char and char:FindFirstChild("Gun")) or (backpack and backpack:FindFirstChild("Gun"))
 
-    local ListCardCorner = Instance.new("UICorner")
-    ListCardCorner.CornerRadius = UDim.new(0, 10)
-    ListCardCorner.Parent = ListCard
-
-    local ListCardStroke = Instance.new("UIStroke")
-    ListCardStroke.Color = Color3.fromRGB(39, 40, 48)
-    ListCardStroke.Thickness = 1
-    ListCardStroke.Parent = ListCard
-
-    local ListTitle = Instance.new("TextLabel")
-    ListTitle.Name = "Title"
-    ListTitle.Size = UDim2.new(1, -24, 0, 25)
-    ListTitle.Position = UDim2.fromOffset(12, 8)
-    ListTitle.BackgroundTransparency = 1
-    ListTitle.Text = "🎯 Select Player"
-    ListTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
-    ListTitle.TextSize = 12
-    ListTitle.Font = Enum.Font.GothamSemibold
-    ListTitle.TextXAlignment = Enum.TextXAlignment.Left
-    ListTitle.ZIndex = 6
-    ListTitle.Parent = ListCard
-
-    local PlayerListFrame = Instance.new("ScrollingFrame")
-    PlayerListFrame.Name = "PlayerList"
-    PlayerListFrame.Size = UDim2.new(1, -24, 0, 115)
-    PlayerListFrame.Position = UDim2.fromOffset(12, 35)
-    PlayerListFrame.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-    PlayerListFrame.BackgroundTransparency = 0.5
-    PlayerListFrame.BorderSizePixel = 0
-    PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-    PlayerListFrame.ScrollBarThickness = 5
-    PlayerListFrame.ScrollBarImageColor3 = Color3.fromRGB(225, 40, 56) -- Scrollbar vermelha
-    PlayerListFrame.ZIndex = 6
-    PlayerListFrame.Parent = ListCard
-
-    local PlayerListCorner = Instance.new("UICorner")
-    PlayerListCorner.CornerRadius = UDim.new(0, 6)
-    PlayerListCorner.Parent = PlayerListFrame
-
-    local PlayerListLayout = Instance.new("UIListLayout")
-    PlayerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    PlayerListLayout.Padding = UDim.new(0, 4)
-    PlayerListLayout.Parent = PlayerListFrame
-
-    -- 📦 CARD 2: BOTÃO FLING SEPARADO (Estilo Kill All)
-    local FlingCard = Instance.new("Frame")
-    FlingCard.Name = "FlingCard"
-    FlingCard.Size = UDim2.new(1, -6, 0, 50)
-    FlingCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
-    FlingCard.BorderSizePixel = 0
-    FlingCard.ZIndex = 5
-    FlingCard.Parent = targetParent
-
-    local FlingCardCorner = Instance.new("UICorner")
-    FlingCardCorner.CornerRadius = UDim.new(0, 10)
-    FlingCardCorner.Parent = FlingCard
-
-    local FlingCardStroke = Instance.new("UIStroke")
-    FlingCardStroke.Color = Color3.fromRGB(39, 40, 48)
-    FlingCardStroke.Thickness = 1
-    FlingCardStroke.Parent = FlingCard
-
-    local FlingLabel = Instance.new("TextLabel")
-    FlingLabel.Name = "Title"
-    FlingLabel.Size = UDim2.new(1, -110, 1, 0)
-    FlingLabel.Position = UDim2.fromOffset(12, 0)
-    FlingLabel.BackgroundTransparency = 1
-    FlingLabel.Text = "Executar Fling no Alvo"
-    FlingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FlingLabel.TextSize = 12
-    FlingLabel.Font = Enum.Font.GothamSemibold
-    FlingLabel.TextXAlignment = Enum.TextXAlignment.Left
-    FlingLabel.ZIndex = 6
-    FlingLabel.Parent = FlingCard
-
-    local FlingButton = Instance.new("TextButton")
-    FlingButton.Name = "ActionButton"
-    FlingButton.Size = UDim2.fromOffset(90, 34)
-    FlingButton.AnchorPoint = Vector2.new(1, 0.5)
-    FlingButton.Position = UDim2.new(1, -12, 0.5, 0)
-    FlingButton.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
-    FlingButton.BorderSizePixel = 0
-    FlingButton.Text = "FLING"
-    FlingButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FlingButton.TextSize = 12
-    FlingButton.Font = Enum.Font.GothamBold
-    FlingButton.AutoButtonColor = false
-    FlingButton.ZIndex = 6
-    FlingButton.Parent = FlingCard
-
-    local FlingButtonCorner = Instance.new("UICorner")
-    FlingButtonCorner.CornerRadius = UDim.new(0, 8)
-    FlingButtonCorner.Parent = FlingButton
-
-    -- ==================================
-    -- FUNÇÃO ATUALIZAR LISTA SEM PISCAR
-    -- ==================================
-    local function refreshPlayerList()
-        local existingPlayers = {}
-        
-        -- Mapeia os botões que já existem
-        for _, child in ipairs(PlayerListFrame:GetChildren()) do
-            if child:IsA("TextButton") then
-                local playerName = child.Name:gsub("PlayerBtn_", "")
-                existingPlayers[playerName] = child
-            end
-        end
-
-        local count = 0
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= player then
-                count = count + 1
-                local btnName = "PlayerBtn_"..p.Name
-                local PlayerBtn = existingPlayers[p.Name]
-
-                if not PlayerBtn then
-                    -- Cria o botão apenas se ele ainda não estiver na lista
-                    PlayerBtn = Instance.new("TextButton")
-                    PlayerBtn.Name = btnName
-                    PlayerBtn.Size = UDim2.new(1, -4, 0, 28)
-                    PlayerBtn.BorderSizePixel = 0
-                    PlayerBtn.Text = ""
-                    PlayerBtn.AutoButtonColor = false
-                    PlayerBtn.ZIndex = 7
-                    PlayerBtn.Parent = PlayerListFrame
-
-                    local PlayerBtnCorner = Instance.new("UICorner")
-                    PlayerBtnCorner.CornerRadius = UDim.new(0, 6)
-                    PlayerBtnCorner.Parent = PlayerBtn
-
-                    local AvatarImg = Instance.new("ImageLabel")
-                    AvatarImg.Name = "Avatar"
-                    AvatarImg.Size = UDim2.fromOffset(20, 20)
-                    AvatarImg.Position = UDim2.new(0, 6, 0.5, -10)
-                    AvatarImg.BackgroundTransparency = 1
-                    AvatarImg.ZIndex = 8
-                    AvatarImg.Parent = PlayerBtn
-
-                    local AvatarCorner = Instance.new("UICorner")
-                    AvatarCorner.CornerRadius = UDim.new(0, 4)
-                    AvatarCorner.Parent = AvatarImg
-
-                    pcall(function()
-                        AvatarImg.Image = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
-                    end)
-
-                    local NameLabel = Instance.new("TextLabel")
-                    NameLabel.Name = "NameLabel"
-                    NameLabel.Size = UDim2.new(1, -32, 1, 0)
-                    NameLabel.Position = UDim2.fromOffset(32, 0)
-                    NameLabel.BackgroundTransparency = 1
-                    NameLabel.Text = p.Name
-                    NameLabel.TextSize = 12
-                    NameLabel.Font = Enum.Font.Gotham
-                    NameLabel.TextXAlignment = Enum.TextXAlignment.Left
-                    NameLabel.ZIndex = 8
-                    NameLabel.Parent = PlayerBtn
-
-                    PlayerBtn.Activated:Connect(function()
-                        selectedPlayerName = p.Name
-                        refreshPlayerList()
-                    end)
-                else
-                    existingPlayers[p.Name] = nil -- Marca como mantido
-                end
-
-                -- Atualiza a cor de fundo dependendo se está selecionado
-                if selectedPlayerName == p.Name then
-                    PlayerBtn.BackgroundColor3 = Color3.fromRGB(45, 48, 62)
-                    PlayerBtn:FindFirstChild("NameLabel").TextColor3 = Color3.fromRGB(255, 255, 255)
-                else
-                    PlayerBtn.BackgroundColor3 = Color3.fromRGB(24, 25, 32)
-                    PlayerBtn:FindFirstChild("NameLabel").TextColor3 = Color3.fromRGB(200, 200, 210)
-                end
-            end
-        end
-
-        -- Remove jogadores que saíram do jogo
-        for name, btn in pairs(existingPlayers) do
-            btn:Destroy()
-            if selectedPlayerName == name then
-                selectedPlayerName = nil
-            end
-        end
-
-        PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, count * 32)
+    if temFaca then
+        return "Murderer"
+    elseif temArma then
+        return "Sheriff"
     end
 
-    -- ==================================
-    -- AÇÃO DO BOTÃO FLING
-    -- ==================================
-    FlingButton.Activated:Connect(function()
-        if not selectedPlayerName then return end
-        local target = Players:FindFirstChild(selectedPlayerName)
-        if target then
-            executeCustomFling(target)
-            TweenService:Create(FlingButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(180, 25, 40)}):Play()
-            task.wait(0.1)
-            TweenService:Create(FlingButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(225, 40, 56)}):Play()
+    return "Inocente"
+end
+
+local function AcharMurderer()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            if DescobrirCargo(p) == "Murderer" then
+                return p
+            end
+        end
+    end
+    return nil
+end
+
+local function AcharSheriff()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local cargo = DescobrirCargo(p)
+            if cargo == "Sheriff" or cargo == "Hero" then
+                return p
+            end
+        end
+    end
+    return nil
+end
+
+-- ==============================================================--
+-- 🌪️ FUNÇÃO DE FLING (JOGAR O JOGADOR PARA LONGE)
+-- ==============================================================--
+
+local function ExecutarFling(targetPlayer)
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local targetChar = targetPlayer and targetPlayer.Character
+    local targetHrp = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
+
+    if not hrp or not targetHrp then return end
+
+    local posAntiga = hrp.CFrame
+    local vel = hrp.AssemblyLinearVelocity
+
+    local runConnection
+    runConnection = RunService.Heartbeat:Connect(function()
+        if not targetHrp or not targetHrp.Parent or not hrp or not hrp.Parent then
+            if runConnection then runConnection:Disconnect() end
+            return
+        end
+        hrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 0)
+        hrp.AssemblyLinearVelocity = Vector3.new(99999, 99999, 99999)
+    end)
+
+    task.wait(0.3)
+    if runConnection then runConnection:Disconnect() end
+    
+    if hrp then
+        hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        hrp.CFrame = posAntiga
+    end
+end
+
+-- ==============================================================--
+-- 📍 FUNÇÕES DE TELEPORT
+-- ==============================================================--
+
+local function TeleportarPara(targetPlayer)
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local targetChar = targetPlayer and targetPlayer.Character
+    local targetHrp = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
+
+    if hrp and targetHrp then
+        hrp.CFrame = targetHrp.CFrame + Vector3.new(0, 3, 0)
+    end
+end
+
+-- ==============================================================--
+-- 🎛️ BOTÕES FLUTUANTES FLING & TP
+-- ==============================================================--
+
+local function CriarBotaoFlutuante(nome, textoBtn, corBorda, callbackClick)
+    local parentGui = CoreGui
+    pcall(function()
+        if not CoreGui then parentGui = LocalPlayer:WaitForChild("PlayerGui") end
+    end)
+
+    local GuiBtn = Instance.new("ScreenGui")
+    GuiBtn.Name = nome
+    GuiBtn.ResetOnSpawn = false
+    GuiBtn.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    GuiBtn.Parent = parentGui
+
+    local Btn = Instance.new("ImageButton")
+    Btn.Size = UDim2.new(0, 140, 0, 50)
+    Btn.Position = UDim2.new(0.5, -70, 0.4, 0)
+    Btn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    Btn.BackgroundTransparency = 0.3
+    Btn.AutoButtonColor = false
+    Btn.BorderSizePixel = 0
+    Btn.Parent = GuiBtn
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 10)
+    Corner.Parent = Btn
+
+    local Borda = Instance.new("UIStroke")
+    Borda.Color = corBorda
+    Borda.Thickness = 2.5
+    Borda.Parent = Btn
+
+    local Texto = Instance.new("TextLabel")
+    Texto.Size = UDim2.new(1, 0, 1, 0)
+    Texto.BackgroundTransparency = 1
+    Texto.Text = textoBtn
+    Texto.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Texto.TextSize = 13
+    Texto.Font = Enum.Font.GothamBold
+    Texto.Parent = Btn
+
+    local dragging = false
+    local startPos, startMouse
+
+    Btn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+            startMouse = input.Position
+            startPos = Btn.Position
         end
     end)
 
-    -- 🔄 ATUALIZA LISTA CONTINUAMENTE SEM APAGAR TUDO
-    task.spawn(function()
-        while true do
-            pcall(refreshPlayerList)
-            task.wait(1)
+    Btn.InputChanged:Connect(function(input)
+        if (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) and startMouse then
+            local delta = input.Position - startMouse
+            if delta.Magnitude > 8 then
+                dragging = true
+                Btn.Position = startPos + UDim2.fromOffset(delta.X, delta.Y)
+            end
         end
     end)
-else
-    warn("Error: PageFrame not found!")
+
+    Btn.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if not dragging then
+                callbackClick(Texto)
+            end
+            startMouse = nil
+            dragging = false
+        end
+    end)
+
+    return GuiBtn
+end
+
+-- ==============================================================--
+-- 🖥️ INTEGRAÇÃO NA SUA UI (PAGEFRAME)
+-- ==============================================================--
+
+-- Verifica se a variável PageFrame da sua UI existe para adicionar os cartões de controle
+if typeof(PageFrame) == "Instance" then
+    
+    -- Card Fling Murderer
+    local CardFlingM = Instance.new("Frame")
+    CardFlingM.Size = UDim2.new(1, -6, 0, 50)
+    CardFlingM.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    CardFlingM.BorderSizePixel = 0
+    CardFlingM.Parent = PageFrame
+    
+    Instance.new("UICorner", CardFlingM).CornerRadius = UDim.new(0, 10)
+    local strokeM = Instance.new("UIStroke", CardFlingM)
+    strokeM.Color = Color3.fromRGB(39, 40, 48)
+    strokeM.Thickness = 1
+
+    local lblM = Instance.new("TextLabel", CardFlingM)
+    lblM.Size = UDim2.new(1, -120, 1, 0)
+    lblM.Position = UDim2.fromOffset(12, 0)
+    lblM.BackgroundTransparency = 1
+    lblM.Text = "Fling Murderer"
+    lblM.TextColor3 = Color3.fromRGB(245, 245, 248)
+    lblM.TextSize = 12
+    lblM.Font = Enum.Font.GothamSemibold
+    lblM.TextXAlignment = Enum.TextXAlignment.Left
+
+    local btnExecM = Instance.new("TextButton", CardFlingM)
+    btnExecM.Size = UDim2.fromOffset(90, 28)
+    btnExecM.AnchorPoint = Vector2.new(1, 0.5)
+    btnExecM.Position = UDim2.new(1, -12, 0.5, 0)
+    btnExecM.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+    btnExecM.Text = "Executar"
+    btnExecM.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btnExecM.TextSize = 11
+    btnExecM.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", btnExecM).CornerRadius = UDim.new(0, 6)
+
+    btnExecM.Activated:Connect(function()
+        local murderer = AcharMurderer()
+        if murderer then
+            ExecutarFling(murderer)
+        else
+            btnExecM.Text = "Não achado!"
+            task.delay(1, function() btnExecM.Text = "Executar" end)
+        end
+    end)
+
+
+    -- Card TP Murderer
+    local CardTPM = Instance.new("Frame")
+    CardTPM.Size = UDim2.new(1, -6, 0, 50)
+    CardTPM.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    CardTPM.BorderSizePixel = 0
+    CardTPM.Parent = PageFrame
+    
+    Instance.new("UICorner", CardTPM).CornerRadius = UDim.new(0, 10)
+    local strokeTPM = Instance.new("UIStroke", CardTPM)
+    strokeTPM.Color = Color3.fromRGB(39, 40, 48)
+    strokeTPM.Thickness = 1
+
+    local lblTPM = Instance.new("TextLabel", CardTPM)
+    lblTPM.Size = UDim2.new(1, -120, 1, 0)
+    lblTPM.Position = UDim2.fromOffset(12, 0)
+    lblTPM.BackgroundTransparency = 1
+    lblTPM.Text = "TP to Murderer"
+    lblTPM.TextColor3 = Color3.fromRGB(245, 245, 248)
+    lblTPM.TextSize = 12
+    lblTPM.Font = Enum.Font.GothamSemibold
+    lblTPM.TextXAlignment = Enum.TextXAlignment.Left
+
+    local btnExecTPM = Instance.new("TextButton", CardTPM)
+    btnExecTPM.Size = UDim2.fromOffset(90, 28)
+    btnExecTPM.AnchorPoint = Vector2.new(1, 0.5)
+    btnExecTPM.Position = UDim2.new(1, -12, 0.5, 0)
+    btnExecTPM.BackgroundColor3 = Color3.fromRGB(225, 40, 56)
+    btnExecTPM.Text = "Teleportar"
+    btnExecTPM.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btnExecTPM.TextSize = 11
+    btnExecTPM.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", btnExecTPM).CornerRadius = UDim.new(0, 6)
+
+    btnExecTPM.Activated:Connect(function()
+        local murderer = AcharMurderer()
+        if murderer then
+            TeleportarPara(murderer)
+        else
+            btnExecTPM.Text = "Não achado!"
+            task.delay(1, function() btnExecTPM.Text = "Teleportar" end)
+        end
+    end)
+
+
+    -- Card Fling Sheriff
+    local CardFlingS = Instance.new("Frame")
+    CardFlingS.Size = UDim2.new(1, -6, 0, 50)
+    CardFlingS.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    CardFlingS.BorderSizePixel = 0
+    CardFlingS.Parent = PageFrame
+    
+    Instance.new("UICorner", CardFlingS).CornerRadius = UDim.new(0, 10)
+    local strokeS = Instance.new("UIStroke", CardFlingS)
+    strokeS.Color = Color3.fromRGB(39, 40, 48)
+    strokeS.Thickness = 1
+
+    local lblS = Instance.new("TextLabel", CardFlingS)
+    lblS.Size = UDim2.new(1, -120, 1, 0)
+    lblS.Position = UDim2.fromOffset(12, 0)
+    lblS.BackgroundTransparency = 1
+    lblS.Text = "Fling Sheriff"
+    lblS.TextColor3 = Color3.fromRGB(245, 245, 248)
+    lblS.TextSize = 12
+    lblS.Font = Enum.Font.GothamSemibold
+    lblS.TextXAlignment = Enum.TextXAlignment.Left
+
+    local btnExecS = Instance.new("TextButton", CardFlingS)
+    btnExecS.Size = UDim2.fromOffset(90, 28)
+    btnExecS.AnchorPoint = Vector2.new(1, 0.5)
+    btnExecS.Position = UDim2.new(1, -12, 0.5, 0)
+    btnExecS.BackgroundColor3 = Color3.fromRGB(40, 120, 225)
+    btnExecS.Text = "Executar"
+    btnExecS.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btnExecS.TextSize = 11
+    btnExecS.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", btnExecS).CornerRadius = UDim.new(0, 6)
+
+    btnExecS.Activated:Connect(function()
+        local sheriff = AcharSheriff()
+        if sheriff then
+            ExecutarFling(sheriff)
+        else
+            btnExecS.Text = "Não achado!"
+            task.delay(1, function() btnExecS.Text = "Executar" end)
+        end
+    end)
+
+
+    -- Card TP Sheriff
+    local CardTPS = Instance.new("Frame")
+    CardTPS.Size = UDim2.new(1, -6, 0, 50)
+    CardTPS.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    CardTPS.BorderSizePixel = 0
+    CardTPS.Parent = PageFrame
+    
+    Instance.new("UICorner", CardTPS).CornerRadius = UDim.new(0, 10)
+    local strokeTPS = Instance.new("UIStroke", CardTPS)
+    strokeTPS.Color = Color3.fromRGB(39, 40, 48)
+    strokeTPS.Thickness = 1
+
+    local lblTPS = Instance.new("TextLabel", CardTPS)
+    lblTPS.Size = UDim2.new(1, -120, 1, 0)
+    lblTPS.Position = UDim2.fromOffset(12, 0)
+    lblTPS.BackgroundTransparency = 1
+    lblTPS.Text = "TP to Sheriff"
+    lblTPS.TextColor3 = Color3.fromRGB(245, 245, 248)
+    lblTPS.TextSize = 12
+    lblTPS.Font = Enum.Font.GothamSemibold
+    lblTPS.TextXAlignment = Enum.TextXAlignment.Left
+
+    local btnExecTPS = Instance.new("TextButton", CardTPS)
+    btnExecTPS.Size = UDim2.fromOffset(90, 28)
+    btnExecTPS.AnchorPoint = Vector2.new(1, 0.5)
+    btnExecTPS.Position = UDim2.new(1, -12, 0.5, 0)
+    btnExecTPS.BackgroundColor3 = Color3.fromRGB(40, 120, 225)
+    btnExecTPS.Text = "Teleportar"
+    btnExecTPS.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btnExecTPS.TextSize = 11
+    btnExecTPS.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", btnExecTPS).CornerRadius = UDim.new(0, 6)
+
+    btnExecTPS.Activated:Connect(function()
+        local sheriff = AcharSheriff()
+        if sheriff then
+            TeleportarPara(sheriff)
+        else
+            btnExecTPS.Text = "Não achado!"
+            task.delay(1, function() btnExecTPS.Text = "Teleportar" end)
+        end
+    end)
+
 end
 
 -- ==========================================
