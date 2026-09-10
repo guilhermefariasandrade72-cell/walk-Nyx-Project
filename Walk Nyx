@@ -394,10 +394,9 @@ for Index, TabData in ipairs(TabsData) do
     if TabData.Name == "Main" then
 -- ================================================
 
--- ==============================================================--
---             WALK NYX PROJECT - TARGET SELECTOR & FLING        --
--- ==============================================================--
-
+-- ==================================
+-- VARIÁVEIS — TELEPORT & FLING
+-- ==================================
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -407,10 +406,9 @@ local LocalPlayer = Players.LocalPlayer
 local selectedPlayerName = nil
 local isFlinging = false
 
--- ==============================================================--
--- 🔍 SISTEMA DE IDENTIFICAÇÃO DE CARGOS CORRIGIDO
--- ==============================================================--
-
+-- ==================================
+-- SISTEMA — IDENTIFICAÇÃO DE CARGOS
+-- ==================================
 local function ObterDadosCargos()
     local funcs = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
     if funcs and funcs:IsA("RemoteFunction") then
@@ -430,13 +428,11 @@ local function DescobrirCargo(player)
     local char = player.Character
     local backpack = player:FindFirstChild("Backpack")
     
-    -- Verifica se o jogador está morto (sem Humanoid ou Health <= 0)
     local humanoid = char and char:FindFirstChildOfClass("Humanoid")
     if not humanoid or humanoid.Health <= 0 then
         return "Lobby", 5
     end
 
-    -- Checa itens na mão ou no inventário
     local temFaca = (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife"))
     local temArma = (char and char:FindFirstChild("Gun")) or (backpack and backpack:FindFirstChild("Gun"))
 
@@ -444,7 +440,6 @@ local function DescobrirCargo(player)
         return "Murderer", 1
     end
 
-    -- Consulta o servidor para ver o estado real (Sheriff original ou se virou Herói)
     local dados = ObterDadosCargos()
     if dados and dados[player.Name] then
         local info = dados[player.Name]
@@ -456,29 +451,27 @@ local function DescobrirCargo(player)
             if temArma then
                 return "Sheriff", 4
             else
-                return "Inocente", 3 -- Sheriff morreu e perdeu a arma
+                return "Inocente", 3
             end
         elseif serverRole == "Hero" then
             if temArma then
-                return "Hero", 4
+                return "Hero", 2
             else
-                return "Inocente", 3 -- Herói anterior morreu e perdeu a arma
+                return "Inocente", 3
             end
         end
     end
 
-    -- Fallback visual caso a RemoteFunction demore, baseado na presença da arma
     if temArma then
-        return "Hero", 4
+        return "Hero", 2
     end
 
     return "Inocente", 3
 end
 
--- ==============================================================--
--- 🌪️ SISTEMA — FLING INTELIGENTE
--- ==============================================================--
-
+-- ==================================
+-- SISTEMA — FLING INTELIGENTE
+-- ==================================
 local function executeCustomFling(targetPlr)
     if isFlinging then return end
     if not targetPlr or not targetPlr.Character then return end
@@ -572,10 +565,9 @@ local function executeCustomFling(targetPlr)
     isFlinging = false
 end
 
--- ==============================================================--
--- 📍 FUNÇÃO DE TELEPORT
--- ==============================================================--
-
+-- ==================================
+-- SISTEMA — TELEPORT
+-- ==================================
 local function TeleportarPara(targetPlayer)
     local char = LocalPlayer.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -587,29 +579,29 @@ local function TeleportarPara(targetPlayer)
     end
 end
 
--- ==============================================================--
--- 🖥️ INTERFACE INTEGRADA DIRETAMENTE NO PAGEFRAME
--- ==============================================================--
+-- ==================================
+-- INTERFACE — TELEPORT & FLING
+-- ==================================
+if PageFrame then
+    -- SEPARADOR / TITULO DA SESSAO
+    local FlingSectionLabel = Instance.new("TextLabel")
+    FlingSectionLabel.Name = "SectionLabel"
+    FlingSectionLabel.Size = UDim2.new(1, -6, 0, 30)
+    FlingSectionLabel.BackgroundTransparency = 1
+    FlingSectionLabel.Text = "TELEPORT & FLING"
+    FlingSectionLabel.TextColor3 = Color3.fromRGB(180, 180, 195)
+    FlingSectionLabel.TextSize = 14
+    FlingSectionLabel.Font = Enum.Font.GothamBold
+    FlingSectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+    FlingSectionLabel.Parent = PageFrame
 
-local targetParent = PageFrame
-
-if targetParent then
-    local mainLayout = targetParent:FindFirstChildOfClass("UIListLayout")
-    if not mainLayout then
-        mainLayout = Instance.new("UIListLayout")
-        mainLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        mainLayout.Padding = UDim.new(0, 8)
-        mainLayout.Parent = targetParent
-    end
-
-    -- 📦 CARD 1: LISTA DE SELEÇÃO DE JOGADORES (Com Badges de Cargo)
+    -- 📦 CARD 1: LISTA DE JOGADORES
     local ListCard = Instance.new("Frame")
     ListCard.Name = "PlayerListCard"
     ListCard.Size = UDim2.new(1, -6, 0, 175)
     ListCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
     ListCard.BorderSizePixel = 0
-    ListCard.ZIndex = 5
-    ListCard.Parent = targetParent
+    ListCard.Parent = PageFrame
 
     Instance.new("UICorner", ListCard).CornerRadius = UDim.new(0, 10)
     local ListCardStroke = Instance.new("UIStroke", ListCard)
@@ -621,12 +613,11 @@ if targetParent then
     ListTitle.Size = UDim2.new(1, -24, 0, 25)
     ListTitle.Position = UDim2.fromOffset(12, 8)
     ListTitle.BackgroundTransparency = 1
-    ListTitle.Text = "🎯 Select Player & Roles"
-    ListTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+    ListTitle.Text = "Select Player & Roles"
+    ListTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
     ListTitle.TextSize = 12
     ListTitle.Font = Enum.Font.GothamSemibold
     ListTitle.TextXAlignment = Enum.TextXAlignment.Left
-    ListTitle.ZIndex = 6
 
     local PlayerListFrame = Instance.new("ScrollingFrame", ListCard)
     PlayerListFrame.Name = "PlayerList"
@@ -638,7 +629,6 @@ if targetParent then
     PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     PlayerListFrame.ScrollBarThickness = 5
     PlayerListFrame.ScrollBarImageColor3 = Color3.fromRGB(225, 40, 56)
-    PlayerListFrame.ZIndex = 6
 
     Instance.new("UICorner", PlayerListFrame).CornerRadius = UDim.new(0, 6)
 
@@ -646,14 +636,13 @@ if targetParent then
     PlayerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
     PlayerListLayout.Padding = UDim.new(0, 4)
 
-    -- 📦 CARD 2: BOTÕES DE AÇÃO (FLING & TP NO ALVO SELECIONADO)
+    -- 📦 CARD 2: BOTÕES DE AÇÃO
     local ActionCard = Instance.new("Frame")
     ActionCard.Name = "ActionCard"
     ActionCard.Size = UDim2.new(1, -6, 0, 50)
     ActionCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
     ActionCard.BorderSizePixel = 0
-    ActionCard.ZIndex = 5
-    ActionCard.Parent = targetParent
+    ActionCard.Parent = PageFrame
 
     Instance.new("UICorner", ActionCard).CornerRadius = UDim.new(0, 10)
     local ActionCardStroke = Instance.new("UIStroke", ActionCard)
@@ -665,30 +654,28 @@ if targetParent then
     ActionLabel.Size = UDim2.new(1, -195, 1, 0)
     ActionLabel.Position = UDim2.fromOffset(12, 0)
     ActionLabel.BackgroundTransparency = 1
-    ActionLabel.Text = "Ações no Alvo"
+    ActionLabel.Text = "Actions on Target"
     ActionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     ActionLabel.TextSize = 12
     ActionLabel.Font = Enum.Font.GothamSemibold
     ActionLabel.TextXAlignment = Enum.TextXAlignment.Left
-    ActionLabel.ZIndex = 6
 
-    -- Botão TP (Verde)
+    -- 🔵 BOTÃO TELEPORT
     local TPButton = Instance.new("TextButton", ActionCard)
     TPButton.Name = "TPButton"
     TPButton.Size = UDim2.fromOffset(80, 30)
     TPButton.AnchorPoint = Vector2.new(1, 0.5)
     TPButton.Position = UDim2.new(1, -100, 0.5, 0)
-    TPButton.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+    TPButton.BackgroundColor3 = Color3.fromRGB(52, 152, 219)
     TPButton.BorderSizePixel = 0
-    TPButton.Text = "TP"
+    TPButton.Text = "TELEPORT"
     TPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     TPButton.TextSize = 11
     TPButton.Font = Enum.Font.GothamBold
     TPButton.AutoButtonColor = false
-    TPButton.ZIndex = 6
     Instance.new("UICorner", TPButton).CornerRadius = UDim.new(0, 6)
 
-    -- Botão Fling
+    -- 🔴 BOTÃO FLING
     local FlingButton = Instance.new("TextButton", ActionCard)
     FlingButton.Name = "FlingButton"
     FlingButton.Size = UDim2.fromOffset(80, 30)
@@ -701,12 +688,11 @@ if targetParent then
     FlingButton.TextSize = 11
     FlingButton.Font = Enum.Font.GothamBold
     FlingButton.AutoButtonColor = false
-    FlingButton.ZIndex = 6
     Instance.new("UICorner", FlingButton).CornerRadius = UDim.new(0, 6)
 
-    -- ==============================================================--
-    -- FUNÇÃO DE ATUALIZAÇÃO DA LISTA (COM ORDENAÇÃO DE CARGOS E CORES)
-    -- ==============================================================--
+    -- ==================================
+    -- FUNÇÃO ATUALIZAR LISTA COM CORES
+    -- ==================================
     local function refreshPlayerList()
         local activePlayerNames = {}
         for _, p in ipairs(Players:GetPlayers()) do
@@ -715,7 +701,6 @@ if targetParent then
             end
         end
 
-        -- Remove botões de jogadores que saíram da partida
         for _, child in ipairs(PlayerListFrame:GetChildren()) do
             if child:IsA("TextButton") then
                 local playerName = child.Name:gsub("PlayerBtn_", "")
@@ -728,7 +713,6 @@ if targetParent then
             end
         end
 
-        -- Coleta e classifica os dados dos jogadores para ordenar a interface
         local playerDataList = {}
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer then
@@ -741,7 +725,6 @@ if targetParent then
             end
         end
 
-        -- Ordena: 1. Murderer, 2/3. Inocente/Hero, 4. Sheriff, 5. Lobby
         table.sort(playerDataList, function(a, b)
             if a.Priority == b.Priority then
                 return a.Player.Name < b.Player.Name
@@ -753,7 +736,6 @@ if targetParent then
         for index, data in ipairs(playerDataList) do
             local p = data.Player
             local cargo = data.Cargo
-            local priority = data.Priority
             
             count = count + 1
             local btnName = "PlayerBtn_" .. p.Name
@@ -766,42 +748,27 @@ if targetParent then
                 PlayerBtn.BorderSizePixel = 0
                 PlayerBtn.Text = ""
                 PlayerBtn.AutoButtonColor = false
-                PlayerBtn.ZIndex = 7
                 PlayerBtn.Parent = PlayerListFrame
 
                 Instance.new("UICorner", PlayerBtn).CornerRadius = UDim.new(0, 6)
 
-                local AvatarImg = Instance.new("ImageLabel", PlayerBtn)
-                AvatarImg.Name = "Avatar"
-                AvatarImg.Size = UDim2.fromOffset(22, 22)
-                AvatarImg.Position = UDim2.new(0, 5, 0.5, -11)
-                AvatarImg.BackgroundTransparency = 1
-                AvatarImg.ZIndex = 8
-                Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(0, 4)
-
-                pcall(function()
-                    AvatarImg.Image = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
-                end)
-
                 local NameLabel = Instance.new("TextLabel", PlayerBtn)
                 NameLabel.Name = "NameLabel"
-                NameLabel.Size = UDim2.new(1, -110, 1, 0)
-                NameLabel.Position = UDim2.fromOffset(32, 0)
+                NameLabel.Size = UDim2.new(1, -80, 1, 0)
+                NameLabel.Position = UDim2.fromOffset(10, 0)
                 NameLabel.BackgroundTransparency = 1
                 NameLabel.TextSize = 12
                 NameLabel.Font = Enum.Font.Gotham
                 NameLabel.TextXAlignment = Enum.TextXAlignment.Left
-                NameLabel.ZIndex = 8
 
                 local RoleBadge = Instance.new("TextLabel", PlayerBtn)
                 RoleBadge.Name = "RoleBadge"
-                RoleBadge.Size = UDim2.fromOffset(70, 20)
+                RoleBadge.Size = UDim2.fromOffset(65, 20)
                 RoleBadge.AnchorPoint = Vector2.new(1, 0.5)
-                RoleBadge.Position = UDim2.new(1, -6, 0.5, 0)
-                RoleBadge.BackgroundTransparency = 0.2
+                RoleBadge.Position = UDim2.new(1, -8, 0.5, 0)
+                RoleBadge.BackgroundTransparency = 0
                 RoleBadge.TextSize = 10
                 RoleBadge.Font = Enum.Font.GothamBold
-                RoleBadge.ZIndex = 8
                 Instance.new("UICorner", RoleBadge).CornerRadius = UDim.new(0, 4)
 
                 PlayerBtn.Activated:Connect(function()
@@ -810,30 +777,30 @@ if targetParent then
                 end)
             end
 
-            -- Atualiza a ordem visual no Layout
             PlayerBtn.LayoutOrder = index
 
-            -- Atualiza textos, cores e cargos dinamicamente
             local nameLbl = PlayerBtn:FindFirstChild("NameLabel")
             local roleBd = PlayerBtn:FindFirstChild("RoleBadge")
 
             if nameLbl then nameLbl.Text = p.Name end
             if roleBd then
                 roleBd.Text = cargo
+                
+                -- 🎨 CORES IGUAIS AO ASTRAL X HUB
                 if cargo == "Murderer" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(225, 40, 56) -- Vermelho
+                    roleBd.BackgroundColor3 = Color3.fromRGB(225, 40, 56)   -- 🔴 Vermelho
                     roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
                 elseif cargo == "Sheriff" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(40, 120, 225) -- Azul
+                    roleBd.BackgroundColor3 = Color3.fromRGB(52, 152, 219)   -- 🔵 Azul
                     roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
                 elseif cargo == "Hero" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(241, 196, 15) -- Amarelo
-                    roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    roleBd.BackgroundColor3 = Color3.fromRGB(241, 196, 15)   -- 🟡 Amarelo
+                    roleBd.TextColor3 = Color3.fromRGB(30, 30, 30)
                 elseif cargo == "Lobby" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Branco
+                    roleBd.BackgroundColor3 = Color3.fromRGB(255, 255, 255)   -- ⚪ Branco
                     roleBd.TextColor3 = Color3.fromRGB(30, 30, 30)
                 else -- Inocente
-                    roleBd.BackgroundColor3 = Color3.fromRGB(46, 204, 113) -- Verde
+                    roleBd.BackgroundColor3 = Color3.fromRGB(46, 204, 113)   -- 🟢 Verde
                     roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
                 end
             end
@@ -851,16 +818,16 @@ if targetParent then
     end
 
     -- ==================================
-    -- CONEXÕES DOS BOTÕES DE AÇÃO
+    -- AÇÕES DOS BOTÕES
     -- ==================================
     TPButton.Activated:Connect(function()
         if not selectedPlayerName then return end
         local target = Players:FindFirstChild(selectedPlayerName)
         if target then
             TeleportarPara(target)
-            TweenService:Create(TPButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(34, 153, 84)}):Play()
+            TweenService:Create(TPButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(41, 128, 185)}):Play()
             task.wait(0.1)
-            TweenService:Create(TPButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(46, 204, 113)}):Play()
+            TweenService:Create(TPButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(52, 152, 219)}):Play()
         end
     end)
 
@@ -875,7 +842,7 @@ if targetParent then
         end
     end)
 
-    -- Loop otimizado para atualizar a lista de cargos em tempo real
+    -- 🔄 ATUALIZA LISTA AUTOMATICAMENTE
     task.spawn(function()
         while true do
             pcall(refreshPlayerList)
