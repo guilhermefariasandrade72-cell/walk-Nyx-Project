@@ -395,13 +395,14 @@ for Index, TabData in ipairs(TabsData) do
 -- ================================================
 
 -- ==============================================================--
---             WALK NYX PROJECT - TARGET SELECTOR & FLING        --
+--             WALK NYX PROJECT - TARGET SELECTOR & ESP          --
 -- ==============================================================--
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
 
 local LocalPlayer = Players.LocalPlayer
 local selectedPlayerName = nil
@@ -430,13 +431,11 @@ local function DescobrirCargo(player)
     local char = player.Character
     local backpack = player:FindFirstChild("Backpack")
     
-    -- Verifica se o jogador está morto (sem Humanoid ou Health <= 0)
     local humanoid = char and char:FindFirstChildOfClass("Humanoid")
     if not humanoid or humanoid.Health <= 0 then
         return "Morto", 5
     end
 
-    -- Checa itens na mão ou no inventário
     local temFaca = (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife"))
     local temArma = (char and char:FindFirstChild("Gun")) or (backpack and backpack:FindFirstChild("Gun"))
 
@@ -444,7 +443,6 @@ local function DescobrirCargo(player)
         return "Murderer", 1
     end
 
-    -- Consulta o servidor para ver o estado real (Sheriff original ou se virou Herói)
     local dados = ObterDadosCargos()
     if dados and dados[player.Name] then
         local info = dados[player.Name]
@@ -463,13 +461,98 @@ local function DescobrirCargo(player)
         end
     end
 
-    -- Fallback visual caso a RemoteFunction demore ou não retorne o Hero/Sheriff instantaneamente
     if temArma then
         return "Sheriff", 4
     end
 
     return "Inocente", 3
 end
+
+-- ==============================================================--
+-- 👁️ SISTEMA DE ESP VISUAL (HIGHLIGHT & BILLBOARD)
+-- ==============================================================--
+
+local function ObterCorCargo(cargo)
+    if cargo == "Murderer" then
+        return Color3.fromRGB(225, 40, 56) -- Vermelho
+    elseif cargo == "Sheriff" then
+        return Color3.fromRGB(40, 120, 225) -- Azul
+    elseif cargo == "Hero" then
+        return Color3.fromRGB(241, 196, 15) -- Amarelo
+    elseif cargo == "Morto" then
+        return Color3.fromRGB(255, 255, 255) -- Branco
+    else
+        return Color3.fromRGB(46, 204, 113) -- Verde (Inocente)
+    end
+end
+
+local function AtualizarESP(player)
+    if player == LocalPlayer then return end
+    
+    local char = player.Character
+    if not char then 
+        if player:FindFirstChild("WalkNyx_ESP") then
+            player.WalkNyx_ESP:Destroy()
+        end
+        return 
+    end
+
+    local cargo, _ = DescobrirCargo(player)
+    local cor = ObterCorCargo(cargo)
+
+    -- Gerencia o Highlight no personagem
+    local highlight = char:FindFirstChild("WalkNyx_Highlight")
+    if not highlight then
+        highlight = Instance.new("Highlight")
+        highlight.Name = "WalkNyx_Highlight"
+        highlight.Adornee = char
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        highlight.Parent = char
+    end
+    highlight.FillColor = cor
+    highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
+    highlight.FillTransparency = 0.5
+
+    -- Gerencia o BillboardGui (Nome e Cargo flutuante)
+    local head = char:FindFirstChild("Head")
+    if head then
+        local billboard = head:FindFirstChild("WalkNyx_Billboard")
+        if not billboard then
+            billboard = Instance.new("BillboardGui")
+            billboard.Name = "WalkNyx_Billboard"
+            billboard.Size = UDim2.new(0, 100, 0, 40)
+            billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = head
+
+            local textLabel = Instance.new("TextLabel")
+            textLabel.Name = "ESPText"
+            textLabel.Size = UDim2.new(1, 0, 1, 0)
+            textLabel.BackgroundTransparency = 1
+            textLabel.TextSize = 12
+            textLabel.Font = Enum.Font.GothamBold
+            textLabel.TextStrokeTransparency = 0
+            textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            textLabel.Parent = billboard
+        end
+
+        local textLabel = billboard:FindFirstChild("ESPText")
+        if textLabel then
+            textLabel.Text = player.Name .. "\n[" .. cargo .. "]"
+            textLabel.TextColor3 = cor
+        end
+    end
+end
+
+RunService.Heartbeat:Connect(function()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            pcall(function()
+                AtualizarESP(p)
+            end)
+        end
+    end
+end)
 
 -- ==============================================================--
 -- 🌪️ SISTEMA — FLING INTELIGENTE
@@ -527,9 +610,7 @@ local function executeCustomFling(targetPlr)
             local offsetX, offsetY, offsetZ = 0, 0, 0
 
             if isTargetStandingStill then
-                offsetX = 0
-                offsetY = 0
-                offsetZ = 0
+                offsetX, offsetY, offsetZ = 0, 0, 0
             else
                 offsetX = math.sin(angle * 1.5) * 2.5
                 offsetY = math.cos(angle * 2) * 2.5
@@ -617,7 +698,7 @@ if targetParent then
     ListTitle.Size = UDim2.new(1, -24, 0, 25)
     ListTitle.Position = UDim2.fromOffset(12, 8)
     ListTitle.BackgroundTransparency = 1
-    ListTitle.Text = "🎯 Select Player & Roles"
+    ListTitle.Text = "🎯 Select Player & Roles (ESP Active)"
     ListTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
     ListTitle.TextSize = 12
     ListTitle.Font = Enum.Font.GothamSemibold
@@ -701,7 +782,7 @@ if targetParent then
     Instance.new("UICorner", FlingButton).CornerRadius = UDim.new(0, 6)
 
     -- ==============================================================--
-    -- FUNÇÃO DE ATUALIZAÇÃO DA LISTA (COM ORDENAÇÃO DE CARGOS E CORES DO LOBBY)
+    -- FUNÇÃO DE ATUALIZAÇÃO DA LISTA (COM ORDENAÇÃO DE CARGOS E CORES)
     -- ==============================================================--
     local function refreshPlayerList()
         local activePlayerNames = {}
@@ -711,7 +792,6 @@ if targetParent then
             end
         end
 
-        -- Remove botões de jogadores que saíram da partida ou duplicados órfãos
         for _, child in ipairs(PlayerListFrame:GetChildren()) do
             if child:IsA("TextButton") then
                 local playerName = child.Name:gsub("PlayerBtn_", "")
@@ -724,7 +804,6 @@ if targetParent then
             end
         end
 
-        -- Coleta e classifica os dados dos jogadores para ordenar a interface
         local playerDataList = {}
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer then
@@ -737,7 +816,6 @@ if targetParent then
             end
         end
 
-        -- Ordena: 1. Murderer, 2/3. Inocente/Hero, 4. Sheriff (por último entre os vivos), 5. Morto
         table.sort(playerDataList, function(a, b)
             if a.Priority == b.Priority then
                 return a.Player.Name < b.Player.Name
@@ -749,7 +827,6 @@ if targetParent then
         for index, data in ipairs(playerDataList) do
             local p = data.Player
             local cargo = data.Cargo
-            local priority = data.Priority
             
             count = count + 1
             local btnName = "PlayerBtn_" .. p.Name
@@ -806,30 +883,19 @@ if targetParent then
                 end)
             end
 
-            -- Atualiza a ordem visual no Layout
             PlayerBtn.LayoutOrder = index
 
-            -- Atualiza textos, cores e cargos dinamicamente a cada ciclo
             local nameLbl = PlayerBtn:FindFirstChild("NameLabel")
             local roleBd = PlayerBtn:FindFirstChild("RoleBadge")
 
             if nameLbl then nameLbl.Text = p.Name end
             if roleBd then
                 roleBd.Text = cargo
-                if cargo == "Murderer" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(225, 40, 56) -- Vermelho
-                    roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                elseif cargo == "Sheriff" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(40, 120, 225) -- Azul
-                    roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                elseif cargo == "Hero" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(241, 196, 15) -- Amarelo
-                    roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
-                elseif cargo == "Morto" then
-                    roleBd.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Branco (Lobby/Morto igual ao ESP)
+                local corCard = ObterCorCargo(cargo)
+                roleBd.BackgroundColor3 = corCard
+                if cargo == "Morto" then
                     roleBd.TextColor3 = Color3.fromRGB(30, 30, 30)
-                else -- Inocente
-                    roleBd.BackgroundColor3 = Color3.fromRGB(46, 204, 113) -- Verde
+                else
                     roleBd.TextColor3 = Color3.fromRGB(255, 255, 255)
                 end
             end
@@ -846,9 +912,6 @@ if targetParent then
         PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, count * 34)
     end
 
-    -- ==================================
-    -- CONEXÕES DOS BOTÕES DE AÇÃO
-    -- ==================================
     TPButton.Activated:Connect(function()
         if not selectedPlayerName then return end
         local target = Players:FindFirstChild(selectedPlayerName)
@@ -867,20 +930,8 @@ if targetParent then
             executeCustomFling(target)
             TweenService:Create(FlingButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(180, 25, 40)}):Play()
             task.wait(0.1)
-            TweenService:Create(FlingButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(225, 40, 56)}):Play()
-        end
-    end)
+            TweenService:Create(FlingButton, Twee
 
-    -- Loop otimizado para atualizar a lista e checar mortes/mudanças de armas rapidamente a cada 0.3 segundos
-    task.spawn(function()
-        while true do
-            pcall(refreshPlayerList)
-            task.wait(0.3)
-        end
-    end)
-else
-    warn("Error: PageFrame not found!")
-end
 
 -- ==========================================
 local SectionTitle = Instance.new("TextLabel")
