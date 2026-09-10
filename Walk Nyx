@@ -651,13 +651,13 @@ if targetParent then
     ActionLabel.TextXAlignment = Enum.TextXAlignment.Left
     ActionLabel.ZIndex = 6
 
-    -- Botão TP
+    -- Botão TP (Alterado para verde e corrigido para o toque mobile via Activated)
     local TPButton = Instance.new("TextButton", ActionCard)
     TPButton.Name = "TPButton"
     TPButton.Size = UDim2.fromOffset(80, 30)
     TPButton.AnchorPoint = Vector2.new(1, 0.5)
     TPButton.Position = UDim2.new(1, -100, 0.5, 0)
-    TPButton.BackgroundColor3 = Color3.fromRGB(40, 120, 225)
+    TPButton.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
     TPButton.BorderSizePixel = 0
     TPButton.Text = "TP"
     TPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -687,12 +687,23 @@ if targetParent then
     -- FUNÇÃO DE ATUALIZAÇÃO DA LISTA
     -- ==================================
     local function refreshPlayerList()
-        local existingPlayers = {}
-        
+        local activePlayerNames = {}
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer then
+                activePlayerNames[p.Name] = p
+            end
+        end
+
+        -- Remove botões de jogadores que saíram ou duplicados antigos
         for _, child in ipairs(PlayerListFrame:GetChildren()) do
             if child:IsA("TextButton") then
                 local playerName = child.Name:gsub("PlayerBtn_", "")
-                existingPlayers[playerName] = child
+                if not activePlayerNames[playerName] then
+                    child:Destroy()
+                    if selectedPlayerName == playerName then
+                        selectedPlayerName = nil
+                    end
+                end
             end
         end
 
@@ -700,8 +711,8 @@ if targetParent then
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer then
                 count = count + 1
-                local btnName = "PlayerBtn_"..p.Name
-                local PlayerBtn = existingPlayers[p.Name]
+                local btnName = "PlayerBtn_" .. p.Name
+                local PlayerBtn = PlayerListFrame:FindFirstChild(btnName)
                 local cargo = DescobrirCargo(p)
 
                 if not PlayerBtn then
@@ -749,12 +760,11 @@ if targetParent then
                     RoleBadge.ZIndex = 8
                     Instance.new("UICorner", RoleBadge).CornerRadius = UDim.new(0, 4)
 
+                    -- Usando Activated em vez de InputBegan para registrar o toque mobile perfeitamente
                     PlayerBtn.Activated:Connect(function()
                         selectedPlayerName = p.Name
                         refreshPlayerList()
                     end)
-                else
-                    existingPlayers[p.Name] = nil
                 end
 
                 -- Atualiza textos, cores e cargos dinamicamente
@@ -786,13 +796,6 @@ if targetParent then
             end
         end
 
-        for name, btn in pairs(existingPlayers) do
-            btn:Destroy()
-            if selectedPlayerName == name then
-                selectedPlayerName = nil
-            end
-        end
-
         PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, count * 34)
     end
 
@@ -804,14 +807,16 @@ if targetParent then
         local target = Players:FindFirstChild(selectedPlayerName)
         if target then
             TeleportarPara(target)
-            TweenService:Create(TPButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(30, 90, 180)}):Play()
+            TweenService:Create(TPButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(34, 153, 84)}):Play()
             task.wait(0.1)
-            TweenService:Create(TPButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(40, 120, 225)}):Play()
+            TweenService:Create(TPButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(46, 204, 113)}):Play()
         end
     end)
 
     FlingButton.Activated:Connect(function()
-        if not selectedPlayerName then return end
+        if not selectedPlayerName then response = nil
+            if not selectedPlayerName then return end
+        end
         local target = Players:FindFirstChild(selectedPlayerName)
         if target then
             executeCustomFling(target)
@@ -831,7 +836,6 @@ if targetParent then
 else
     warn("Error: PageFrame not found!")
 end
-
 
 -- ==========================================
 local SectionTitle = Instance.new("TextLabel")
