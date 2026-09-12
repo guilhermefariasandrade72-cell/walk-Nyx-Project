@@ -39,7 +39,6 @@ local FloatingButtonSize = DEFAULT_FLOATING_SIZE
 --==============================================================--
 
 local Theme = {
-
     Window = Color3.fromRGB(9, 10, 14),
     Sidebar = Color3.fromRGB(7, 8, 12),
     Content = Color3.fromRGB(10, 11, 15),
@@ -157,15 +156,12 @@ end
 local function Tween(Object, Properties, Time)
 
     local T = TweenService:Create(
-
         Object,
-
         TweenInfo.new(
             Time or 0.2,
             Enum.EasingStyle.Quint,
             Enum.EasingDirection.Out
         ),
-
         Properties
     )
 
@@ -184,15 +180,10 @@ local function CreateLabel(
     local L = Instance.new("TextLabel")
 
     L.BackgroundTransparency = 1
-
     L.Text = Text
     L.TextColor3 = Theme.Text
-
-    L.TextSize =
-        Size or 14
-
-    L.Font =
-        Font or Enum.Font.Gotham
+    L.TextSize = Size or 14
+    L.Font = Font or Enum.Font.Gotham
 
     L.TextXAlignment =
         Enum.TextXAlignment.Left
@@ -234,11 +225,9 @@ FloatingButton.Size =
     )
 
 FloatingButton.Position =
-    UDim2.new(
+    UDim2.fromScale(
         0.5,
-        0,
-        0.5,
-        0
+        0.5
     )
 
 FloatingButton.AnchorPoint =
@@ -410,7 +399,10 @@ local TopLine = Instance.new("Frame")
 TopLine.Name = "TopLine"
 
 TopLine.Size =
-    UDim2.fromScale(1, 1)
+    UDim2.fromScale(
+        1,
+        1
+    )
 
 TopLine.BackgroundColor3 =
     CurrentAccent.Bright
@@ -580,8 +572,7 @@ LogoStroke.Thickness = 1.4
 LogoStroke.ApplyStrokeMode =
     Enum.ApplyStrokeMode.Border
 
-LogoStroke.Parent =
-    LogoButton
+LogoStroke.Parent = LogoButton
 
 --==============================================================--
 --                           TITLE                              --
@@ -663,7 +654,10 @@ Minimize.BackgroundColor3 =
 Minimize.BorderSizePixel = 0
 
 Minimize.Text = "—"
-Minimize.TextColor3 = Theme.SubText
+
+Minimize.TextColor3 =
+    Theme.SubText
+
 Minimize.TextSize = 18
 
 Minimize.Font =
@@ -712,7 +706,10 @@ Close.BackgroundColor3 =
 Close.BorderSizePixel = 0
 
 Close.Text = "×"
-Close.TextColor3 = Theme.SubText
+
+Close.TextColor3 =
+    Theme.SubText
+
 Close.TextSize = 20
 
 Close.Font =
@@ -1035,8 +1032,6 @@ local Tabs = {
 
     {
         Name = "Info",
-
-        -- Exclamation mark inside a circle
         Icon = "circle-alert"
     },
 
@@ -1143,7 +1138,6 @@ local function MakeIcon(
         )
 
     IconFrame.ZIndex = 1090
-
     IconFrame.Parent = Parent
 
     return IconFrame
@@ -1167,6 +1161,7 @@ local function SelectTab(Name)
 
             Pages[TabName].Visible =
                 Active
+
         end
 
         if Active then
@@ -1683,6 +1678,7 @@ local function SetCompact(State)
             },
             0.15
         )
+
     end
 
     for _, Data
@@ -1696,6 +1692,7 @@ local function SetCompact(State)
             },
             0.15
         )
+
     end
 end
 
@@ -1716,7 +1713,7 @@ LogoButton.MouseButton1Click:Connect(function()
 end)
 
 --==============================================================--
---                 MINIMIZE / RESTORE                          --
+--                 MINIMIZE / RESTORE                           --
 --==============================================================--
 
 local function SetMinimized(State)
@@ -1795,6 +1792,7 @@ local function SetMinimized(State)
         )
 
         task.wait(0.35)
+
     end
 
     WindowMinimizing = false
@@ -2251,59 +2249,19 @@ local function SetFloatingButtonSize(Size)
             MAX_FLOATING_SIZE
         )
 
-    -- Capture the current absolute center.
-    -- The center is preserved when the button changes size.
-    local OldAbsolutePosition =
-        FloatingButton.AbsolutePosition
-
-    local OldAbsoluteSize =
-        FloatingButton.AbsoluteSize
-
-    local CurrentCenter =
-        Vector2.new(
-            OldAbsolutePosition.X +
-                OldAbsoluteSize.X / 2,
-
-            OldAbsolutePosition.Y +
-                OldAbsoluteSize.Y / 2
-        )
-
     FloatingButtonSize =
         NewSize
 
-    -- Change only the size.
+    -- IMPORTANT:
+    -- Do not modify Position here.
+    -- The button uses AnchorPoint 0.5 / 0.5,
+    -- so Roblox keeps its center fixed automatically.
+
     FloatingButton.Size =
         UDim2.fromOffset(
             NewSize,
             NewSize
         )
-
-    -- Wait one frame so AbsoluteSize is updated.
-    task.defer(function()
-
-        if not FloatingButton.Parent then
-            return
-        end
-
-        local ClampedCenter =
-            ClampFloatingButton(
-                CurrentCenter
-            )
-
-        -- AnchorPoint is 0.5 / 0.5, so this position
-        -- represents the center of the button.
-        FloatingButton.Position =
-            UDim2.fromOffset(
-                math.floor(
-                    ClampedCenter.X + 0.5
-                ),
-
-                math.floor(
-                    ClampedCenter.Y + 0.5
-                )
-            )
-
-    end)
 end
 
 --==============================================================--
@@ -2830,7 +2788,10 @@ ConfirmYes.BackgroundColor3 =
 ConfirmYes.BorderSizePixel = 0
 
 ConfirmYes.Text = "Yes"
-ConfirmYes.TextColor3 = Theme.White
+
+ConfirmYes.TextColor3 =
+    Theme.White
+
 ConfirmYes.TextSize = 10
 
 ConfirmYes.Font =
@@ -2870,7 +2831,10 @@ ConfirmNo.BackgroundColor3 =
 ConfirmNo.BorderSizePixel = 0
 
 ConfirmNo.Text = "Cancel"
-ConfirmNo.TextColor3 = Theme.Text
+
+ConfirmNo.TextColor3 =
+    Theme.Text
+
 ConfirmNo.TextSize = 10
 
 ConfirmNo.Font =
@@ -2882,7 +2846,12 @@ ConfirmNo.ZIndex = 5030
 ConfirmNo.Parent = ConfirmBox
 
 Corner(ConfirmNo, 8)
-Stroke(ConfirmNo, Theme.Border, 1)
+
+Stroke(
+    ConfirmNo,
+    Theme.Border,
+    1
+)
 
 --==============================================================--
 --                    SETTINGS HEADER                           --
@@ -3063,7 +3032,7 @@ ColorOpen.Parent =
     ColorCard
 
 --==============================================================--
---                     COLOR LIST                               --
+--                     COLOR LIST                              --
 --==============================================================--
 
 local ColorList =
@@ -3260,9 +3229,7 @@ for Index, ColorName
         )
 
     Check.ZIndex = 1060
-
-    Check.Parent =
-        ColorButton
+    Check.Parent = ColorButton
 
     ColorButtons[ColorName] = {
 
@@ -3574,8 +3541,7 @@ local function UpdateFloatingSizeFromX(X)
             MAX_FLOATING_SIZE -
             MIN_FLOATING_SIZE
         )
-        *
-        Percentage
+        * Percentage
 
     NewSize =
         math.floor(
@@ -3664,15 +3630,11 @@ end)
 --              FLOATING BUTTON SIZE INITIALIZE                 --
 --==============================================================--
 
-task.defer(function()
+SetFloatingButtonSize(
+    DEFAULT_FLOATING_SIZE
+)
 
-    SetFloatingButtonSize(
-        DEFAULT_FLOATING_SIZE
-    )
-
-    UpdateFloatingSizeSliderVisual()
-
-end)
+UpdateFloatingSizeSliderVisual()
 
 --==============================================================--
 --                  FLOATING LOCK CARD                          --
@@ -3935,7 +3897,6 @@ local function SetAccentColor(Name)
 
                     Data.Icon.ImageColor3 =
                         Theme.Icon
-
                 end
 
             end)
@@ -4325,48 +4286,59 @@ local function UpdateScreen()
     task.defer(function()
 
         if WindowVisible then
-
             ClampWindow()
         end
 
-        if FloatingButton.Parent then
+        if not FloatingButton.Parent then
+            return
+        end
 
-            local Camera =
-                workspace.CurrentCamera
+        local Camera =
+            workspace.CurrentCamera
 
-            if Camera then
+        if not Camera then
+            return
+        end
 
-                local AbsolutePosition =
-                    FloatingButton.AbsolutePosition
+        -- Only clamp the floating button when
+        -- the actual viewport changes.
+        -- This does NOT run during slider resizing.
 
-                local AbsoluteSize =
-                    FloatingButton.AbsoluteSize
+        local AbsolutePosition =
+            FloatingButton.AbsolutePosition
 
-                local Center =
-                    Vector2.new(
-                        AbsolutePosition.X +
-                            AbsoluteSize.X / 2,
+        local AbsoluteSize =
+            FloatingButton.AbsoluteSize
 
-                        AbsolutePosition.Y +
-                            AbsoluteSize.Y / 2
+        local Center =
+            Vector2.new(
+                AbsolutePosition.X +
+                    AbsoluteSize.X / 2,
+
+                AbsolutePosition.Y +
+                    AbsoluteSize.Y / 2
+            )
+
+        local Clamped =
+            ClampFloatingButton(
+                Center
+            )
+
+        local Difference =
+            Clamped - Center
+
+        if Difference.Magnitude > 0.5 then
+
+            FloatingButton.Position =
+                UDim2.fromOffset(
+                    math.floor(
+                        Clamped.X + 0.5
+                    ),
+
+                    math.floor(
+                        Clamped.Y + 0.5
                     )
-
-                local Clamped =
-                    ClampFloatingButton(
-                        Center
-                    )
-
-                FloatingButton.Position =
-                    UDim2.fromOffset(
-                        math.floor(
-                            Clamped.X + 0.5
-                        ),
-
-                        math.floor(
-                            Clamped.Y + 0.5
-                        )
-                    )
-            end
+                )
         end
     end)
 end
@@ -4390,15 +4362,11 @@ FloatingButton.Visible = true
 
 SetAccentColor("Red")
 
-task.defer(function()
+CenterWindow()
+ClampWindow()
 
-    CenterWindow()
-    ClampWindow()
+SetFloatingButtonSize(
+    DEFAULT_FLOATING_SIZE
+)
 
-    SetFloatingButtonSize(
-        DEFAULT_FLOATING_SIZE
-    )
-
-    UpdateFloatingSizeSliderVisual()
-
-end)
+UpdateFloatingSizeSliderVisual()
