@@ -239,7 +239,7 @@ local Aba_LocalPlayer = Window:Tab({
 -- ———— // BOTOES DA ABA LOCAL PLAYER \\ ———— --
 
 -- ==================================
--- ⚡ SPEED + SLIDER (16 a 45)
+-- ⚡ SPEED + SLIDER (16 a 45) - CORRIGIDO
 -- ==================================
 Aba_LocalPlayer:Toggle({
     Title = "Speed",
@@ -251,16 +251,19 @@ Aba_LocalPlayer:Toggle({
 
 Aba_LocalPlayer:Slider({
     Title = "Speed Value",
-    Min = 16,
-    Max = 45,
-    Default = 16,
+    Value = {
+        Min = 16,
+        Max = 45,
+        Default = 16,
+    },
+    Step = 1,
     Callback = function(value)
         SpeedValor = value
     end
 })
 
 -- ==================================
--- 🦘 POWER JUMP + SLIDER (50 a 120)
+-- 🦘 POWER JUMP + SLIDER (50 a 120) - CORRIGIDO
 -- ==================================
 Aba_LocalPlayer:Toggle({
     Title = "Power Jump",
@@ -272,9 +275,12 @@ Aba_LocalPlayer:Toggle({
 
 Aba_LocalPlayer:Slider({
     Title = "Jump Power",
-    Min = 50,
-    Max = 120,
-    Default = 50,
+    Value = {
+        Min = 50,
+        Max = 120,
+        Default = 50,
+    },
+    Step = 5,
     Callback = function(value)
         JumpPowerValor = value
     end
