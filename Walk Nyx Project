@@ -1,284 +1,115 @@
---==============================================================--
---                    WALK NYX INTRO                            --
---==============================================================--
-
-if _G.WalkNyxRunning then
-    return
+-- Protected by Mnx Obfuscator | Public Enemy
+local m2tq5AQ5EDkE_5Zy=225
+local wxSsMfVqOrb=math.floor(3)
+local tJUsbSsOkfZH=878
+local yliH_oK3dD_8SXu=string.len("opS0x5u")
+local ifY4L_YRS1B7JK3=996
+local eBjXr3GhI39dupjs=string.len("vGcYR")
+local uC681wizKGyPvv=tostring(84)
+local mKyG0jJze02g=type(nil)
+local dWxKO7coVl=string.len("c7c0m5j")
+local ztQYVVVVJc6k9=math.abs(-35)
+local qF0m5n7Gm=type(nil)
+local cjyEJqCwW=math.floor(4)
+if false then error("") end
+for _=1,0 do end
+local uZPECMyZr=#"m7apFcc3"
+local lcYqlunwIz=#"ydt"
+local y68aVZTFuSde=string.len("kzTfv")
+if false then error("") end
+local v6arhScstIyAWeM_N={"34f5da6c64fa86b8778ec816643b06c589f23229fae548b272bf22eb6bd745ab656fa365df96495fc0844694ad0e9d4a217c4d6","4f512c62ba912b53f33b7920af6fc5b16382fe42208dc236cd0ba2f812413b71946fabe68c8b755b68b8b03d7d72c24dfbee8cf","41ea76b9fc00150bdcf2cd0b9a53776a4dfd77f21fd8534c44087eb4c704ac706b0d7645949f90e0102fed5e90cd42c635927bc","d53cbf73de50c8b674f0edb9d163672e9d7f6860fa23467028961531b55a75f584a8a4b4e6639dcd4c427c1f6aa5787f7748121","da3ccb89e05ca5da8f15d02d72952f116d5719c050fb915a12ceccf06b92c0634f5d941d5c94d1bd64a0b0dd487b0aaeb9107df","5fbb386223b263f127e5cef0f9f708453433ea9351b45b6cfa3111bb351983e7c4bcd8fedd2ad7c87285c70af782f4ab3764e22","7494aa1d5f1d10099f9b7e9ae3a40312da08f376f9f92ec463df7581dc9e3cbeef8a2a0bb0ec59b68571cb316ff72765945658d","78c522d3f0762f6218eb3e143eb51a6f27a435619dfc8466d281ed099c3f5b8789c64b7b368ad1dbe859f921d19852b149a2578","6a4a6cd09d16c1416f9a342be4ed7f9f0ed0bc7b2e6ebdb7eec70123ca878a68c98316745fb5eff45ae650520b3e4afc974c61e","2b4f51b5dc8aadaa6db3e42b516e315e72a5bde38ae94c9309820b3b2b925ce98bed0792a0d041e6e3495f2fbc958481b0c3493","c711183fd180b7f501a95fc669ec6b127455f08bec189474c965eeae3c874642c8fbe6d1384e4863ba0ee269767c49b5d285f5b","59ca909cb32dee55da14351200b3c343fd42a7186a35f9691bfd68cccf0bda3890717bda5f4fb316b573b0e26b60df751b933df","f4143f8e0c3d63162bd1f46879e6463c2edba672c5e5185730e83788d20af4a3323f39eabc92c5d7fc33a123c6581fed0ffa555","5104455322ee5550bc31d8bcaf55e8df226ca0eeb4cf86cac691e8103bea9d3926e3f92c069b0e11ce92c2a01b1a55a2c5ab3e3","9c1e50c80501184fbab3fe9f30533d9cf83ea3d860823b7789784743c271ef3d64558893018eff586abe5f71b6c62da21bb69be","6e22a840979e8931383eaffae4add65d2a53b24366835bf08c1ca04e13689522ca6a74f154bf137824371bccf9defc6a7f1e938","59c11b99c58bed8fe3107dde7c1f42c01d55af3d4e507736ae551b5f08980ff1848094e241cd8d843e11fe9bfd62ad1ce546f28","dbd8fc66ae78c7f2054d7522457dc48bb6d0b899a6229e498c0d9b7389bf4e11a9a8af66151be88bf49e70e30e27273536d6b66","402bd141d5d36ee10e356fed4c0e27035242cfc83ccb4505a1512f2b604eb25f46b4b8761f84954e4e335e9f5b12dd2f5931f89","5ef51d1f52c8f801a4773fa6b38d4b626842a326a47aaabd2de3b2bd9a98bcbf3a7a51ab6b56aa31f62f4b57d3e9073cea473ce","e674139fb3196291be436923954de3a541c1e767c730c5b962cfa3c54d3184094233639f8ac1b4a651863c101e05d07d41500e3","5432dd4f876649b0cc05616f9345946eff725c17736a00b08bb1517d1ac6fe3e7b4e235c8815a9cb681d880fb742557e8de119a","c9fc49d8612eb1609fe3126aa36d4bc17fd84084f618dd05b2d6dd9f6ed73cda07fc4ae24e437cdc415c8d40894275c54f2d9a8","f36c3e193d6af401fd08d88cf385c46eb0bbf22b807a8d9866549a4afde117583093dd882c1a41e63dbb0530639d00bf7ca0829","3ed1d9c16d1a4ca973338f0c1eb6617591bd869e67aa38050d62fbbf99df311605a4c1ecf0a329a6e1559530e0d21d9a9abed3b","75ee1f3f417ecb9ebdd5a4fb062086003424a0efd3a53a5c0de2f57bffdc5caec4da209f9226f508ba0ec1808727dc1ad556a0f","2af980b9328af731ed46e733fd7e573a7584b66b2b7e3f340ce4864bd8f2279e4f699b8dda756a0a662a3c830433d8b88a154ab","25aa15b2009ccf1d33d678f502ee153f389f089a8917360ee5da701cfe70a3e0752a0f0df163c71d59b2ec72f43446dab90990a","819cfae957f9009440adacf81552352efd231f78c349d9ab75d42b531db4f7072defcb225689731b380b4cfaef73105045427c7","1d9abd66e8f1787888ca20c34ce675c2f16a721674efe3cc7994aee84350f25678a3c5840f9529493b19a9f4788a029ed29f57c","b39127674f7c0b66e101dc86f9a01d4dee9bd290a36c3b00b06d35876a6cb3669f595b03f73e81386002f69dd929f7a18ab835a","986be9bc613ced957a0b138df3821f27a4cc360fbec507663c48f72fe73abb937a8b64c386d8430491cb8efdc90a82156e5ba71","c12b558bf8cc85cf1277eb0ffd52f0ca3e46eba5035f06b93b7ac44f34dab7fc782846e9a81f683b965b4c6402a715ea50bc489","2bfe537654d6c44105f2eaa5a6b813214d372f34c1951665b96d59002505fa53b33394095dff38956446e5ac37678f6ff0b4c65","74a0ae0662822f973033a16f725d29c2cac028c66d3eb71955d35666d968da894e5e8ca63a36ae158f7faed98b3e74fa0854e03","f02925d61ee1a75a6af7fc04ffb5e24e95cc3b1eab9449877734e460b02e449c459250a1297026a609ee0df1a1d6003399ee650","046d954a8b4b9adaad1a44834613498bba9dbe31889a527bd8d95d9cce72d4de50d78f53e5ab415e8281b194e9e15a58921ca3c","c4aa8a67baa1d9b273b11d33d70886542e5d4d2c14ffbcd712b66bf4f70ed6164c1253d9996c2bb8879ed509c7a6c7b2a852839","7b1b50dcad32db5a88e1cd7a4419d6a09ad0dac7fb47f6d26434afbb01b68a9f97a11acc526a598e66ba203c77aea845778fee9","f6311adc88ea8d029ad3cb4293c77e5aecaca79df6aaf9f8afacdaf6abd98dbb03419d10cf95376270cbed919f58e96215c2984","a5728b31eb791609493bceac511ca4e59a50158c96c4664d1477c87429cc7d074d51bbb4cc9c83d4479860b0c8500f6016e37fc","9e02d4e8c476fa3fdd7d0b7c7da1aa4f6825add3e44b349b6c92d894fb2a13552d38c81c4deae1b3d871ded76e7e8e4c90b069f","f35713afa1b8de3e1dd88eccfbe866f052f8952c065f83ca6f20308404e853eeaa8f8c89ad702ac1696288c096e8b83895bd169","fccc9ea134413bb1ff67539cb75b9774b15155b95fae42d118a2d8d8e7056b90f8613dad","c6b11971040615eb1ee732872928336636d6233c2c584aafda7dd6daa9f00a3d74841ea7e5675dfe6ada40e486f31d1a1444e8f","b5921a2c4abe38f454f3b6d25e6223785a19df783bbde7b0997b3b2b5f32eb5b38bf254b2100d5d81073e13f25473d7934d1697","7d9f4d82b6b0fbaefbb5435e405593bbc5aca459c2ef0395c16a5a8ecaa569a9f3b71979b0b47db116358cc0c4c06a1218f7296","b50ae86fdb1d44837972a25b378ff482b5df098754fd58d0ba3a222bf70cd6b189b80030ffc1dc934f9377e9d2922292f9339be","59feb752eb2a031f6a6b4a3076047bc5d5dcdf014fc48428258f4bb3eec3c6fd7e363b5f26470912fa69dd5eb0940f2e66e2c55"}
+local xpZcZZ0vyZpC_={33,44,30,29,22,27,16,12,1,19,39,18,28,42,38,13,24,8,41,6,25,20,32,21,35,36,48,43,5,14,31,40,7,17,37,26,2,46,11,10,34,23,9,49,4,45,47,15,3}
+local tCiTcuYx1GaSatG2cC={"14f908782bbc690e03987b4592f31aff98deac148505e84fdadc5144912c3fdc6151621a23b691512f5d6a0700016e267124592","a87130bb15e4f688ffe37982e42478ef2f5e7d1f7b2e4c854539ed6854a34875cc5463fb4dd4d3f8eb290eaa05ef37165c02668","80dadfe738b67892cd9edc23e058a2643f09569cf48da7169c7ea808c19f46a0e467bd7afb9c24916eafbecb6865b73b94e7cd5","8737708a07a813d3d6a13ecdd3ce696400e42534ddbaeafc2a1e0f75788b41630bfd8c90da04392f152b5e0c877d49ec9497816","e6b6159bcd4297e912e72464b1f586cfa18bbcff5f8a8817af56f693a418499afa037d47ad98f76bf2ef44480d9cde1abe8ba6c","57fdc0d739fef435f109e68b4b1f332986057d83f0464bcbe4df8616c60cd8cab49d7220319c78d5ddd25083afd989402f25626","054bf7b3dddc844c6c2cfba5480aaedb69fb59b9539a7c65b2aabfac916298838e89ac0f70768da8fe703c21a45fe7228907ef6","fc1329e4176614c413c38e6993070126e2f8eccc02e922cc660d0cfa881d6f4d8a583704b102f20d31b05508296acbe8c0f6393","ec84c99787835b2ca2cf3cf3b79a4e81592d4fe8db5e7b4fc59e5516c93cad8c5f333058e5acf8e4da1fa4f748f537ae3c9eb10","fbf8f44e60e3c66bf7fad0a1a9f866b906c420a80044432a04fde7e9ece7601887a5de0d0cd2b6d80c86f4a5aab12a8136d2a24","57301145cd762083dacc06207f2faf4164d82f30471ff5cad35a4586f7c2b0a4ed17cf2367cc37bdbde4fa0b48011f144e2060e","5937f7a05af94e418b1f327a498069cdcc7b4f11d5caea467557fa3573dab16388f72e4cb5d1e47a70e4b431d69fe115e2a6f2f","070e93fa0282613213321b588a528c5c870377eef4ec7e1ef597c6c3b0857cb53f6de0115973e92447019463111b76737248268","f4b3121c0fd8cf46e1ab91041a75c0b789e68a1b2748822d42a387436196e6b28c253044fff7396a9b9fbbabdb4a76a6c266941","d51c370887ef87cfec33849416f67b91dccf443d161b08e0646911e1a6ca2588cdbf5b00b098efaa0da686723a38b40ebb7fb34","bbc7f5078430ddb77bdfd0ca7cc542f9062c520eb0fec65665c304ffab2b155a4b7aa7ba","bc3b7add3f02c531e984a5663ff530c7e14a8103d763cad9c7d8bd81fe014d08871f1a04ca2af48e4fe3e9511ebc65bb6dd6e43","e448bbc320126d59a62437c21c9591c2246f7d05fe2ce56f83fef725785bb82c19b9bdbd1f9f65878d7b9ca4759ca35075852b1","2fd0baa94b27477eed72d676d4756071df5e4fe87d3a08d9f926660f7d8eb15f252e12eb957310cb5d26210d924d685189be75c","bf0d0de1186cf91cea02ae505a1274a698998e6b0cca35f4a0a03631ced474a4b0acd6e67c2c09d31a5fae92bca1d848bccab0a","1288e4000858735a81d92cedddf71d4b63c52ac1245cb7e4a4911c9715581808583837930bb2aee4a581629addb85c6d79c2c8e","7f754defb32d914667d5a70bb25e56dbede770b7bdfa8cd3b201d2228c89b28c0b8b188b969cd05f69087235c3f3b4d3988c134","8700548201d26bd956542fca4508bf798eee59ac3cbf04585228033c2bd8aae080cb54e39b5eff8f2bffbf026dfa18a86d7e4b9","75555617822eb54eb639eb06986904b01784cb15c0d7f6397d7340838ad46550c6cb46f6ee5663500a8563403f7c7b86f1b13de","b29c2a159443cec1fd8b27beeeab674caae6a0d9d5379a7c978a6c6cd97b8a16f100fcf0d8306abac297cd32c6bb8b22b9c29b3","aacc9e2ca618fdb356ad146648a1db7f005b3038bcf03d47763f9ae9d3bbdae705643f9ff9108f941d2c828c65e1c7ae5ee0fd6","e3d5b6f2e73dae1e6aeeb033720d884cba72506c8e87c8e3fd64ad25b02f3ee3ca632e8c789842a382a05715bf0504d1e17c482","bb9360ae1ea0df51c19382e97f46623e3a1bd1cd71a10864ec89ebf8f6a48b8b45351c24eba518372b8817bf3b99e1dd03825c5","d71046b7c5bad08fabbcce3e5c46db9f4bbac4e141b8dfaafb709e09d4fd0750ee7c6c87bbae2d816744981774c3139bf832617","24b2f44310dfe8ad51bf123a57228257f7245cfdc98579b659527c2333db48b73bff8fcc3c993abd8c5519639745e857fa22f67","d3ab63807e1db35715879b95710d72089dd2d7770a4f91721431972dea9dee03eef182913081ac152f1bca53b14cdff6d7786b8","c9c7f039f4028e1075dfa8f3b503ded0a5a6483199444b66142ec2fb0740de68dcfbd84ae4b81642742f46d4b44c64d9d04bb57","a603749def86387c727d3b7e40cee2f1a2ca60dd6ba259ad35812bbf1fe16f72ba1ce6cca9f3f9705a08cb6757e8b646e2788c9","9fd7f4f29a017fc0d63caf82b8dc4aabae21061e32f6fc21e46018bac7d5dc2a9420cc682361e5cc5324bc8391902239c3752d9","823b9927a4d63cbf2e5c59dbe6e2e3bcf0d12d3f05e4555efd5e5d94a64381e347a41d37909b4a6948b6525357bc72c652d3cc2","e4dc2e1577bdf3888576eae887575f6aca072c42c6837e126eb454f76e047e6b4fececee384986253161491ec7eb70e192f659a","0497bd9dcbe44f5c8e5ab504a78d7faea7a93c75954e5f5092a97bdf11cd8b4c13000bbf6a23630b139638c6a31379ad1e36b5d","e421d14008f6c4508947f3d5424290d3de66045098b41b0c86ac5998aa869209f0387a106adb95039d9fb47bb0f7618c893238c","36afc225b741846a92327e6bd6c6dc42a68a1912e0b2c0887962df6165c8deb1cd615c726b564f5e282143d000ff124b69d8e56","43b86421e90552ee22d7ef5d24db92bd31e630b2627b49485366ab179b8d12a2ef65310b77dd0247fca31c2d2b84d50b4d46dd4","bfd8261a4e11f1d78a5f216a1fce679ad996dca6cd99e8384631314eee72ad7de6a7d1b3296dbc4bd1d5c4960320202efbffc1a","1d4f026b8e1da44c0307886ddf23ca301da4bd7dfbf87ec10110df3ad555bfda5f52e625aa5ab81d9f566952cf4098037d81310","38fe0c674657da9cf4c7513b0ba53c927e6fc471b21809f7c059eef5b9da01a042cecee26b861b8d7394b257dea8079a71b027f","4a51e843b5e005bd23628f4de0c9ec835067c120641221fb5ce6cba6233bd39a83deb115740eb3ee245c258ebec322fff02398c","878ce1ddc3d6c17f5cea653f01b419681cf356610b709144d8cf92b6805887d7a249825baeada4745e5c610ded0cdcb15831ba3","22cf936df1aba59e3f66a016367e3a5aad6bd20739b11e6a30889db2d4e6fdc64f17b4b592337995ef757bd49f1bbdd12be282b","6af716e45efbcd347ecab2ed3a7fd17470e5eb0098a9a8b716d3cf5613e1309898515b40191f6cbaa0bdeeed692364ce6e49727","0e544c5d810aae1180227c77ef762a42d761075b5869ab56eeb1530b6e1567f0bc4097000096938d5c2b481868458ff37e2fabb","dd9c70e11a1e3f442c9832237102abf6978a324a3e5265bd2f289321e05aaa05e7bbf5f7268d82ec33eeac1ca1027e5d1646750"}
+local aC6nAumsN2D={47,27,10,3,28,17,18,44,13,35,20,33,41,6,11,49,24,15,40,48,4,5,7,38,43,23,25,12,37,34,29,1,42,26,8,30,19,36,45,21,2,9,14,32,31,22,39,16,46}
+local ggvn76KtUJMnZIlVOp=math.floor(0)
+local vOz68NT_guxGfv8IAf=bit32.bxor(174,135)
+local iSqOSmBLnWagP7QLQ=string.len("e_v_nXsS")
+local vzCukT2f9TQ=math.floor(5)
+local a9wAMGck9xrGHnO=math.abs(-88)
+for _=1,0 do end
+local dm537b0wvZEf9CbSx={}
+for tFhkHSb09RP9oG=1,#xpZcZZ0vyZpC_ do dm537b0wvZEf9CbSx[xpZcZZ0vyZpC_[tFhkHSb09RP9oG]]=v6arhScstIyAWeM_N[tFhkHSb09RP9oG] end
+dm537b0wvZEf9CbSx=table.concat(dm537b0wvZEf9CbSx)
+local voRkuCHcWoomqB={}
+for tFhkHSb09RP9oG=1,#aC6nAumsN2D do voRkuCHcWoomqB[aC6nAumsN2D[tFhkHSb09RP9oG]]=tCiTcuYx1GaSatG2cC[tFhkHSb09RP9oG] end
+voRkuCHcWoomqB=table.concat(voRkuCHcWoomqB)
+local zZHhsanxGipAJmcd={}
+for tFhkHSb09RP9oG=1,#dm537b0wvZEf9CbSx,2 do
+  zZHhsanxGipAJmcd[#zZHhsanxGipAJmcd+1]=tonumber(string.sub(dm537b0wvZEf9CbSx,tFhkHSb09RP9oG,tFhkHSb09RP9oG+1),16)
 end
-
-_G.WalkNyxRunning = true
-
---==============================================================--
---                    SERVIÇOS                                  --
---==============================================================--
-
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-
-local Player = Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
-
---==============================================================--
---              REMOVE INTRO ANTIGA                             --
---==============================================================--
-
-local OldIntro = PlayerGui:FindFirstChild("WalkNyxIntro")
-
-if OldIntro then
-    OldIntro:Destroy()
+local xscHrkC6V6f={27,180,32,156,20,158,199,142,45,30,189,102,244,22,229,191,58,221,37,54,68,176,40,7,120,106,129,90,11,96,36,147,94,177,183,190,92,174,193,179,80,61,155}
+for tFhkHSb09RP9oG=1,#zZHhsanxGipAJmcd do
+  zZHhsanxGipAJmcd[tFhkHSb09RP9oG]=bit32.bxor(zZHhsanxGipAJmcd[tFhkHSb09RP9oG],xscHrkC6V6f[(tFhkHSb09RP9oG-1)%#xscHrkC6V6f+1])
 end
-
---==============================================================--
---                    INTRO GUI                                 --
---==============================================================--
-
-local Intro = Instance.new("ScreenGui")
-Intro.Name = "WalkNyxIntro"
-Intro.ResetOnSpawn = false
-Intro.IgnoreGuiInset = true
-Intro.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-Intro.Parent = PlayerGui
-
---==============================================================--
---                    FUNDO                                     --
---==============================================================--
-
-local Background = Instance.new("Frame")
-Background.Name = "Background"
-Background.Size = UDim2.fromScale(1, 1)
-Background.Position = UDim2.fromScale(0, 0)
-Background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Background.BorderSizePixel = 0
-Background.Parent = Intro
-
---==============================================================--
---                    WALK NYX                                  --
---==============================================================--
-
-local WalkNyx = Instance.new("TextLabel")
-WalkNyx.Name = "WalkNyx"
-WalkNyx.BackgroundTransparency = 1
-WalkNyx.Size = UDim2.fromOffset(300, 60)
-WalkNyx.AnchorPoint = Vector2.new(0.5, 0.5)
-WalkNyx.Position = UDim2.fromScale(0.5, 0.45)
-WalkNyx.Text = "W a l k   N y x"
-WalkNyx.TextColor3 = Color3.fromRGB(255, 255, 255)
-WalkNyx.TextTransparency = 0
-WalkNyx.Font = Enum.Font.GothamBold
-WalkNyx.TextSize = 30
-WalkNyx.TextXAlignment = Enum.TextXAlignment.Center
-WalkNyx.Parent = Intro
-
---==============================================================--
---                    HUB PROJECT                               --
---==============================================================--
-
-local HubProject = Instance.new("TextLabel")
-HubProject.Name = "HubProject"
-HubProject.BackgroundTransparency = 1
-HubProject.Size = UDim2.fromOffset(420, 60)
-HubProject.AnchorPoint = Vector2.new(0.5, 0.5)
-HubProject.Position = UDim2.fromScale(0.90, 0.45)
-HubProject.Text = "H u b   P r o j e c t"
-HubProject.TextColor3 = Color3.fromRGB(255, 255, 255)
-HubProject.TextTransparency = 1
-HubProject.Font = Enum.Font.GothamBold
-HubProject.TextSize = 30
-HubProject.TextXAlignment = Enum.TextXAlignment.Left
-HubProject.Parent = Intro
-
---==============================================================--
---                    SLIDER                                    --
---==============================================================--
-
-local SliderBack = Instance.new("Frame")
-SliderBack.Name = "SliderBack"
-SliderBack.Size = UDim2.fromOffset(360, 8)
-SliderBack.AnchorPoint = Vector2.new(0.5, 0.5)
-SliderBack.Position = UDim2.fromScale(0.5, 0.57)
-SliderBack.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-SliderBack.BorderSizePixel = 0
-SliderBack.Parent = Intro
-
-local SliderCorner = Instance.new("UICorner")
-SliderCorner.CornerRadius = UDim.new(1, 0)
-SliderCorner.Parent = SliderBack
-
-local SliderFill = Instance.new("Frame")
-SliderFill.Name = "SliderFill"
-SliderFill.Size = UDim2.new(0, 0, 1, 0)
-SliderFill.Position = UDim2.fromScale(0, 0)
-SliderFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-SliderFill.BorderSizePixel = 0
-SliderFill.Parent = SliderBack
-
-local FillCorner = Instance.new("UICorner")
-FillCorner.CornerRadius = UDim.new(1, 0)
-FillCorner.Parent = SliderFill
-
---==============================================================--
---                    PORCENTAGEM                                --
---==============================================================--
-
-local Percentage = Instance.new("TextLabel")
-Percentage.Name = "Percentage"
-Percentage.BackgroundTransparency = 1
-Percentage.Size = UDim2.fromOffset(150, 35)
-Percentage.AnchorPoint = Vector2.new(0.5, 0.5)
-Percentage.Position = UDim2.fromScale(0.5, 0.63)
-Percentage.Text = "0%"
-Percentage.TextColor3 = Color3.fromRGB(255, 255, 255)
-Percentage.Font = Enum.Font.Gotham
-Percentage.TextSize = 16
-Percentage.Parent = Intro
-
---==============================================================--
---                    CARREGAMENTO                              --
---==============================================================--
-
-for i = 0, 100 do
-
-    if not Intro or not Intro.Parent then
-        _G.WalkNyxRunning = false
-        return
-    end
-
-    SliderFill.Size = UDim2.new(i / 100, 0, 1, 0)
-    Percentage.Text = tostring(i) .. "%"
-
-    task.wait(0.025)
+local fegoAgsZFIZsnmxc={}
+for tFhkHSb09RP9oG=1,#voRkuCHcWoomqB,2 do
+  fegoAgsZFIZsnmxc[#fegoAgsZFIZsnmxc+1]=tonumber(string.sub(voRkuCHcWoomqB,tFhkHSb09RP9oG,tFhkHSb09RP9oG+1),16)
 end
-
---==============================================================--
---             WALK NYX VAI PARA A ESQUERDA                     --
---==============================================================--
-
-WalkNyx.TextXAlignment = Enum.TextXAlignment.Right
-
-local MoveWalkNyx = TweenService:Create(
-    WalkNyx,
-    TweenInfo.new(
-        0.8,
-        Enum.EasingStyle.Quart,
-        Enum.EasingDirection.Out
-    ),
-    {
-        Position = UDim2.fromScale(0.30, 0.45)
-    }
-)
-
-MoveWalkNyx:Play()
-
---==============================================================--
---             HUB PROJECT ENTRA PELA DIREITA                   --
---==============================================================--
-
-local MoveHubProject = TweenService:Create(
-    HubProject,
-    TweenInfo.new(
-        0.8,
-        Enum.EasingStyle.Quart,
-        Enum.EasingDirection.Out
-    ),
-    {
-        Position = UDim2.fromScale(0.69, 0.45),
-        TextTransparency = 0
-    }
-)
-
-MoveHubProject:Play()
-
-task.wait(0.9)
-
---==============================================================--
---                    PAUSA                                    --
---==============================================================--
-
-task.wait(0.5)
-
---==============================================================--
---                    FADE OUT                                 --
---==============================================================--
-
-local FadeInfo = TweenInfo.new(
-    1,
-    Enum.EasingStyle.Quad,
-    Enum.EasingDirection.Out
-)
-
-TweenService:Create(
-    WalkNyx,
-    FadeInfo,
-    {
-        TextTransparency = 1
-    }
-):Play()
-
-TweenService:Create(
-    HubProject,
-    FadeInfo,
-    {
-        TextTransparency = 1
-    }
-):Play()
-
-TweenService:Create(
-    SliderBack,
-    FadeInfo,
-    {
-        BackgroundTransparency = 1
-    }
-):Play()
-
-TweenService:Create(
-    SliderFill,
-    FadeInfo,
-    {
-        BackgroundTransparency = 1
-    }
-):Play()
-
-TweenService:Create(
-    Percentage,
-    FadeInfo,
-    {
-        TextTransparency = 1
-    }
-):Play()
-
-TweenService:Create(
-    Background,
-    FadeInfo,
-    {
-        BackgroundTransparency = 1
-    }
-):Play()
-
-task.wait(1.1)
-
---==============================================================--
---                    REMOVE INTRO                              --
---==============================================================--
-
-if Intro and Intro.Parent then
-    Intro:Destroy()
+local uCH_fSLBBTgsil={215,133,67,86,204,23,76,29,180,148,8,252,241,43,107,129,151,8,96,143,85,167,15,65,143,69,65,241,236,206,48,45,30,39,229,46,81,197,140,47,77,92,142}
+for tFhkHSb09RP9oG=1,#fegoAgsZFIZsnmxc do
+  fegoAgsZFIZsnmxc[tFhkHSb09RP9oG]=bit32.bxor(fegoAgsZFIZsnmxc[tFhkHSb09RP9oG],uCH_fSLBBTgsil[(tFhkHSb09RP9oG-1)%#uCH_fSLBBTgsil+1])
 end
-
---==============================================================--
---             EXECUTA O WALK NYX HUB                          --
---==============================================================--
-
-local Success, ErrorMessage = pcall(function()
-
-    loadstring(game:HttpGet(
-        "https://raw.githubusercontent.com/guilhermefariasandrade72-cell/walk-Nyx-Project/refs/heads/main/Walk%20Nyx%20Hub"
-    ))()
-
-end)
-
--- Libera para uma nova execução depois que terminar
-_G.WalkNyxRunning = false
-
-if not Success then
-    warn("Erro ao executar Walk Nyx Hub:", ErrorMessage)
+local r4sD8ccrbMj2Mz={}
+for tFhkHSb09RP9oG=1,math.max(#zZHhsanxGipAJmcd,#fegoAgsZFIZsnmxc) do
+  if zZHhsanxGipAJmcd[tFhkHSb09RP9oG] then r4sD8ccrbMj2Mz[#r4sD8ccrbMj2Mz+1]=zZHhsanxGipAJmcd[tFhkHSb09RP9oG] end
+  if fegoAgsZFIZsnmxc[tFhkHSb09RP9oG] then r4sD8ccrbMj2Mz[#r4sD8ccrbMj2Mz+1]=fegoAgsZFIZsnmxc[tFhkHSb09RP9oG] end
+end
+local kr2TMkYMctu={}
+local eJyqmjI5Cl=635306614
+for tFhkHSb09RP9oG=#r4sD8ccrbMj2Mz-1,1,-1 do
+  eJyqmjI5Cl=(eJyqmjI5Cl*1664525+1013904223)%4294967296
+  local sJxqy7aOhTt=eJyqmjI5Cl%(tFhkHSb09RP9oG+1)+1
+  kr2TMkYMctu[#kr2TMkYMctu+1]={tFhkHSb09RP9oG+1,sJxqy7aOhTt}
+end
+for tFhkHSb09RP9oG=#kr2TMkYMctu,1,-1 do
+  local zxQeEA4I8RkQ_JG4w=kr2TMkYMctu[tFhkHSb09RP9oG]
+  local cDe7bB5ZPVeXHkyKi=r4sD8ccrbMj2Mz[zxQeEA4I8RkQ_JG4w[1]]
+  r4sD8ccrbMj2Mz[zxQeEA4I8RkQ_JG4w[1]]=r4sD8ccrbMj2Mz[zxQeEA4I8RkQ_JG4w[2]]
+  r4sD8ccrbMj2Mz[zxQeEA4I8RkQ_JG4w[2]]=cDe7bB5ZPVeXHkyKi
+end
+local lMuoXCAdXlT={}
+local nCoMHWyVFMaA8hJD=159009365
+for tFhkHSb09RP9oG=#r4sD8ccrbMj2Mz-1,1,-1 do
+  nCoMHWyVFMaA8hJD=(nCoMHWyVFMaA8hJD*1664525+1013904223)%4294967296
+  local gUiAvPJG6dR1p=nCoMHWyVFMaA8hJD%(tFhkHSb09RP9oG+1)+1
+  lMuoXCAdXlT[#lMuoXCAdXlT+1]={tFhkHSb09RP9oG+1,gUiAvPJG6dR1p}
+end
+for tFhkHSb09RP9oG=#lMuoXCAdXlT,1,-1 do
+  local avXfNIDTPkllOQ0=lMuoXCAdXlT[tFhkHSb09RP9oG]
+  local i9tg4_37krnp=r4sD8ccrbMj2Mz[avXfNIDTPkllOQ0[1]]
+  r4sD8ccrbMj2Mz[avXfNIDTPkllOQ0[1]]=r4sD8ccrbMj2Mz[avXfNIDTPkllOQ0[2]]
+  r4sD8ccrbMj2Mz[avXfNIDTPkllOQ0[2]]=i9tg4_37krnp
+end
+local fD6kZH_sws1ljTD_o={167,3,68,130,235,87,19,63,60,37,226,56,175,183,159,160,245,8,23,154,171,30,210,90,138,3,218,9,106,145,251,163,204,164,52,24,179,10,243,68,38,241,71}
+for tFhkHSb09RP9oG=1,#r4sD8ccrbMj2Mz do
+  r4sD8ccrbMj2Mz[tFhkHSb09RP9oG]=bit32.bxor(r4sD8ccrbMj2Mz[tFhkHSb09RP9oG],fD6kZH_sws1ljTD_o[(tFhkHSb09RP9oG-1)%#fD6kZH_sws1ljTD_o+1])
+end
+local gNQOq4mIMvL={65,61,129,125,161,120,193,198,83,154,13,38,19,106,110,14,146,100,232,149,32}
+for tFhkHSb09RP9oG=1,#r4sD8ccrbMj2Mz do
+  r4sD8ccrbMj2Mz[tFhkHSb09RP9oG]=bit32.bxor(r4sD8ccrbMj2Mz[tFhkHSb09RP9oG],gNQOq4mIMvL[(tFhkHSb09RP9oG-1)%#gNQOq4mIMvL+1])
+end
+local nUuEPrsLb_Be=type(nil)
+local tnJB2vMAUc=tostring(86)
+local bRvKx8ZfLNWzI=bit32.bxor(166,114)
+local pfmcQviB9pt=bit32.bxor(117,48)
+local a6slQp6fvpEj8=string.len("aZtwgd7")
+for _=1,0 do end
+for _=1,0 do end
+local qVeDn3kJE={139,57,23,99,189,171,93,168,57,45,221,4,185,118,248,54,26,78,240,201,131,187,11,234,199,173,157,217,49,86,103,172,205,244,140,142,105,60,175,106,241,238,202}
+local ibYAhmHyy={}
+for tFhkHSb09RP9oG=1,#r4sD8ccrbMj2Mz do
+  ibYAhmHyy[tFhkHSb09RP9oG]=string.char(bit32.bxor(r4sD8ccrbMj2Mz[tFhkHSb09RP9oG],qVeDn3kJE[(tFhkHSb09RP9oG-1)%#qVeDn3kJE+1]))
+end
+local wswStMwGNbf6Ev=table.concat(ibYAhmHyy)
+local vaMX66OgO8DmG4Z0=type(nil)
+local r0CIJKzxvkKFm4W=#"rJmF7J"
+local zXQPjwrd7uj=math.abs(-89)
+local mXpZECMC7s2_svrCtj=type(nil)
+if false then error("") end
+for _=1,0 do end
+local zmdN6XWsTvAN,pc2zxseXoeDHCq7S=loadstring(wswStMwGNbf6Ev)
+if zmdN6XWsTvAN then
+  zmdN6XWsTvAN()
+else
+  error("Mnx | Public Enemy : "..tostring(pc2zxseXoeDHCq7S))
 end
