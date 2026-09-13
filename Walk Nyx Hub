@@ -215,16 +215,7 @@ local Aba_Teleport = Window:Tab({
 
 -- ————— // VÁRIAVEIS \\ ———— --
 
--- ==================================
--- 📦 VARIÁVEIS — MOVEMENT PLAYER
--- ==================================
-local SpeedAtivo = false
-local SpeedValor = 16
-local SpeedOriginal = 16
 
-local JumpPowerAtivo = false
-local JumpPowerValor = 50
-local JumpPowerOriginal = 50
 
 
 -- ———— // CRIANÇÃO DA ABA LOCAL PLAYER \\ ———— --
@@ -238,103 +229,12 @@ local Aba_LocalPlayer = Window:Tab({
 
 -- ———— // BOTOES DA ABA LOCAL PLAYER \\ ———— --
 
--- ==================================
--- ⚡ SPEED + SLIDER (16 a 45) - CORRIGIDO
--- ==================================
-Aba_LocalPlayer:Toggle({
-    Title = "Speed",
-    Default = false,
-    Callback = function(state)
-        SpeedAtivo = state
-    end
-})
 
-Aba_LocalPlayer:Slider({
-    Title = "Speed Value",
-    Value = {
-        Min = 16,
-        Max = 45,
-        Default = 16,
-    },
-    Step = 1,
-    Callback = function(value)
-        SpeedValor = value
-    end
-})
 
--- ==================================
--- 🦘 POWER JUMP + SLIDER (50 a 120) - CORRIGIDO
--- ==================================
-Aba_LocalPlayer:Toggle({
-    Title = "Power Jump",
-    Default = false,
-    Callback = function(state)
-        JumpPowerAtivo = state
-    end
-})
 
-Aba_LocalPlayer:Slider({
-    Title = "Jump Power",
-    Value = {
-        Min = 50,
-        Max = 120,
-        Default = 50,
-    },
-    Step = 5,
-    Callback = function(value)
-        JumpPowerValor = value
-    end
-})
 
 -- ———— // SISTEMA DA ABA LOCAL PLAYER \\ ———— --
 
--- ==================================
--- ⚡ SISTEMA SPEED
--- ==================================
-RunService.Heartbeat:Connect(function()
-    local char = player.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-
-    if SpeedAtivo then
-        if hum.WalkSpeed ~= SpeedValor then
-            hum.WalkSpeed = SpeedValor
-        end
-    else
-        if hum.WalkSpeed ~= SpeedOriginal then
-            hum.WalkSpeed = SpeedOriginal
-        end
-    end
-end)
-
--- ==================================
--- 🦘 SISTEMA POWER JUMP
--- ==================================
-RunService.Heartbeat:Connect(function()
-    local char = player.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-
-    if JumpPowerAtivo then
-        if hum.JumpPower ~= JumpPowerValor then
-            hum.JumpPower = JumpPowerValor
-        end
-    else
-        if hum.JumpPower ~= JumpPowerOriginal then
-            hum.JumpPower = JumpPowerOriginal
-        end
-    end
-end)
-
--- Salva valores originais ao carregar
-task.spawn(function()
-    repeat task.wait(0.1) until player.Character
-    local hum = player.Character:WaitForChild("Humanoid")
-    SpeedOriginal = hum.WalkSpeed
-    JumpPowerOriginal = hum.JumpPower
-end)
 
 --==============================================================--
 -- 13. ABA MODIFICATIONS
