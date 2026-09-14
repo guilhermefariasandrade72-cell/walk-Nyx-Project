@@ -1,6 +1,6 @@
 --==============================================================--
 --                    WALK NYX HUB                             --
---                  INTERFACE ONLY                             --
+--                  INTERFACE + LOCAL PLAYER                   --
 --==============================================================--
 
 
@@ -11,8 +11,10 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
 
 
 --==============================================================--
@@ -31,13 +33,22 @@ local WindUI = loadstring(game:HttpGet(
 local TamanhoBotao = 1.0
 
 local OpenButton = nil
-
 local EscalaBotao = nil
 
 
 --==============================================================--
--- 4. CRIAR WINDOW
--- TEMA PADRÃO DO WINDUI
+-- 4. VARIÁVEIS — MOVEMENT PLAYER
+--==============================================================--
+
+local SpeedAtivo = false
+local SpeedValor = 16
+
+local JumpPowerAtivo = false
+local JumpPowerValor = 50
+
+
+--==============================================================--
+-- 5. CRIAR WINDOW
 --==============================================================--
 
 local Window = WindUI:CreateWindow({
@@ -77,8 +88,7 @@ local Window = WindUI:CreateWindow({
 
 
 --==============================================================--
--- 5. BOTÃO FLUTUANTE
--- PRETO NA ESQUERDA → BRANCO NA DIREITA
+-- 6. BOTÃO FLUTUANTE
 --==============================================================--
 
 OpenButton = Window:EditOpenButton({
@@ -111,7 +121,7 @@ OpenButton = Window:EditOpenButton({
 
 
 --==============================================================--
--- 6. TAMANHO DO BOTÃO FLUTUANTE
+-- 7. TAMANHO DO BOTÃO FLUTUANTE
 --==============================================================--
 
 task.wait(1)
@@ -139,7 +149,7 @@ end)
 
 
 --==============================================================--
--- 7. ABA MURDERER
+-- 8. ABA MURDERER
 -- VAZIA
 --==============================================================--
 
@@ -153,7 +163,7 @@ local Aba_Murderer = Window:Tab({
 
 
 --==============================================================--
--- 8. ABA SHERIFF
+-- 9. ABA SHERIFF
 -- VAZIA
 --==============================================================--
 
@@ -167,7 +177,7 @@ local Aba_Sheriff = Window:Tab({
 
 
 --==============================================================--
--- 9. ABA AUTO FARM
+-- 10. ABA AUTO FARM
 -- VAZIA
 --==============================================================--
 
@@ -181,7 +191,7 @@ local Aba_AutoFarm = Window:Tab({
 
 
 --==============================================================--
--- 10. ABA ESP
+-- 11. ABA ESP
 -- VAZIA
 --==============================================================--
 
@@ -195,7 +205,7 @@ local Aba_ESP = Window:Tab({
 
 
 --==============================================================--
--- 11. ABA TELEPORT
+-- 12. ABA TELEPORT
 -- VAZIA
 --==============================================================--
 
@@ -209,25 +219,9 @@ local Aba_Teleport = Window:Tab({
 
 
 --==============================================================--
--- 12. ABA LOCAL PLAYER
--- VAZIA
+-- 13. ABA LOCAL PLAYER
 --==============================================================--
 
--- ————— // VÁRIAVEIS \\ ———— --
-
--- ==================================
--- 📦 VARIÁVEIS — MOVEMENT PLAYER
--- ==================================
-local SpeedAtivo = false
-local SpeedValor = 16
-local SpeedOriginal = 16
-
-local JumpPowerAtivo = false
-local JumpPowerValor = 50
-local JumpPowerOriginal = 50
-
-
--- ———— // CRIANÇÃO DA ABA LOCAL PLAYER \\ ———— --
 local Aba_LocalPlayer = Window:Tab({
 
     Title = "Local Player",
@@ -236,117 +230,188 @@ local Aba_LocalPlayer = Window:Tab({
 
 })
 
--- ———— // BOTOES DA ABA LOCAL PLAYER \\ ———— --
-
--- ==================================
--- 📂 SEÇÃO: MOVEMENT PLAYER
--- ==================================
-Aba_LocalPlayer:Section({
-    Title = "Movement Player",
-})
-
--- ==================================
--- ⚡ SPEED + SLIDER (16 a 45)
--- ==================================
-Aba_LocalPlayer:Toggle({
-    Title = "Speed",
-    Default = false,
-    Callback = function(state)
-        SpeedAtivo = state
-    end
-})
-
-Aba_LocalPlayer:Slider({
-    Title = "Speed Value",
-    Value = {
-        Min = 16,
-        Max = 45,
-        Default = 16,
-    },
-    Step = 1,
-    Callback = function(value)
-        SpeedValor = value
-    end
-})
-
-Aba_LocalPlayer:Toggle({
-    Title = "Power Jump",
-    Default = false,
-    Callback = function(state)
-        JumpPowerAtivo = state
-    end
-})
-
-Aba_LocalPlayer:Slider({
-    Title = "Jump Power",
-    Value = {
-        Min = 50,
-        Max = 120,
-        Default = 50,
-    },
-    Step = 5,
-    Callback = function(value)
-        JumpPowerValor = value
-    end
-})
-
-
-
--- ———— // SISTEMA DA ABA LOCAL PLAYER \\ ———— --
-
---   ==   / / / / / / / ———— \ \ \ \ \ \   ==    --
-
-
--- ==================================
--- ⚡ SISTEMA SPEED — CORRIGIDO
--- ==================================
-RunService.Heartbeat:Connect(function()
-    local char = player.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-
-    if SpeedAtivo then
-        hum.WalkSpeed = SpeedValor
-    else
-        hum.WalkSpeed = SpeedOriginal
-    end
-end)
-
--- ==================================
--- 🦘 SISTEMA POWER JUMP — CORRIGIDO
--- ==================================
-RunService.Heartbeat:Connect(function()
-    local char = player.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-
-    if JumpPowerAtivo then
-        hum.JumpPower = JumpPowerValor
-    else
-        hum.JumpPower = JumpPowerOriginal
-    end
-end)
-
--- Salva valores originais ao carregar
-task.spawn(function()
-    repeat task.wait(0.1) until player.Character
-    local hum = player.Character:WaitForChild("Humanoid")
-    SpeedOriginal = hum.WalkSpeed
-    JumpPowerOriginal = hum.JumpPower
-end)
-
--- ✅ RESETA AUTOMÁTICO AO RENASCER
-player.CharacterAdded:Connect(function(novoChar)
-    task.wait(0.2)
-    local hum = novoChar:WaitForChild("Humanoid")
-    SpeedOriginal = hum.WalkSpeed
-    JumpPowerOriginal = hum.JumpPower
-end)
 
 --==============================================================--
--- 13. ABA MODIFICATIONS
+-- 14. SEÇÃO MOVEMENT PLAYER
+--==============================================================--
+
+Aba_LocalPlayer:Section({
+
+    Title = "Movement Player",
+
+})
+
+
+--==============================================================--
+-- 15. TOGGLE SPEED
+--==============================================================--
+
+Aba_LocalPlayer:Toggle({
+
+    Title = "Speed",
+
+    Default = false,
+
+    Callback = function(state)
+
+        SpeedAtivo = state
+
+    end,
+
+})
+
+
+--==============================================================--
+-- 16. SLIDER SPEED
+--==============================================================--
+
+Aba_LocalPlayer:Slider({
+
+    Title = "Speed Value",
+
+    Value = {
+
+        Min = 16,
+
+        Max = 45,
+
+        Default = 16,
+
+    },
+
+    Step = 1,
+
+    Callback = function(value)
+
+        SpeedValor = value
+
+    end,
+
+})
+
+
+--==============================================================--
+-- 17. TOGGLE POWER JUMP
+--==============================================================--
+
+Aba_LocalPlayer:Toggle({
+
+    Title = "Power Jump",
+
+    Default = false,
+
+    Callback = function(state)
+
+        JumpPowerAtivo = state
+
+    end,
+
+})
+
+
+--==============================================================--
+-- 18. SLIDER JUMP POWER
+--==============================================================--
+
+Aba_LocalPlayer:Slider({
+
+    Title = "Jump Power",
+
+    Value = {
+
+        Min = 50,
+
+        Max = 120,
+
+        Default = 50,
+
+    },
+
+    Step = 5,
+
+    Callback = function(value)
+
+        JumpPowerValor = value
+
+    end,
+
+})
+
+Aba_LocalPlayer:Section({
+    Title = "Movement",
+})
+
+--==============================================================--
+-- 19. SISTEMA SPEED
+--==============================================================--
+
+RunService.Heartbeat:Connect(function()
+
+    local Character = Player.Character
+
+    if not Character then
+        return
+    end
+
+    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+
+    if not Humanoid then
+        return
+    end
+
+    if SpeedAtivo then
+
+        -- Ligado = valor do slider
+        Humanoid.WalkSpeed = SpeedValor
+
+    else
+
+        -- Desligado = padrão 16
+        Humanoid.WalkSpeed = 16
+
+    end
+
+end)
+
+
+--==============================================================--
+-- 20. SISTEMA POWER JUMP
+--==============================================================--
+
+RunService.Heartbeat:Connect(function()
+
+    local Character = Player.Character
+
+    if not Character then
+        return
+    end
+
+    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+
+    if not Humanoid then
+        return
+    end
+
+    -- Faz o Humanoid usar JumpPower
+    Humanoid.UseJumpPower = true
+
+    if JumpPowerAtivo then
+
+        -- Ligado = valor do slider
+        Humanoid.JumpPower = JumpPowerValor
+
+    else
+
+        -- Desligado = padrão 50
+        Humanoid.JumpPower = 50
+
+    end
+
+end)
+
+
+--==============================================================--
+-- 21. ABA MODIFICATIONS
 -- VAZIA
 --==============================================================--
 
@@ -357,4 +422,3 @@ local Aba_Modifications = Window:Tab({
     Icon = "wand-sparkles",
 
 })
-
