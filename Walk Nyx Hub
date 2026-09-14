@@ -318,8 +318,57 @@ Aba_LocalPlayer:Slider({
 })
 
 Aba_LocalPlayer:Section({
-    Title = "Movement",
+    Title = "Extras",
 })
+
+-- ==================================
+-- ⚡ SPEED GLITCH + SLIDER (50 a 550)
+-- ==================================
+Aba_LocalPlayer:Toggle({
+    Title = "Speed Glitch",
+    Default = false,
+    Callback = function(state)
+        SpeedGlitchAtivo = state
+    end,
+})
+
+Aba_LocalPlayer:Slider({
+    Title = "Glitch Speed",
+    Value = {
+        Min = 50,
+        Max = 550,
+        Default = 50,
+    },
+    Step = 5,
+    Callback = function(value)
+        SpeedGlitchValor = value
+    end,
+})
+
+-- ==================================
+-- 📦 VARIÁVEIS — SPEED GLITCH
+-- ==================================
+local SpeedGlitchAtivo = false
+local SpeedGlitchValor = 50
+
+-- ==================================
+-- ⚡ SISTEMA SPEED GLITCH
+-- ==================================
+RunService.Heartbeat:Connect(function()
+    if not SpeedGlitchAtivo then return end
+
+    local Character = Player.Character
+    if not Character then return end
+    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+    if not Humanoid then return end
+
+    -- No ar = velocidade do slider | No chão = velocidade normal
+    if Humanoid.FloorMaterial == Enum.Material.Air then
+        Humanoid.WalkSpeed = SpeedGlitchValor
+    else
+        Humanoid.WalkSpeed = SpeedOriginal
+    end
+end)
 
 --==============================================================--
 -- 19. SISTEMA SPEED
