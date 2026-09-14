@@ -322,13 +322,50 @@ Aba_LocalPlayer:Section({
 })
 
 -- ==================================
--- ⚡ SPEED GLITCH + SLIDER (50 a 550)
+-- 📦 VARIÁVEIS — SPEED GLITCH
+-- ==================================
+local SpeedGlitchAtivo = false
+local SpeedGlitchValor = 50
+local SpeedOriginal = 16 -- Definido corretamente para 16 no chão
+
+-- ==================================
+-- ⚡ SISTEMA SPEED GLITCH
+-- ==================================
+RunService.Heartbeat:Connect(function()
+    if not SpeedGlitchAtivo then return end
+
+    local Character = Player.Character
+    if not Character then return end
+    
+    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+    local RootPart = Character:FindFirstChild("HumanoidRootPart")
+    if not Humanoid or not RootPart then return end
+
+    -- Verifica se o personagem está no ar de forma mais precisa
+    -- (Olha se o material do chão é Air ou se ele está pulando/caindo)
+    local estaNoAr = (Humanoid.FloorMaterial == Enum.Material.Air) or (math.abs(RootPart.AssemblyLinearVelocity.Y) > 0.5)
+
+    if estaNoAr then
+        Humanoid.WalkSpeed = SpeedGlitchValor
+    else
+        Humanoid.WalkSpeed = SpeedOriginal
+    end
+end)
+
+-- ==================================
+-- ⚡ BOTÕES — SPEED GLITCH
 -- ==================================
 Aba_LocalPlayer:Toggle({
     Title = "Speed Glitch",
     Default = false,
     Callback = function(state)
         SpeedGlitchAtivo = state
+        -- Se desativar o glitch, reseta a velocidade para o normal imediatamente
+        local char = Player.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if not state and hum then
+            hum.WalkSpeed = 16
+        end
     end,
 })
 
@@ -345,30 +382,6 @@ Aba_LocalPlayer:Slider({
     end,
 })
 
--- ==================================
--- 📦 VARIÁVEIS — SPEED GLITCH
--- ==================================
-local SpeedGlitchAtivo = false
-local SpeedGlitchValor = 50
-
--- ==================================
--- ⚡ SISTEMA SPEED GLITCH
--- ==================================
-RunService.Heartbeat:Connect(function()
-    if not SpeedGlitchAtivo then return end
-
-    local Character = Player.Character
-    if not Character then return end
-    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-    if not Humanoid then return end
-
-    -- No ar = velocidade do slider | No chão = velocidade normal
-    if Humanoid.FloorMaterial == Enum.Material.Air then
-        Humanoid.WalkSpeed = SpeedGlitchValor
-    else
-        Humanoid.WalkSpeed = SpeedOriginal
-    end
-end)
 
 --==============================================================--
 -- 19. SISTEMA SPEED
